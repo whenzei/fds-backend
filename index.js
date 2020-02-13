@@ -1,12 +1,15 @@
 const express = require("express");
-const path = require("path");
 const app = express();
+const customer = require('./customer');
+const rider = require('./rider');
+const staff = require('./staff');
+const manager = require('./manager');
 const port = process.env.PORT || "8000";
 
-
-app.get("/", (req, res) => {
-    res.status(200).send("HELLO");
-});
+app.use('/customer', customer);
+app.use('/rider', rider);
+app.use('/staff', staff);
+app.use('/manager', manager);
 
 app.listen(port, () => {
     console.log(`Listening to requests on http://localhost:${port}`);
