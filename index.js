@@ -1,9 +1,9 @@
 const express = require("express");
 const app = express();
-const customer = require('./customer');
-const rider = require('./rider');
-const staff = require('./staff');
-const manager = require('./manager');
+const customer = require('./routes/customer');
+const rider = require('./routes/rider');
+const staff = require('./routes/staff');
+const manager = require('./routes/manager');
 const morgan = require('morgan')
 
 const port = process.env.PORT || "8000";
