@@ -6,7 +6,6 @@ const customerLocalStrategy = new LocalStrategy(
     function(userName, password, done) {
         customerController.findByUserName(userName)
         .then((user) => {
-            console.log(user)
             if (!user || user.password != password) {
                 return done(null, false)
             }
