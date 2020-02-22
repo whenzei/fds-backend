@@ -3,7 +3,8 @@ const db = require('./index')
 SQL_CREATE_TABLE_STATEMENTS = {
     "customers": "create table Customers ( " +
         "id                 integer primary key," +
-        "userName           varchar(100) not null" +
+        "userName           varchar(100) not null," +
+        "password           varchar(100) not null" +
         ");",
 
     "riders": "create table Riders ( " +
