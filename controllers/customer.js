@@ -11,7 +11,11 @@ const getCustomers = function (req, res) {
 };
 
 async function findByUserName (userName) {
+    try {
     const user = await db.one(`SELECT * FROM Customers WHERE username = '${userName}'`);
+    } catch (err) {
+        return null;
+    }
     return user;
 }
 
