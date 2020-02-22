@@ -7,7 +7,9 @@ const _ = require('lodash')
 router.post('/',
     passport.authenticate('customer-local'),
     function (req, res) {
-        res.send(_.omit(req.user, ['password']));
+        const user = _.omit(req.user, ['password'])
+        user['type'] = "customer"
+        res.send(user);
     }
 );
 
