@@ -10,14 +10,15 @@ const getManagers = function (req, res) {
         });
 };
 
-async function findByUserName(userName) {
+async function findByUserName(userName, callback) {
     let user = {};
     try {
-        user = await db.one(`SELECT * FROM Managers WHERE username = '${userName}'`);
+        user = await db.one(`SELECT * FROM Users WHERE userName = '${userName}'`);
+        await db.one(`SELECT * FROM Managers WHERE uid = '${user.uid}'`);
     } catch (err) {
-        return null;
+        callback(err, null)
     }
-    return user;
+    callback(null, user);
 }
 
 module.exports = {
