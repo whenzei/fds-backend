@@ -1,6 +1,8 @@
 const LocalStrategy = require('passport-local');
 const customerController = require('./controllers/customer')
 const riderController = require('./controllers/rider')
+const staffController = require('./controllers/staff')
+const managerController = require('./controllers/manager')
 const _ = require('lodash')
 
 const customerLocalStrategy = new LocalStrategy(
@@ -27,4 +29,28 @@ const riderLocalStrategy = new LocalStrategy(
     }
 )
 
-module.exports = {customerLocalStrategy, riderLocalStrategy} 
+const staffLocalStrategy = new LocalStrategy(
+    function(userName, password, done) {
+        staffController.findByUserName(userName)
+        .then((user) => {
+            if (!user || user.password != password) {
+                return done(null, false)
+            }
+            return done(null, user);
+        })
+    }
+)
+
+const managerLocalStrategy = new LocalStrategy(
+    function(userName, password, done) {
+        managerController.findByUserName(userName)
+        .then((user) => {
+            if (!user || user.password != password) {
+                return done(null, false)
+            }
+            return done(null, user);
+        })
+    }
+)
+
+module.exports = {customerLocalStrategy, riderLocalStrategy, staffLocalStrategy, managerLocalStrategy} 

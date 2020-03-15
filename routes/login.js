@@ -6,7 +6,7 @@ const _ = require('lodash')
 
 // Get all customers
 router.post('/',
-    passport.authenticate(['customer-local', 'rider-local']),
+    passport.authenticate(['customer-local', 'rider-local', 'staff-local', 'manager-local']),
     async function (req, res) {
         const user = _.omit(req.user, ['password'])
         user['type'] = await userController.getUserType(req.user.username);

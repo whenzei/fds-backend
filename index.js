@@ -31,6 +31,8 @@ passport.deserializeUser(function (username, done) {
 
 passport.use('customer-local', strategies.customerLocalStrategy);
 passport.use('rider-local', strategies.riderLocalStrategy);
+passport.use('staff-local', strategies.staffLocalStrategy);
+passport.use('manager-local', strategies.managerLocalStrategy);
 
 app.use(logger('tiny'));
 
