@@ -1,33 +1,38 @@
 const db = require('./index')
 
-SQL_CREATE_TABLE_STATEMENTS = {
-    "customers": "insert into Customers (id, username, password) Values" +
-        "(1, 'lalala', '123')," +
-        "(2, 'blablabla', '321');",
+SQL_STATEMENTS = {
+    restaurants: `insert into Restaurants (rid, minSpending, rname) Values
+        (1, 5, 'Shake Shag')
+    `,
+    users: `
+        insert into Users (uid, name, username, salt, passwordhash) Values
+        (1, 'lala bin blabla', 'lalala', 'saltysplatoon', 'brown'),
+        (2, 'zhow qing tian', 'zhow', 'pepper', 'asdsad'),
+        (3, 'staff of wizardry', 'Knack2Babee', 'SeaSalt', '123'),
+        (4, 'the fork on the left', 'oheehee', 'Mother', 'Father')
+    `,
+    customers: `insert into Customers (uid) Values
+    (1)`,
 
-    "riders": "insert into Riders (id, username, password) Values" +
-    "(3, '123', 'abc')," +
-    "(4, '321', 'asd');",
+    riders: `insert into Riders (uid) Values
+    (2)`,
 
-    "staff": "insert into Staff (id, username, password) Values" +
-    "(5, 'a', 'pen')," +
-    "(6, 'b', '15');",
+    staff: `insert into Staff (uid, rid) Values
+    (3, 1)`,
 
-    "managers": "insert into Managers (id, username, password) Values" +
-    "(7, 'c', '123')," +
-    "(8, 'd', '321');"
-}
-promises = []
-for (const [tableName, sqlCommand] of Object.entries(SQL_CREATE_TABLE_STATEMENTS)) {
-    promises.push(new Promise((resolve, reject) =>
-        db.none(sqlCommand)
-            .then(data => {
-                console.log(tableName + ' rows added');
-            })
-            .catch(error => {
-                console.log(error);
-            })
-    ))
+    managers: `insert into Managers (uid) Values
+    (4)`
 }
 
-Promise.all(promises)
+async function fill() {
+    for (const [key, sqlCommand] of Object.entries(SQL_STATEMENTS)) {
+        try {
+            await db.none(sqlCommand);
+            console.log(key + " done")
+        } catch (e) {
+            console.log(e);
+            break;
+        }
+    }
+};
+fill().then(() => console.log("DONE"))
