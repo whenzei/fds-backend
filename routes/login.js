@@ -9,9 +9,10 @@ router.post('/',
     passport.authenticate(['customer-local', 'rider-local', 'staff-local', 'manager-local']),
     async function (req, res) {
         const user = _.omit(req.user, ['password'])
-        user['type'] = await userController.getUserType(req.user.username);
+        console.log(user)
+        user['type'] = await userController.getUserType(req.user.uid);
         res.send(user);
     }
 );
-
+//, 'rider-local', 'staff-local', 'manager-local'
 module.exports = router;

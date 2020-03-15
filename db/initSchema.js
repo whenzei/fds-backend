@@ -129,10 +129,6 @@ SQL_STATEMENTS = {
     Customers:
         `CREATE TABLE Customers (
                         uid            SERIAL,
-                        name            VARCHAR(100),
-                        userName        VARCHAR(100),
-                        salt            VARCHAR(100),
-                        passwordHash    VARCHAR(100),
                         creditCard        CHAR(16),
                         points            INTEGER,
                         primary key (uid),

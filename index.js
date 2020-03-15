@@ -4,7 +4,7 @@ const session = require("express-session");
 const bodyParser = require("body-parser");
 const logger = require('morgan');
 const strategies = require('./strategies');
-const customerController = require('./controllers/customer')
+const userController = require('./controllers/user')
 const passport = require('passport')
 
 const customerRouter = require('./routes/customer');
@@ -22,11 +22,12 @@ app.use(passport.session());
 
 
 passport.serializeUser(function (user, done) {
-    done(null, user.username);
+    done(null, user.uid);
 });
 
-passport.deserializeUser(function (username, done) {
-    customerController.findByUserName(username).then((user) => done(null, user))
+passport.deserializeUser(function (uid, done) {
+    // userController.findByUid(uid).then((err, user) => done(err, user))
+    userController.findByUid(uid, (err, user) => done(err, user))
 });
 
 passport.use('customer-local', strategies.customerLocalStrategy);

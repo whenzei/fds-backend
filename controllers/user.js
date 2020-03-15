@@ -10,15 +10,15 @@ const getUsers = function (req, res) {
         });
 };
 
-async function getUserType(userName) {
+async function getUserType(uid) {
     let result;
     try {
         result = await db.one(
             `SELECT distinct case
-            when exists (select 1 from Customers where username = '${userName}') then 'Customer'
-            when exists (select 1 from Riders where username = '${userName}') then 'Rider'
-            when exists (select 1 from Managers where username = '${userName}') then 'Manager'
-            when exists (select 1 from Staff where username = '${userName}') then 'Staff'
+            when exists (select 1 from Customers where uid = '${uid}') then 'Customer'
+            when exists (select 1 from Riders where uid = '${uid}') then 'Rider'
+            when exists (select 1 from Managers where uid = '${uid}') then 'Manager'
+            when exists (select 1 from Staff where uid = '${uid}') then 'Staff'
             end as userType FROM Customers;`
         );
     } catch (err) {
@@ -27,6 +27,16 @@ async function getUserType(userName) {
     return result.usertype;
 }
 
+async function findByUid(uid, callback) {
+    let user;
+    try {
+        user = await db.one(`SELECT * from USERS WHERE uid = ${uid}`);
+    } catch (err) {
+        callback(err, null)
+    }
+    callback(null, user);
+}
+
 module.exports = {
-    getUsers, getUserType
+    getUsers, getUserType, findByUid
 }

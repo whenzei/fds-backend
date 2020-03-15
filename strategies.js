@@ -5,11 +5,15 @@ const staffController = require('./controllers/staff')
 const managerController = require('./controllers/manager')
 const _ = require('lodash')
 
+const hash = function (password) {
+    return password;
+}
+
 const customerLocalStrategy = new LocalStrategy(
     function(userName, password, done) {
         customerController.findByUserName(userName)
         .then((user) => {
-            if (!user || user.password != password) {
+            if (!user || (hash(password) != user.passwordhash)) {
                 return done(null, false)
             }
             return done(null, user);

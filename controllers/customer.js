@@ -10,14 +10,16 @@ const getCustomers = function (req, res) {
         });
 };
 
-async function findByUserName(userName) {
+async function findByUserName(userName, callback) {
     let user = {};
     try {
-        user = await db.one(`SELECT * FROM Customers WHERE username = '${userName}'`);
+        user = await db.one(`SELECT * FROM Users WHERE userName = '${userName}'`);
+        customer = await db.one(`SELECT * FROM Customers WHERE uid = '${user.uid}'`);
+        if (!customer) throw (userName + " not a customer")
     } catch (err) {
-        return null;
+        callback(err, null)
     }
-    return user;
+    callback(null, user);
 }
 
 module.exports = {
