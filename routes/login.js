@@ -8,7 +8,6 @@ router.post('/',
     passport.authenticate(['customer-local', 'rider-local', 'staff-local', 'manager-local']),
     async (req, res) => {
         const user = _.omit(req.user, ['password'])
-        user['userType'] = await userController.getUserType(req.user.uid);
         res.send(user);
     }
 );
