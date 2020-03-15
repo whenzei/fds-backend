@@ -10,9 +10,10 @@ const getCustomers = function (req, res) {
         });
 };
 
-async function findByUserName (userName) {
+async function findByUserName(userName) {
+    let user = {};
     try {
-    const user = await db.one(`SELECT * FROM Customers WHERE username = '${userName}'`);
+        user = await db.one(`SELECT * FROM Customers WHERE username = '${userName}'`);
     } catch (err) {
         return null;
     }
