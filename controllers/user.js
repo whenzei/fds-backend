@@ -19,7 +19,7 @@ async function getUserType(uid) {
             when exists (select 1 from Riders where uid = '${uid}') then 'Rider'
             when exists (select 1 from Managers where uid = '${uid}') then 'Manager'
             when exists (select 1 from Staff where uid = '${uid}') then 'Staff'
-            end as userType FROM Customers;`
+            end as userType FROM Users;`
         );
     } catch (err) {
         console.log(err)

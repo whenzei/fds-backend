@@ -26,7 +26,6 @@ passport.serializeUser(function (user, done) {
 });
 
 passport.deserializeUser(function (uid, done) {
-    // userController.findByUid(uid).then((err, user) => done(err, user))
     userController.findByUid(uid, (err, user) => done(err, user))
 });
 

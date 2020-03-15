@@ -14,12 +14,13 @@ async function findByUserName(userName, callback) {
     let user = {};
     try {
         user = await db.one(`SELECT * FROM Users WHERE userName = '${userName}'`);
-        customer = await db.one(`SELECT * FROM Customers WHERE uid = '${user.uid}'`);
-        if (!customer) throw (userName + " not a customer")
+        await db.one(`SELECT * FROM Customers WHERE uid = '${user.uid}'`);
     } catch (err) {
         callback(err, null)
+        return
     }
     callback(null, user);
+    return
 }
 
 module.exports = {
