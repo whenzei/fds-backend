@@ -30,6 +30,7 @@ passport.deserializeUser(function (username, done) {
 });
 
 passport.use('customer-local', strategies.customerLocalStrategy);
+passport.use('rider-local', strategies.riderLocalStrategy);
 
 app.use(logger('tiny'));
 
