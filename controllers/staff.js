@@ -1,5 +1,5 @@
 const db = require('../db');
-const UserTypes = require('./user').UserTypes;
+const {Roles} = require('../auth')
 
 const getStaff = function (req, res) {
     db.any('SELECT * FROM Staff')
@@ -16,7 +16,7 @@ async function findByUserName(userName, callback) {
     try {
         user = await db.one(`SELECT * FROM Users WHERE userName = '${userName}'`);
         await db.one(`SELECT * FROM Staff WHERE uid = '${user.uid}'`);
-        user['userType'] = UserTypes.staff;
+        user['role'] = Roles.staff;
     } catch (err) {
         callback(err, null)
         return
