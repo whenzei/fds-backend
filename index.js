@@ -3,7 +3,7 @@ const app = express();
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const logger = require('morgan');
-const strategies = require('./strategies');
+const strategies = require('./auth/strategies');
 const userController = require('./controllers/user')
 const passport = require('passport')
 
@@ -29,10 +29,7 @@ passport.deserializeUser(function (uid, done) {
     userController.findByUid(uid, (err, user) => done(err, user))
 });
 
-passport.use('customer-local', strategies.customerLocalStrategy);
-passport.use('rider-local', strategies.riderLocalStrategy);
-passport.use('staff-local', strategies.staffLocalStrategy);
-passport.use('manager-local', strategies.managerLocalStrategy);
+passport.use('local', strategies.localStrategy);
 
 app.use(logger('tiny'));
 

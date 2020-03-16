@@ -5,7 +5,7 @@ const userController = require('../controllers/user')
 const _ = require('lodash')
 
 router.post('/',
-    passport.authenticate(['customer-local', 'rider-local', 'staff-local', 'manager-local']),
+    passport.authenticate('local'),
     async (req, res) => {
         const user = _.omit(req.user, ['password'])
         res.send(user);
