@@ -4,4 +4,6 @@ const authMiddleWare = require('../auth')
 
 router.all("/", authMiddleWare.authorizeRider);
 
+router.get("/", (req, res) => res.send(`Hi I'm ${req.user.name}. I'm a ${req.user.role}.`))
+
 module.exports = router;
