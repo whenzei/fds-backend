@@ -1,13 +1,8 @@
 const initOptions = {}
+const config = require('./config.json');
 const pgp = require('pg-promise')(initOptions);
-const cn = {
-    host: 'localhost',
-    port: 5432,
-    database: 'postgres',
-    user: 'postgres',
-    password: 'postgres'
-};
-const db = pgp(cn);
+
+const db = pgp(config.db);
 const dbName = 'fds';
 db.none("CREATE DATABASE " + dbName)
     .then(data => {
