@@ -285,6 +285,7 @@ async function init() {
         await db.none(DROP_TABLES);
     } catch (e) {
         console.log(e);
+        return;
     }
     for (const [key, sqlCommand] of Object.entries(SQL_STATEMENTS)) {
         try {
