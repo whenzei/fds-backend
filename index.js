@@ -6,6 +6,7 @@ const logger = require('morgan');
 const strategies = require('./auth/strategies');
 const userController = require('./controllers/user')
 const passport = require('passport')
+const cors = require('cors');
 
 const customerRouter = require('./routes/customer');
 const loginRouter = require('./routes/login');
@@ -16,6 +17,7 @@ const managerRouter = require('./routes/manager');
 
 const port = process.env.PORT || "8000";
 
+app.use(cors());
 app.use(session({ secret: "lalalalala" }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
