@@ -9,6 +9,7 @@ const passport = require('passport')
 
 const customerRouter = require('./routes/customer');
 const loginRouter = require('./routes/login');
+const logoutRouter = require('./routes/logout');
 const riderRouter = require('./routes/rider');
 const staffRouter = require('./routes/staff');
 const managerRouter = require('./routes/manager');
@@ -34,6 +35,7 @@ passport.use('local', strategies.localStrategy);
 app.use(logger('tiny'));
 
 app.use('/login', loginRouter);
+app.use('/logout', logoutRouter);
 app.use('/customer', customerRouter);
 app.use('/rider', riderRouter);
 app.use('/staff', staffRouter);
