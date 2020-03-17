@@ -18,6 +18,7 @@ const port = process.env.PORT || "8000";
 
 app.use(cors());
 app.use(session({ secret: "lalalalala" }));
+app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -32,7 +33,7 @@ app.use(logger('tiny'));
 
 app.use('/login', loginRouter);
 app.use('/logout', logoutRouter);
-app.use('/customer', passport.authenticate('jwt-customer', {session: false}),customerRouter);
+app.use('/customer',customerRouter);
 app.use('/rider', passport.authenticate('jwt-rider', {session: false}),riderRouter);
 app.use('/staff', passport.authenticate('jwt-staff', {session: false}),staffRouter);
 app.use('/manager', passport.authenticate('jwt-manager', {session: false}),managerRouter);
