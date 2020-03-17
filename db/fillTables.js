@@ -28,11 +28,46 @@ const Staffs = [
     [12, 'Pom', 'iamvegan', 'password22', 'iambatman', 2],
 ];
 
+// (rid, minSpending (in cents), rname)
 const Restaurants = [
     [1, 5, 'Fukuroku'],
-    [2, 10, 'MaMas Specials']
+    [2, 10, 'MaMas Specials'],
+    [3, 11, 'MacDonalds'],
+    [4, 15, 'KFC']
 ];
 
+// (pid, points, startDate, endDate, percentOff, minSpending (in cents), monthsWithNoOrders)
+const GlobalPromotions = [
+    // 10% off all orders for one month with min spend $30
+    [1, null, '2019-06-01', '2019-07-01', 10, 3000, null],
+    [2, null, '2019-06-01', '2019-07-01', 15, 3000, 2],
+    [3, 25, '2019-05-01', '2019-06-01', null, null, null],
+    [4, 35, '2019-05-01', '2019-06-01', null, null, 3]
+];
+
+// (pid, rid, points, startDate, endDate, percentOff, minSpending (in cents), monthsWithNoOrders)
+const RestaurantPromotions = [
+    [5, 2, null, '2019-06-01', '2019-07-01', 15, 3500, null],
+    [6, 2, 25, '2019-05-01', '2019-06-01', null, null, null],
+    [7, 4, null, '2019-06-01', '2019-07-01', 10, 3000, 1],
+    [8, 4, 10, '2019-05-01', '2019-06-01', null, null, 3]
+];
+
+const Addresses = [
+    [1, '12-34', 'blk 123 admiralty ave', 123456],
+    [2, '13-35', 'blk 13 thomas road', 123457],
+    [3, '14-36', 'blk 23 bendemeer street', 123458],
+    [4, '14-36', 'blk 23 clementi boulevard', 123459]
+];
+
+// (uid, addrId, lastUsed)
+const Frequents = [
+    [1, 1, '2016-01-22 19:10:25-07'],
+    [2, 2, '2016-02-22 19:10:25-07'],
+    [3, 3, '2016-03-22 19:10:25-07'],
+    [4, 3, '2016-06-22 19:10:25-07'],
+    [4, 4, '2016-07-22 19:10:25-07']
+];
 
 async function addCustomer(arr) {
     try {
@@ -113,6 +148,61 @@ async function addRestaurant(arr) {
         console.log(error, 'Failed to add restaurant');
     }
 }
+
+async function addGlobalPromotion(arr) {
+    try {
+        await db.tx(t => {
+            const q1 = t.none(
+                `Insert into Promotions (pid, points, startDate, endDate, percentOff, minSpending, monthsWithNoOrders) Values
+                (${arr[0]}, ${arr[1]}, '${arr[2]}', '${arr[3]}', ${arr[4]}, ${arr[5]}, ${arr[6]})`);
+            const q2 = t.none(
+                `Insert into GlobalPromos (pid) Values
+                (${arr[0]})`);
+            return t.batch([q1, q2]);
+        });
+    } catch (error) {
+        console.log(error, 'Failed to add global promotions');
+    }
+}
+
+async function addRestaurantPromotion(arr) {
+    try {
+        await db.tx(t => {
+            const q1 = t.none(
+                `Insert into Promotions (pid, points, startDate, endDate, percentOff, minSpending, monthsWithNoOrders) Values
+                (${arr[0]}, ${arr[2]}, '${arr[3]}', '${arr[4]}', ${arr[5]}, ${arr[6]}, ${arr[7]})`);
+            const q2 = t.none(
+                `Insert into RestaurantPromos (pid, rid) Values
+                (${arr[0]}, ${arr[1]})`);
+            return t.batch([q1, q2]);
+        });
+    } catch (error) {
+        console.log(error, 'Failed to add restaurant promotions');
+    }
+}
+
+async function addAddress(arr) {
+    try {
+        await db.none(
+            `Insert into Address (addrId, unit, streetname, postalCode) Values
+            (${arr[0]}, '${arr[1]}', '${arr[2]}', ${arr[3]})`
+        );
+    } catch (error) {
+        console.log(error, 'Failed to add address')
+    }
+}
+
+async function addFrequents(arr) {
+    try {
+        await db.none(
+            `Insert into Frequents (uid, addrId, lastUsed) Values
+            (${arr[0]}, ${arr[1]}, '${arr[2]}')`
+        );
+    } catch (error) {
+        console.log(error, 'Failed to add record to Frequents')
+    }
+}
+
 async function deleteTables() {
     try {
         await db.none(`
@@ -124,6 +214,7 @@ async function deleteTables() {
         console.log(error);
     }
 }
+
 async function fill() {
     await deleteTables().then(()=> console.log('Tables cleared'));
 
@@ -141,6 +232,18 @@ async function fill() {
     }
     for (const manager of Managers) {
         await addManager(manager);
+    }
+    for (const promo of GlobalPromotions) {
+        await addGlobalPromotion(promo);
+    }
+    for (const promo of RestaurantPromotions) {
+        await addRestaurantPromotion(promo);
+    }
+    for (const addr of Addresses) {
+        await addAddress(addr);
+    }
+    for (const rec of Frequents) {
+        await addFrequents(rec);
     }
 };
 
