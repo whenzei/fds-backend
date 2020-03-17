@@ -4,7 +4,6 @@ const session = require("express-session");
 const bodyParser = require("body-parser");
 const logger = require('morgan');
 const strategies = require('./auth/strategies');
-const userController = require('./controllers/user')
 const passport = require('passport')
 const cors = require('cors');
 
@@ -24,16 +23,19 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 passport.use('local', strategies.localStrategy);
-passport.use('jwt', strategies.jwtStrategy);
+passport.use('jwt-rider', strategies.jwtStrategyRider);
+passport.use('jwt-manager', strategies.jwtStrategyManager);
+passport.use('jwt-customer', strategies.jwtStrategyCustomer);
+passport.use('jwt-staff', strategies.jwtStrategyStaff);
 
 app.use(logger('tiny'));
 
 app.use('/login', loginRouter);
 app.use('/logout', logoutRouter);
-app.use('/customer', customerRouter);
-app.use('/rider', passport.authenticate('jwt', {session: false}),riderRouter);
-app.use('/staff', staffRouter);
-app.use('/manager', managerRouter);
+app.use('/customer', passport.authenticate('jwt-customer', {session: false}),customerRouter);
+app.use('/rider', passport.authenticate('jwt-rider', {session: false}),riderRouter);
+app.use('/staff', passport.authenticate('jwt-staff', {session: false}),staffRouter);
+app.use('/manager', passport.authenticate('jwt-manager', {session: false}),managerRouter);
 
 app.listen(port, () => {
     console.log(`Listening to requests on http://localhost:${port}`);
