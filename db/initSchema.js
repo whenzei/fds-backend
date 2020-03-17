@@ -166,22 +166,18 @@ SQL_STATEMENTS = {
         `,
     Address:
         `CREATE TABLE Address (
+            addrId          SERIAL primary key,
             unit            VARCHAR(10),
             streetName        VARCHAR(100),
-            postalCode         INTEGER check (postalCode > 99999 and postalCode < 10000000),
-            primary key(unit, streetName, postalCode)
+            postalCode         INTEGER check (postalCode > 99999 and postalCode < 10000000)
         );
         `,
     Frequents:
         `CREATE TABLE Frequents (
             uid            SERIAL references Customers,
-            unit            VARCHAR(10),
-            streetName        VARCHAR(100),
-            postalCode         INTEGER
-            check (postalCode > 99999 and postalCode < 10000000) not NULL,
-            timeStamp        TIMESTAMP not NULL,
-            primary key (uid, unit, streetName, postalCode),
-            foreign key (unit, streetName, postalCode) references Address
+            addrId         INTEGER references Address,
+            lastUsed       TIMESTAMP not NULL,
+            primary key (uid, addrId)
         );
         `,
     Restaurants:
@@ -230,11 +226,9 @@ SQL_STATEMENTS = {
             arriveAtR        TIME,
             departFromR        TIME,
             finalPrice        INTEGER not NULL,
-            unit             VARCHAR(10) not NULL,
-            streetName        VARCHAR(100) not NULL,
-            postalCode        INTEGER not NULL,
+            addrId          INTEGER not null,
             pid            INTEGER references Promotions,
-            foreign key (unit, streetName, postalCode) references Address
+            foreign key (addrId) references Address
         );
         `,
     Reviews:
