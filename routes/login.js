@@ -8,8 +8,8 @@ const {JWT_SECRET_KEY} = require("../auth/strategies")
 router.post('/',
     passport.authenticate('local', {session: false}),
     async (req, res) => {
-        const user = _.omit(req.user, ['password'])
-        const token = jwt.sign(user, JWT_SECRET_KEY);
+        const user = _.omit(req.user, ['password', 'passwordhash', 'salt'])
+        const token = jwt.sign({uid: user.uid}, JWT_SECRET_KEY);
         return res.json({user, token});
     }
 );
