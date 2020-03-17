@@ -23,23 +23,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-
-passport.serializeUser(function (user, done) {
-    done(null, user.uid);
-});
-
-passport.deserializeUser(function (uid, done) {
-    userController.findByUid(uid, (err, user) => done(err, user))
-});
-
 passport.use('local', strategies.localStrategy);
+passport.use('jwt', strategies.jwtStrategy);
 
 app.use(logger('tiny'));
 
 app.use('/login', loginRouter);
 app.use('/logout', logoutRouter);
 app.use('/customer', customerRouter);
-app.use('/rider', riderRouter);
+app.use('/rider', passport.authenticate('jwt', {session: false}),riderRouter);
 app.use('/staff', staffRouter);
 app.use('/manager', managerRouter);
 
