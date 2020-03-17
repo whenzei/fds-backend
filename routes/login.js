@@ -2,12 +2,15 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const _ = require('lodash')
+const jwt = require('jsonwebtoken');
+const {JWT_SECRET_KEY} = require("../auth/strategies")
 
 router.post('/',
-    passport.authenticate('local'),
+    passport.authenticate('local', {session: false}),
     async (req, res) => {
-        const user = _.omit(req.user, ['password'])
-        res.send(user);
+        const user = _.omit(req.user, ['password', 'passwordhash', 'salt'])
+        const token = jwt.sign({uid: user.uid}, JWT_SECRET_KEY);
+        return res.json({user, token});
     }
 );
-module.exports = router;
+module.exports = router
