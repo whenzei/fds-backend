@@ -11,18 +11,16 @@ const getCustomers = function (req, res) {
         });
 };
 
-async function findByUserName(userName, callback) {
+async function findByUserName(userName) {
     let user = {};
     try {
         user = await db.one(`SELECT * FROM Users WHERE userName = '${userName}'`);
         await db.one(`SELECT * FROM Customers WHERE uid = '${user.uid}'`);
         user['role'] = Roles.customer
     } catch (err) {
-        callback(err, null)
-        return
+        throw Error("Cannot retrieve customer")
     }
-    callback(null, user);
-    return
+    return user;
 }
 
 module.exports = {

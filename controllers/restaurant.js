@@ -9,6 +9,10 @@ const getMenu = async (rid) => {
     return menu
 };
 
+const getRestaurant = async(rid) => {
+    return await db.oneOrNone(`SELECT * FROM Restaurants WHERE rid = ${rid}`)
+}
+
 module.exports = {
-    getAllRestaurants, getMenu
+    getAllRestaurants, getMenu, getRestaurant
 }

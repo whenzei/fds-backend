@@ -1,7 +1,7 @@
 const db = require('../db');
 const {Roles} = require('../auth')
 
-const getOrdersById = async (uid) => {
+const getOrdersByUid = async (uid) => {
    const orders =  await db.any(`SELECT * FROM Orders WHERE customerid = ${uid}`)
    console.log(orders)
    return orders;
@@ -14,5 +14,5 @@ const getFoodCollation = async (oid) => {
 
 
 module.exports = {
-    getOrdersById, getFoodCollation
+    getOrdersByUid: getOrdersByUid, getFoodCollation
 }

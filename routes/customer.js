@@ -1,25 +1,22 @@
 const express = require('express')
 const router = express.Router()
-const graphqlHTTP = require('express-graphql');
-const { buildSchema } = require('graphql')
+const { ApolloServer, gql, ApolloError } = require('apollo-server-express');
 const customerController = require('../controllers/customer')
 const restaurantController = require('../controllers/restaurant')
 const orderController = require('../controllers/order')
+const addressController = require('../controllers/address')
 
-router.get("/", (req, res) => res.send(`Hi I'm ${req.user.name}. I'm a ${req.user.role}.`))
-
-const schema = buildSchema(`
+const typeDefs = gql`
     type Restaurant {
         rid: Int!
         rname: String!
         menu: [Food!]!
-        minSpending: Int!
+        minSpending: Int
     }
 
     type Food {
-        fName: String!
+        fname: String!
         price: Int!
-        restaurant: Restaurant!
         category: String!
     }
 
@@ -30,6 +27,7 @@ const schema = buildSchema(`
     }
 
     type Customer {
+        uid: Int!
         cname: String!
         username: String!
         addresses(last: Int = 100): [Address!]!
@@ -41,44 +39,79 @@ const schema = buildSchema(`
     }
 
     type Address {
-        aid: Int!
+        addrId: Int!
         street: String!
         postalCode: String!
     }
 
-    type RootQuery {
+    type Query {
         me: Customer!
         allRestaurants: [Restaurant!]!
         allMyOrders: [Order!]!
     }
 
-    type RootMutation {
+    type Mutation {
         createOrder(subOrders: [Int!]!): Int!,
         addAddress(street: String!, postalCode: String!): Int!
     }
+`;
 
-    schema {
-        query: RootQuery
-        mutation: RootMutation
-    }
-`)
-const graphqlMiddleware = graphqlHTTP({
-    schema: schema,
-    pretty: true,
-    rootValue: {
-        me: () => { return { cname: "req.user", username: "sadad", addresses: [] } },
+const resolvers = {
+    Query: {
+        me: async (parent, args, context) => {
+            context.user = { uid: 1, name: "zhow qing tian", username: "zhow" }
+            return { uid: context.user.uid, cname: context.user.name, username: context.user.username }
+        },
         allRestaurants: async () => {
-            const restaurants = await restaurantController.getAllRestaurants()
-            return restaurants.map(async (r) => { return { rid: r.rid, rname: r.rid, minSpending: r.minSpending, menu: await restaurantController.getMenu(r.rid) } })
+            let restaurants = []
+            try {
+                restaurants = await restaurantController.getAllRestaurants()
+            } catch (err) {
+                throw new ApolloError(err)
+            }
+            return restaurants.map((r) => { return { rid: r.rid, rname: r.rname, minSpending: r.minSpending } })
         },
         allMyOrders: async () => {
-            const orders = await orderController.getOrdersById(1);
-            return orders.map(async (o) => { return { oid: o.oid, finalPrice: finalPrice, subOrders: await orderController.getFoodCollation(o.oid)} })
+            let orders = []
+            try {
+                orders = await orderController.getOrdersByUid()
+            } catch (err) {
+                throw new ApolloError(err)
+            }
+            return orders.map((o) => { return { oid: o.oid, finalPrice: o.finalPrice } })
         }
     },
-    graphiql: true
-})
+    Customer: {
+        addresses: async (customer) => {
+            let addresses;
+            try {
+                addresses = await addressController.getAddressesByUid(customer.uid)
+            } catch (err) {
+                throw new ApolloError(err)
+            }
+            return addresses.map((a => { return { addrId: a.addrId, street: a.streetname, postalCode: a.postalcode } }))
+        }
+    },
+    Restaurant: {
+        menu: async (restaurant) => {
+            let menu = []
+            try {
+                menu = await restaurantController.getMenu(restaurant.rid)
+            } catch (err) {
+                throw new ApolloError(err)
+            }
+            return menu.map(f => { return { fname: f.fname, price: f.price, category: f.category } })
+        }
+    },
+};
 
-router.use('/graphql', graphqlMiddleware);
+const server = new ApolloServer({
+    typeDefs, resolvers,
+    context: ({ req }) => ({
+        user: req
+    })
+});
+router.use("/", server.getMiddleware({ path: "/" }))
+
 
 module.exports = router;
