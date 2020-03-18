@@ -30,6 +30,248 @@ DROP_TABLES = `
         DROP TYPE IF EXISTS MONTH_ENUM CASCADE;
         DROP TYPE IF EXISTS CUISINE_ENUM CASCADE;
     `;
+
+TRIGGERS = {
+        user_subclass_overlap_check: 
+        `CREATE OR REPLACE FUNCTION check_subuser_constraint() RETURNS TRIGGER AS $$
+        DECLARE 
+        user 		INTEGER;
+        BEGIN
+        SELECT
+            uid INTO user
+        FROM
+            Users U
+        WHERE
+            U.uid = NEW.uid
+            AND (
+                U.uid in (SELECT uid FROM Riders) OR
+                U.uid in (SELECT uid FROM Customers) OR
+                U.uid in (SELECT uid FROM Staff) OR
+                U.uid in (SELECT uid FROM Managers)
+            );
+        IF FOUND THEN RAISE exception '% user already exists in a Users subclass', NEW.uid;
+        END IF;
+        RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+
+        
+        DROP TRIGGER IF EXISTS customer_trigger ON Customers CASCADE;
+        CREATE TRIGGER customer_trigger
+        BEFORE INSERT OR UPDATE ON Customers
+        FOR EACH ROW
+        EXECUTE FUNCTION check_subuser_constraint();
+
+        DROP TRIGGER IF EXISTS rider_trigger ON Riders CASCADE;
+        CREATE TRIGGER rider_trigger
+        BEFORE INSERT OR UPDATE ON Riders
+        FOR EACH ROW
+        EXECUTE FUNCTION check_subuser_constraint();
+
+        DROP TRIGGER IF EXISTS manager_trigger ON Managers CASCADE;
+        CREATE TRIGGER manager_trigger
+        BEFORE INSERT OR UPDATE ON Managers
+        FOR EACH ROW
+        EXECUTE FUNCTION check_subuser_constraint();
+
+        DROP TRIGGER IF EXISTS staff_trigger ON Staff CASCADE;
+        CREATE TRIGGER staff_trigger
+        BEFORE INSERT OR UPDATE ON Staff
+        FOR EACH ROW
+        EXECUTE FUNCTION check_subuser_constraint();
+        `,
+    riders_subclass_overlap_check: 
+        `
+        CREATE OR REPLACE FUNCTION check_subrider_constraint() RETURNS TRIGGER AS $$
+        DECLARE
+        rider 		INTEGER;
+        BEGIN
+        SELECT
+            uid INTO rider
+        FROM
+            Riders R
+        WHERE
+            R.uid = NEW.uid
+            AND (
+                R.uid in (SELECT uid FROM PartTimers) OR
+                R.uid in (SELECT uid FROM FullTimers)
+            );
+        IF FOUND THEN RAISE exception '% rider already exists in a Riders subclass', NEW.uid;
+
+        END IF;
+        RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+
+        DROP TRIGGER IF EXISTS full_timer_trigger ON FullTimers CASCADE;
+        CREATE TRIGGER full_timer_trigger
+        BEFORE INSERT OR UPDATE ON FullTimers
+        FOR EACH ROW
+        EXECUTE FUNCTION check_subrider_constraint();
+
+        DROP TRIGGER IF EXISTS part_timer_trigger ON PartTimers CASCADE;
+        CREATE TRIGGER part_timer_trigger
+        BEFORE INSERT OR UPDATE ON PartTimers
+        FOR EACH ROW
+        EXECUTE FUNCTION check_subrider_constraint();
+        `,
+    promo_subclass_check:
+        `
+        CREATE OR REPLACE FUNCTION check_promotions_constraint() RETURNS TRIGGER AS $$
+        DECLARE
+        promotion 	INTEGER;
+        BEGIN
+        SELECT
+            pid INTO promotion
+        FROM
+            Promotions P
+        WHERE
+            P.pid = NEW.pid
+            AND (
+                P.pid in (SELECT pid FROM GlobalPromos) OR
+                P.pid in (SELECT pid FROM RestaurantPromos)
+            );
+        IF FOUND THEN RAISE exception '% promotion already exists in a Promotions subclass', NEW.pid;
+        END IF;
+        RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+
+
+        DROP TRIGGER IF EXISTS gobal_promo_trigger ON GlobalPromos CASCADE;
+        CREATE TRIGGER global_promo_trigger
+        BEFORE INSERT OR UPDATE ON GlobalPromos
+        FOR EACH ROW
+        EXECUTE FUNCTION check_promotions_constraint();
+
+        DROP TRIGGER IF EXISTS restaurant_promo_trigger ON RestaurantPromos CASCADE;
+        CREATE TRIGGER restaurant_promo_trigger
+        BEFORE INSERT OR UPDATE ON RestaurantPromos
+        FOR EACH ROW
+        EXECUTE FUNCTION check_promotions_constraint();
+        `,
+    pt_schedule_break_check:
+        `
+        CREATE OR REPLACE FUNCTION check_pt_schedule() RETURNS TRIGGER AS $$
+        DECLARE
+        numViolates	INTEGER;
+        BEGIN
+        WITH SortPT AS (
+            SELECT P1.uid, P1.date, P2.startTime - P1.endTime as break
+            FROM PTSchedule P1, PTSchedule P2
+            WHERE P1.uid = P2.uid AND P1.date = P2.date AND P1.startTime < P2.startTime
+        )
+        /*check breaks for each day, returns 1 if any of the days have a break that is < 1 hour*/
+        SELECT count(*) INTO numViolates
+        FROM SortPT
+        WHERE NEW.uid = uid AND NEW.date = date AND break < 1;
+        
+        IF numViolates IS NOT NULL AND numViolates > 0 THEN
+            RAISE EXCEPTION 'There must be at least one hour break between two consecutive hour intervals. There were % such violations for date %', numViolates, NEW.date;
+        END IF;
+
+        RETURN NULL;
+        END;
+        $$ LANGUAGE plpgsql;
+
+        DROP TRIGGER IF EXISTS check_pt_schedule_trigger ON PTSchedule;
+        CREATE CONSTRAINT TRIGGER check_pt_schedule_trigger
+        AFTER INSERT OR UPDATE
+        ON PTSchedule
+        DEFERRABLE INITIALLY DEFERRED
+        FOR EACH ROW
+        EXECUTE FUNCTION check_pt_schedule();
+        `,
+    pt_schedule_total_hours_check:
+        `
+        CREATE OR REPLACE FUNCTION check_pt_total_hours () RETURNS TRIGGER AS $$
+        DECLARE
+        totalHours	INTEGER;
+
+        BEGIN
+        /*check if total number of hours in each WWS is at least 10 and at most 48*/
+        SELECT sum(endTime - startTime) INTO totalHours
+            FROM PTSchedule
+            WHERE NEW.uid = uid AND date_part('year', date::date) = date_part('year', NEW.date::date) AND date_part('week', date::date) = date_part('week', NEW.date::date);
+        
+            IF totalHours < 10 OR  totalHours > 48 THEN
+                RAISE EXCEPTION 'Total number of hours for each part time rider must be at least 10 and at most 48 hours.';
+            END IF;
+        RETURN NULL;
+        END;
+        $$ LANGUAGE plpgsql;
+
+        DROP TRIGGER IF EXISTS check_pt_total_hours_trigger ON PTSchedule;
+        CREATE CONSTRAINT TRIGGER check_pt_total_hours_trigger
+        AFTER INSERT OR UPDATE OR DELETE
+        ON PTSchedule
+        DEFERRABLE INITIALLY DEFERRED
+        FOR EACH ROW
+        EXECUTE FUNCTION check_pt_total_hours ();
+        `,
+    collates_check:
+        `
+        CREATE OR REPLACE FUNCTION is_order_from_same_restaurant() RETURNS 
+        TRIGGER AS $$
+        DECLARE 
+
+        uniqueRid INTEGER;
+
+        BEGIN
+        /* counts the unique restaurant ids for an order id */
+
+        SELECT count(distinct rid) INTO uniqueRid
+        FROM Collates C
+        GROUP BY C.oid
+        HAVING C.oid = NEW.oid;
+
+        IF uniqueRid <> 1 THEN
+        RAISE EXCEPTION 'Please make sure the item you have selected belongs to the same restaurant as other items in your order.' ;
+        END IF;
+        RETURN NULL;
+        END;
+        $$ LANGUAGE plpgsql;
+
+        DROP TRIGGER IF EXISTS unique_restaurant_order_trigger ON Collates;
+        CREATE TRIGGER unique_restaurant_order_trigger
+        AFTER UPDATE OR INSERT 
+        ON Collates
+        FOR EACH ROW
+        EXECUTE FUNCTION  is_order_from_same_restaurant();
+        `,
+    frequents_check:
+        `
+        CREATE OR REPLACE FUNCTION is_address_count_in_limit() RETURNS 
+        TRIGGER AS $$
+        DECLARE 
+
+        addressCt INTEGER;
+
+        BEGIN
+        /* counts the number of addresses for each customer*/
+
+        SELECT count(*) INTO addressCt
+        FROM Frequents
+        GROUP BY NEW.uid;
+
+        IF addressCt >= 5 THEN
+            DELETE FROM Frequents WHERE uid = NEW.uid AND lastUsed = (SELECT min(lastUsed) FROM Frequents WHERE NEW.uid = uid);
+            RETURN NEW;
+        END IF;
+        RETURN NULL;
+        END;
+        $$ LANGUAGE plpgsql;
+
+        DROP TRIGGER IF EXISTS limit_customer_address_count_trigger ON Frequents;
+        CREATE TRIGGER limit_customer_address_count_trigger
+        BEFORE INSERT 
+        ON Frequents
+        FOR EACH ROW
+        EXECUTE FUNCTION  is_address_count_in_limit();
+        `,
+        // rider_schedule_check:
+};
+
 SQL_STATEMENTS = {
     Enums:
         `CREATE TYPE MONTH_ENUM AS ENUM
@@ -58,6 +300,8 @@ SQL_STATEMENTS = {
      'Vietnamese',
      'Lebanese'
     );`,
+
+
     Users:
         `CREATE TABLE Users (
         uid            SERIAL primary key,
@@ -284,6 +528,15 @@ async function init() {
     for (const [key, sqlCommand] of Object.entries(SQL_STATEMENTS)) {
         try {
             await db.none(sqlCommand);
+            console.log(key + " done")
+        } catch (e) {
+            console.log(e);
+            break;
+        }
+    }
+    for (const [key, trigger] of Object.entries(TRIGGERS)) {
+        try {
+            await db.none(trigger);
             console.log(key + " done")
         } catch (e) {
             console.log(e);
