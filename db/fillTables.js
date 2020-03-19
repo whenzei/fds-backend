@@ -32,9 +32,46 @@ const Staffs = [
 const Restaurants = [
     [1, 5, 'Fukuroku'],
     [2, 10, 'MaMas Specials'],
-    [3, 11, 'MacDonalds'],
+    [3, 11, 'WacDonalds'],
     [4, 15, 'KFC']
 ];
+
+`
+0)Western 
+1)Chinese
+2)Japanese 
+3)Indonesian
+4)Korean
+5)Indian
+6)Mediterranean
+7)Thai
+8)Vietnamese
+9)Lebanese
+`
+// (rid, fname, price, category, dailyLimit)
+const Food = [
+    [1, 'Fried Rice', 'Chinese', '500', '200'],
+    [1, 'Chow Mein', 'Chinese', '500', '200'],
+    [1, 'Hor Fun', 'Chinese', '600', '300'],
+    [1, 'Chicken Congee', 'Chinese', '400', '100'],
+    [1, 'Tomyum Soup', 'Thai', '600', '150'],
+    [1, 'Pad Thai', 'Thai', '300', '150'],
+    [1, 'Basil Chicken Rice', 'Thai', '650', '100'],
+    [2, 'Chicken Chop', 'Western', '600', '100'],
+    [2, 'Pork Chop', 'Western', '700', '100'],
+    [2, 'Fish n Chips', 'Western', '700', '100'],
+    [2, 'Mediterranean Burrito', 'Mediterranean', '500', '200'],
+    [2, 'Baked Cod', 'Mediterranean', '900', '50'],
+    [2, 'Chicken Shawarma', 'Mediterranean', '900', '100'],
+    [2, 'Seafood Paella', 'Mediterranean', '800', '100'],
+    [3, 'WcSpicy', 'Western', '400', '300'],
+    [3, 'WcChicken', 'Western', '300', '300'],
+    [3, 'WcFillet', 'Western', '400', '200'],
+    [3, 'WcBeef', 'Western', '500', '300'],
+    [4, 'Mushroom Burger', 'Western', '300', '200'],
+    [4, 'Chicken Burger', 'Western', '400', '300'],
+    [4, '2pc Chicken', 'Western', '600', '400'],
+]
 
 // (pid, points, startDate, endDate, percentOff, minSpending (in cents), monthsWithNoOrders)
 const GlobalPromotions = [
@@ -149,6 +186,17 @@ async function addRestaurant(arr) {
     }
 }
 
+async function addFood(arr) {
+    try {
+        await db.none(
+            `Insert into Food (rid, fname, category, price, dailyLimit) Values
+            (${arr[0]}, '${arr[1]}', '${arr[2]}', '${arr[3]}', '${arr[4]}')`
+        );
+    } catch (error) {
+        console.log(error, 'Failed to add restaurant');
+    }
+}
+
 async function addGlobalPromotion(arr) {
     try {
         await db.tx(t => {
@@ -206,7 +254,11 @@ async function addFrequents(arr) {
 async function deleteTables() {
     try {
         await db.none(`
-            DELETE From Users;
+            DELETE FROM Frequents;
+            DELETE FROM Address;
+            DELETE FROM Users;
+            DELETE FROM Food;
+            DELETE FROM Promotions;
             DELETE FROM Restaurants;
             `
         );
@@ -221,6 +273,9 @@ async function fill() {
     for (const restaurant of Restaurants) {
         await addRestaurant(restaurant);
     }
+    for (const food of Food) {
+        await addFood(food);
+    }
     for (const customer of Customers) {
         await addCustomer(customer);
     }
@@ -233,18 +288,19 @@ async function fill() {
     for (const manager of Managers) {
         await addManager(manager);
     }
-    for (const promo of GlobalPromotions) {
-        await addGlobalPromotion(promo);
-    }
-    for (const promo of RestaurantPromotions) {
-        await addRestaurantPromotion(promo);
-    }
     for (const addr of Addresses) {
         await addAddress(addr);
     }
     for (const rec of Frequents) {
         await addFrequents(rec);
     }
+    for (const promo of GlobalPromotions) {
+        await addGlobalPromotion(promo);
+    }
+    for (const promo of RestaurantPromotions) {
+        await addRestaurantPromotion(promo);
+    }
+
 };
 
 fill().then(() => console.log('Tables filled'));
