@@ -9,7 +9,7 @@ router.get("/restaurants", async (req, res, next) => {
     try {
         restaurants = await getAllRestaurants();
     } catch (err) {
-        next(err)
+        return next(err)
     }
     return res.send(restaurants);
 })
@@ -20,7 +20,7 @@ router.get("/restaurants/:rid", async (req, res, next) => {
     try {
         menu = await getMenu(req.params.rid);
     } catch (err) {
-        next(err)
+        return next(err)
     }
     return res.send(menu)
 })
