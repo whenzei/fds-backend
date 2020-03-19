@@ -1,5 +1,5 @@
 const db = require('../db');
-const {Roles} = require('../auth')
+const { Roles } = require('../auth')
 
 const getCustomers = function (req, res) {
     db.any('SELECT * FROM Customers')
@@ -10,6 +10,16 @@ const getCustomers = function (req, res) {
             res.send(error)
         });
 };
+
+async function getRestaurants() {
+    let restaurants = [];
+    try {
+        restaurants = await db.any('SELECT rid, rname FROM Restaurants');
+    } catch (error) {
+        return error;
+    }
+    return restaurants;
+}
 
 async function findByUserName(userName, callback) {
     let user = {};
@@ -26,5 +36,5 @@ async function findByUserName(userName, callback) {
 }
 
 module.exports = {
-    getCustomers, findByUserName
+    getCustomers, getRestaurants, findByUserName
 }
