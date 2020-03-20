@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { getMenu, getAllRestaurants } = require('../controllers/restaurant')
+const { getMenu, getRestaurants } = require('../controllers/restaurant')
 const { check } = require('express-validator');
 const { validate } = require('../validate')
 
@@ -9,7 +9,7 @@ router.get("/", (req, res) => res.send(`Hi I'm ${req.user.name}. I'm a ${req.use
 router.get("/restaurants", async (req, res, next) => {
     let restaurants = []
     try {
-        restaurants = await getAllRestaurants();
+        restaurants = await getRestaurants();
     } catch (err) {
         return next(err)
     }
@@ -23,7 +23,7 @@ router.get("/restaurants/:rid",
     ],
     validate
     , async (req, res, next) => {
-        let menu = []
+        let menu;
         try {
             menu = await getMenu(req.params.rid);
         } catch (err) {

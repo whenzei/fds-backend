@@ -1,19 +1,22 @@
 const db = require('../db');
+const PS = require('pg-promise').PreparedStatement;
 
-const getAllRestaurants = async () => {
-    const restaurants = await db.any('SELECT * FROM Restaurants')
-    return restaurants
+const psGetRestaurants = new PS({ name: 'get-retaurants', text: 'SELECT * FROM Restaurants' })
+const psGetMenu = new PS({ name: 'get-menu', text: 'SELECT * FROM Food WHERE rid = $1' });
+const psGetRestaurant = new PS({ name: 'get-restaurant', text: 'SELECT * FROM Restaurants WHERE rid = $1' });
+
+const getRestaurants = async () => {
+    return await db.any(psGetRestaurants)
 };
 
 const getMenu = async (rid) => {
-    const menu = await db.any(`SELECT * FROM Food WHERE rid = ${rid}`)
-    return menu
+    return await db.any(psGetMenu, [rid])
 };
 
-const getRestaurant = async(rid) => {
-    return await db.oneOrNone(`SELECT * FROM Restaurants WHERE rid = ${rid}`)
+const getRestaurant = async (rid) => {
+    return await db.oneOrNone(psGetRestaurant, [rid])
 }
 
 module.exports = {
-    getAllRestaurants, getMenu, getRestaurant
+    getRestaurants, getMenu, getRestaurant
 }

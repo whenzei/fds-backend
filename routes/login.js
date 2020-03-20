@@ -7,10 +7,12 @@ const { JWT_SECRET_KEY } = require("../auth/strategies")
 const { check } = require('express-validator')
 const { validate } = require('../validate')
 
-router.post('/', [
-    check('username').trim().escape().not().isEmpty(),
-    check('password').trim().escape().not().isEmpty()
-], validate, (req, res, next) => { console.log(req.body.password); next() },
+router.post('/',
+    [
+        check('username').trim().escape().not().isEmpty(),
+        check('password').trim().escape().not().isEmpty()
+    ]
+    , validate,
     passport.authenticate('local', { session: false }),
     async (req, res) => {
         const user = _.omit(req.user, ['password', 'passwordhash', 'salt'])
