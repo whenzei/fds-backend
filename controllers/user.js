@@ -1,58 +1,41 @@
 const db = require('../db');
 const { Roles } = require('../auth')
-const getUsers = function (req, res) {
-    db.any('SELECT * FROM Users')
-        .then(function (data) {
-            res.status(200).send(data);
-        })
-        .catch(function (error) {
-            res.send(error)
-        });
+const PS = require('pg-promise').PreparedStatement
+
+const psGetUsers = new PS({ name: 'get-users', text: 'SELECT * FROM Users' });
+const psGetUserByUid = new PS({ name: 'get-user-by-uid', text: 'SELECT * from USERS WHERE uid = $1' });
+const psGetUserByUsername = new PS({ name: 'get-user-by-username', text: 'SELECT * from USERS WHERE username = $1' });
+const psGetRole = new PS({
+    name: 'get-role', text:
+        `SELECT distinct case
+            when exists (select 1 from Customers where uid = $1) then '${Roles.customer}'
+            when exists (select 1 from Riders where uid = $1) then '${Roles.rider}'
+            when exists (select 1 from Managers where uid = $1) then '${Roles.manager}'
+            when exists (select 1 from Staff where uid = $1) then '${Roles.staff}'
+            else null
+        end as role FROM Users`
+});
+
+const getUsers = async function () {
+    return await db.any(psGetUsers);
 };
 
-async function getRole(uid) {
-    let result;
-    try {
-        result = await db.one(
-            `SELECT distinct case
-            when exists (select 1 from Customers where uid = '${uid}') then '${Roles.customer}'
-            when exists (select 1 from Riders where uid = '${uid}') then '${Roles.rider}'
-            when exists (select 1 from Managers where uid = '${uid}') then '${Roles.manager}'
-            when exists (select 1 from Staff where uid = '${uid}') then '${Roles.staff}'
-            end as role FROM Users;`
-        );
-    } catch (err) {
-        return err;
-    }
-    return result.role;
+const getRole = async function (uid) {
+    return await db.one(psGetRole, [uid])
 }
 
-async function findByUid(uid, callback) {
-    let user;
-    try {
-        user = await db.one(`SELECT * from USERS WHERE uid = ${uid}`);
-        user['role'] = await getRole(uid);
-    } catch (err) {
-        callback(err, null)
-        return
-    }
-    callback(null, user)
-    return;
+const getUserByUid = async function (uid) {
+    user = await db.one(psGetUserByUid, [uid]);
+    user['role'] = (await db.one(psGetRole, [uid])).role
+    return user
 }
 
-async function findByUserName(userName, callback) {
-    let user = {};
-    try {
-        user = await db.one(`SELECT * FROM Users WHERE userName = '${userName}'`);
-        user['role'] = await getRole(user.uid)
-    } catch (err) {
-        callback(err, null)
-        return
-    }
-    callback(null, user);
-    return
+const getUserByUsername = async function (username) {
+    user = await db.one(psGetUserByUsername, [username]);
+    user['role'] = (await db.one(psGetRole, [user.uid])).role
+    return user
 }
 
 module.exports = {
-    getUsers, getRole: getRole, findByUid, findByUserName
+    getUsers, getRole: getRole, getUserByUid, getUserByUsername
 }
