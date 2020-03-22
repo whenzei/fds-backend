@@ -106,6 +106,26 @@ const Frequents = [
     [4, 4, '2016-07-22 19:10:25-07']
 ];
 
+// (fname, rid, oid, totalPrice, qty)
+const Collates = [
+    ['Fried Rice', 1, 1, '1000', '2'],
+    ['Chow Mein', 1, 1, '500', '1'],
+    ['Chow Mein', 1, 2, '500', '1'],
+    ['Chicken Congee', 1, 2, '400', '1'],
+    ['Hor Fun', 1, 3, '1200', '2'],
+    ['Chicken Chop', 2, 4, '1800', '3'],
+    ['Pork Chop', 2, 4, '700', '1']
+];
+
+// (oid, riderId, customerId, orderTime, deliveredTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, departFromR, finalPrice, addrId, pid)
+const Orders = [
+    [1, 5, 2, '2004-10-19 10:23:54', '2004-10-19 12:23:54', 2, false, '2004-10-19 12:00:54', '2004-10-19 12:05:54', '2004-10-19 12:15:54', 1500, 1, null],
+    [2, 6, 2, '2004-10-19 10:23:54', '2004-10-19 12:23:54', 2, false, '2004-10-19 12:00:54', '2004-10-19 12:05:54', '2004-10-19 12:15:54', 900, 1, null],
+    [3, 6, 2, '2019-10-19 10:23:54', '2019-10-19 12:23:54', 3, false, '2019-10-19 12:00:54', '2019-10-19 12:05:54', '2019-10-19 12:15:54', 1200, 2, null],
+    [4, 7, 2, '2019-10-01 10:23:54', '2019-10-01 12:23:54', 3, false, '2019-10-01 12:00:54', '2019-10-01 12:05:54', '2019-10-01 12:15:54', 2500, 2, null]
+    // deliveredTime = null signifies an incomplete order. unable to represent it here because statement will be prepared as 'null' string causing DateTimeParse error
+];
+
 async function addCustomer(arr) {
     try {
         await db.tx(t => {
@@ -122,6 +142,7 @@ async function addCustomer(arr) {
         console.log(error, "Failed to add customer");
     }
 }
+
 async function addRider(arr) {
     try {
         await db.tx(t => {
@@ -193,7 +214,7 @@ async function addFood(arr) {
             (${arr[0]}, '${arr[1]}', '${arr[2]}', '${arr[3]}', '${arr[4]}')`
         );
     } catch (error) {
-        console.log(error, 'Failed to add restaurant');
+        console.log(error, 'Failed to add food');
     }
 }
 
@@ -251,6 +272,28 @@ async function addFrequents(arr) {
     }
 }
 
+async function addCollates(arr) {
+    try {
+        await db.none(
+            `Insert into Collates (fname, rid, oid, totalPrice, qty) Values
+            ('${arr[0]}', ${arr[1]}, ${arr[2]}, '${arr[3]}', '${arr[4]}')`
+        );
+    } catch (error) {
+        console.log(error, 'Failed to add collate');
+    }
+}
+
+async function addOrders(arr) {
+    try {
+        await db.none(
+            `Insert into Orders (oid, riderId, customerId, orderTime, deliveredTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, departFromR, finalPrice, addrId, pid) Values
+            (${arr[0]}, ${arr[1]}, ${arr[2]}, '${arr[3]}', '${arr[4]}', ${arr[5]}, ${arr[6]}, '${arr[7]}', '${arr[8]}', '${arr[9]}', ${arr[10]}, ${arr[11]}, ${arr[12]})`
+        );
+    } catch (error) {
+        console.log(error, 'Failed to add orders');
+    }
+}
+
 async function deleteTables() {
     try {
         await db.none(`
@@ -300,7 +343,12 @@ async function fill() {
     for (const promo of RestaurantPromotions) {
         await addRestaurantPromotion(promo);
     }
-
+    for (const order of Orders) {
+        await addOrders(order);
+    }
+    for (const collate of Collates) {
+        await addCollates(collate);
+    }
 };
 
 fill().then(() => console.log('Tables filled'));
