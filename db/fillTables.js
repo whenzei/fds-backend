@@ -303,6 +303,8 @@ async function deleteTables() {
             DELETE FROM Food;
             DELETE FROM Promotions;
             DELETE FROM Restaurants;
+            DELETE FROM Orders;
+            DELETE FROM Collates;
             `
         );
     } catch (error) {
