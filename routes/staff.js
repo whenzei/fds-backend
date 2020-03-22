@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const { getRestaurantId, getTotalOrdersAndCost, getMinMaxDate, getTop5Food } = require('../controllers/staff');
+const { getRestaurantId, getTotalOrdersAndCost, getMinMaxDate, getFoodCount } = require('../controllers/staff');
 const { check } = require('express-validator');
 const { validate } = require('../validate');
 
@@ -33,7 +33,6 @@ router.get("/order-summary/:rid",
 
     router.get("/min-max-date", async (req, res, next) => {
         let dates = [];
-        console.log
         try {
             dates = await getMinMaxDate();
         } catch (err) {
@@ -42,17 +41,19 @@ router.get("/order-summary/:rid",
         return res.send(dates);
     });
 
-    router.get("/top-food",
+    router.get("/food-count",
     [
         check('rid').isInt(),
         check('mth').isInt(),
-        check('yr').isInt()
+        check('yr').isInt(),
+        check('isDesc').isBoolean(),
+        check('limit').isInt()
     ],
     validate
     , async (req, res, next) => {
         let foodList = [];
         try {
-            foodList = await getTop5Food(req.query.rid, req.query.mth, req.query.yr);
+            foodList = await getFoodCount(req.query.rid, req.query.mth, req.query.yr, req.query.isDesc, req.query.limit);
         } catch (err) {
             return next(err)
         }
