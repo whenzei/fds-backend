@@ -57,7 +57,6 @@ const getSalesSummary = async (queryParams) => {
 }
 
 const getCustomerOrderSummary = async (queryParams) => {
-    console.log(queryParams)
     month = queryParams.month;
     year = queryParams.year;
     if(month == 'true' || (month == 'true' && year == 'true') ||
