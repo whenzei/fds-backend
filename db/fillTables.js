@@ -15,7 +15,7 @@ const Riders = [
     [6, 'Bobby', 'worm', 'qwerty', '2222'],
     [7, 'Alfred', 'batman', 'ytrewq', '33333'],
     [8, 'Penny', 'penny555', 'wiwiwi', 'pppppp'],
-]
+];
 
 //(uid, name, username, salt, passwordHash)
 const Managers = [
@@ -72,7 +72,7 @@ const Food = [
     [4, 'Mushroom Burger', 'Western', '300', '200'],
     [4, 'Chicken Burger', 'Western', '400', '300'],
     [4, '2pc Chicken', 'Western', '600', '400'],
-]
+];
 
 // (pid, points, startDate, endDate, percentOff, minSpending (in cents), monthsWithNoOrders)
 const GlobalPromotions = [

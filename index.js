@@ -13,7 +13,8 @@ const logoutRouter = require('./routes/logout');
 const riderRouter = require('./routes/rider');
 const staffRouter = require('./routes/staff');
 const managerRouter = require('./routes/manager');
-const signupBusinessRouter = require('./routes/signupBusiness')
+const signupBusinessRouter = require('./routes/signupBusiness');
+const ordersRouter = require('./routes/orders');
 
 const port = process.env.PORT || "8000";
 
@@ -39,6 +40,7 @@ app.use('/customer', passport.authenticate('jwt-customer', {session: false}),cus
 app.use('/rider', passport.authenticate('jwt-rider', {session: false}),riderRouter);
 app.use('/staff', passport.authenticate('jwt-staff', {session: false}),staffRouter);
 app.use('/manager', passport.authenticate('jwt-manager', {session: false}),managerRouter);
+app.use('/orders', passport.authenticate('jwt-manager', {session: false}), ordersRouter);
 
 app.listen(port, () => {
     console.log(`Listening to requests on http://localhost:${port}`);
