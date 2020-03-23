@@ -89,7 +89,7 @@ async function addFood(arr) {
             (${arr[0]}, '${arr[1]}', '${arr[2]}', '${arr[3]}', '${arr[4]}')`
         );
     } catch (error) {
-        console.log(error, 'Failed to add restaurant');
+        console.log(error, 'Failed to add food');
     }
 }
 
@@ -147,6 +147,28 @@ async function addFrequents(arr) {
     }
 }
 
+async function addCollates(arr) {
+    try {
+        await db.none(
+            `Insert into Collates (fname, rid, oid, totalPrice, qty) Values
+            ('${arr[0]}', ${arr[1]}, ${arr[2]}, '${arr[3]}', '${arr[4]}')`
+        );
+    } catch (error) {
+        console.log(error, 'Failed to add collate');
+    }
+}
+
+async function addOrders(arr) {
+    try {
+        await db.none(
+            `Insert into Orders (oid, riderId, customerId, orderTime, deliveredTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, departFromR, finalPrice, addrId, pid) Values
+            (${arr[0]}, ${arr[1]}, ${arr[2]}, '${arr[3]}', '${arr[4]}', ${arr[5]}, ${arr[6]}, '${arr[7]}', '${arr[8]}', '${arr[9]}', ${arr[10]}, ${arr[11]}, ${arr[12]})`
+        );
+    } catch (error) {
+        console.log(error, 'Failed to add orders');
+    }
+}
+
 async function deleteTables() {
     try {
         await db.none(`
@@ -156,6 +178,8 @@ async function deleteTables() {
             DELETE FROM Food;
             DELETE FROM Promotions;
             DELETE FROM Restaurants;
+            DELETE FROM Orders;
+            DELETE FROM Collates;
             `
         );
     } catch (error) {
@@ -165,5 +189,5 @@ async function deleteTables() {
 
 module.exports = {
     addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
-    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, deleteTables
+    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables
 };
