@@ -1,8 +1,9 @@
 const db = require('../db');
-const { Roles } = require('../auth')
-const PS = require('pg-promise').PreparedStatement
+const { Roles } = require('../auth/index');
+const PS = require('pg-promise').PreparedStatement;
 
 const psGetUsers = new PS({ name: 'get-users', text: 'SELECT * FROM Users' });
+const psGetUid = new PS({ name: 'getUserId', text: 'SELECT count(*) FROM Users' });
 const psGetUserByUid = new PS({ name: 'get-user-by-uid', text: 'SELECT * from USERS WHERE uid = $1' });
 const psGetUserByUsername = new PS({ name: 'get-user-by-username', text: 'SELECT * from USERS WHERE username = $1' });
 const psGetRole = new PS({
@@ -36,6 +37,12 @@ const getUserByUsername = async function (username) {
     return user
 }
 
+const getNextUid = async () => {
+    const UID = await db.any(psGetUid);
+    uid = parseInt(UID[0].count) + 1;
+    return uid;
+}
+
 module.exports = {
-    getUsers, getRole: getRole, getUserByUid, getUserByUsername
+    getUsers, getRole: getRole, getUserByUid, getUserByUsername, getNextUid
 }
