@@ -1,5 +1,5 @@
 const { addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
-    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, deleteTables } = require('../db/fillTableMethods');
+    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables } = require('../db/fillTableMethods');
 
 //(uid, name, username, salt, passwordHash)
 const Customers = [
@@ -105,6 +105,26 @@ const Frequents = [
     [3, 3, '2016-03-22 19:10:25-07'],
     [4, 3, '2016-06-22 19:10:25-07'],
     [4, 4, '2016-07-22 19:10:25-07']
+];
+
+// (fname, rid, oid, totalPrice, qty)
+const Collates = [
+    ['Fried Rice', 1, 1, '1000', '2'],
+    ['Chow Mein', 1, 1, '500', '1'],
+    ['Chow Mein', 1, 2, '500', '1'],
+    ['Chicken Congee', 1, 2, '400', '1'],
+    ['Hor Fun', 1, 3, '1200', '2'],
+    ['Chicken Chop', 2, 4, '1800', '3'],
+    ['Pork Chop', 2, 4, '700', '1']
+];
+
+// (oid, riderId, customerId, orderTime, deliveredTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, departFromR, finalPrice, addrId, pid)
+const Orders = [
+    [1, 5, 2, '2004-10-19 10:23:54', '2004-10-19 12:23:54', 2, false, '2004-10-19 12:00:54', '2004-10-19 12:05:54', '2004-10-19 12:15:54', 1500, 1, null],
+    [2, 6, 2, '2004-10-19 10:23:54', '2004-10-19 12:23:54', 2, false, '2004-10-19 12:00:54', '2004-10-19 12:05:54', '2004-10-19 12:15:54', 900, 1, null],
+    [3, 6, 2, '2019-10-19 10:23:54', '2019-10-19 12:23:54', 3, false, '2019-10-19 12:00:54', '2019-10-19 12:05:54', '2019-10-19 12:15:54', 1200, 2, null],
+    [4, 7, 2, '2019-10-01 10:23:54', '2019-10-01 12:23:54', 3, false, '2019-10-01 12:00:54', '2019-10-01 12:05:54', '2019-10-01 12:15:54', 2500, 2, null]
+    // deliveredTime = null signifies an incomplete order. unable to represent it here because statement will be prepared as 'null' string causing DateTimeParse error
 ];
 
 async function fill() {
