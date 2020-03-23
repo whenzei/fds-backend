@@ -4,7 +4,6 @@ const {addUser} = require('../controllers/manager')
 
 router.post('/', async (req, res, next) => {
     try {
-        console.log(req.body.user.role);
         const result = await addUser(req.body.user);
     } catch (err) {
         return next(err)
