@@ -63,13 +63,10 @@ const getTotalOrdersAndCost = async (rid) => {
 };
 
 const getFoodCount= async (rid, month, year, isDesc, limit) => {
-    console.log(typeof(isDesc))
     if (isDesc === 'true') {
-        console.log('most')
-        return await db.any(psGetMostPopularFoodCount, [2, month, year, limit]);
+        return await db.any(psGetMostPopularFoodCount, [rid, month, year, limit]);
     }
-    console.log('least')
-    return await db.any(psGetLeastPopularFoodCount, [2, month, year, limit]);
+    return await db.any(psGetLeastPopularFoodCount, [rid, month, year, limit]);
 };
 
 const getMinMaxDate = async () => {
