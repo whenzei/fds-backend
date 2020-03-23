@@ -13,12 +13,14 @@ const logoutRouter = require('./routes/logout');
 const riderRouter = require('./routes/rider');
 const staffRouter = require('./routes/staff');
 const managerRouter = require('./routes/manager');
+const signupBusinessRouter = require('./routes/signupBusiness')
 
 const port = process.env.PORT || "8000";
 
 app.use(cors());
 app.use(session({ secret: "lalalalala" }));
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -32,6 +34,7 @@ app.use(logger('tiny'));
 
 app.use('/login', loginRouter);
 app.use('/logout', logoutRouter);
+app.use('/signupBusiness', passport.authenticate('jwt-manager', {session: false}), signupBusinessRouter);
 app.use('/customer', passport.authenticate('jwt-customer', {session: false}),customerRouter);
 app.use('/rider', passport.authenticate('jwt-rider', {session: false}),riderRouter);
 app.use('/staff', passport.authenticate('jwt-staff', {session: false}),staffRouter);
