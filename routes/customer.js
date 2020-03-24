@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { getMenu, getRestaurants } = require('../controllers/restaurant')
+const { getAddresses } = require('../controllers/addressLookUp')
 const { check } = require('express-validator');
 const { validate } = require('../validate')
 
@@ -30,5 +31,12 @@ router.get("/restaurants/:rid",
             return next(err)
         }
         return res.send(menu)
-    })
+})
+
+router.get("/addresses/", async(req, res, next) => {
+    const searchStr = req.query.search;
+    let addresses = getAddresses(searchStr);
+    return res.send(addresses);
+}) 
+
 module.exports = router;
