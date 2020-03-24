@@ -50,6 +50,37 @@ LIMIT $4;
 
 const psGetMinMaxDate = new PS({ name: 'get-min-max-date', text: 'SELECT min(deliveredTime) as minDate, max(deliveredTime) as maxDate FROM Orders;' });
 
+const psGetPromoStats = new PS({ name: 'get-promo-stats', text: `
+WITH PromoDuration AS (
+SELECT pid, startDate, endDate, (endDate - startDate + 1) as duration
+FROM RestaurantPromos natural join Promotions
+WHERE rid = $1)
+
+SELECT pid, duration, count(*) as numOrders
+FROM PromoDuration natural join Orders
+WHERE orderTime >= startDate AND orderTime <= endDate
+GROUP BY pid, duration; 
+`});
+
+const psGetAllOrders = new PS({ name: 'get-all-orders', text: 
+`
+WITH OrderRestaurantPair AS (
+    SELECT DISTINCT rid, oid
+    FROM Collates natural join Orders
+),
+RidToName AS (
+    SELECT uid as riderId, name as rname
+    FROM Riders natural join Users
+),
+CidToName AS (
+    SELECT uid as customerId, name as cname
+    FROM Customers natural join Users
+)
+SELECT oid, rname, cname, orderTime, deliveredTime, finalPrice, (SELECT string_agg(fname, ', ') FROM COLLATES C WHERE C.oid = X.oid) as itemsOrdered
+FROM (Orders natural join OrderRestaurantPair join RidToName using (riderId) join CidToName using (customerId)) as X
+WHERE rid = $1
+ORDER BY orderTime DESC, deliveredTime DESC;`});
+
 const getStaff = async () => {
     return await db.any(psGetStaff, [uid]);
 };
@@ -71,8 +102,16 @@ const getFoodCount= async (rid, month, year, isDesc, limit) => {
 
 const getMinMaxDate = async () => {
     return await db.oneOrNone(psGetMinMaxDate);
+};
+
+const getPromoStats = async (rid) => {
+    return await db.any(psGetPromoStats, [rid]);
+};
+
+const getAllOrders = async (rid) => {
+    return await db.any(psGetAllOrders, [rid]);
 }
 
 module.exports = {
-    getStaff, getRestaurantId, getTotalOrdersAndCost, getFoodCount, getMinMaxDate
+    getStaff, getRestaurantId, getTotalOrdersAndCost, getFoodCount, getMinMaxDate, getPromoStats, getAllOrders
 }
