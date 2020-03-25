@@ -411,9 +411,10 @@ SQL_STATEMENTS = {
     Address:
         `CREATE TABLE Address (
             addrId          SERIAL primary key,
-            unit            VARCHAR(10),
-            streetName        VARCHAR(100),
-            postalCode         INTEGER check (postalCode > 99999 and postalCode < 10000000)
+            unit            VARCHAR(10) not NULL,
+            streetName        VARCHAR(100) not NULL,
+            postalCode         INTEGER check (postalCode > 99999 and postalCode < 10000000) not NULL,
+            unique(unit, streetName, postalCode)
         );
         `,
     Frequents:
