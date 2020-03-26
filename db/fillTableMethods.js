@@ -8,8 +8,8 @@ async function addCustomer(arr) {
             const q1 = t.none(
                 `Insert into Users (uid, name, userName, salt, passwordhash) Values
                 (${arr[0]}, '${arr[1]}', '${arr[2]}', '${arr[3]}', '${arr[4]}')`);
-        const q2 = t.none(`Insert into Customers (uid) Values
-                    (${arr[0]})`);
+        const q2 = t.none(`Insert into Customers (uid, points) Values
+                    (${arr[0]}, ${arr[5]})`);
         // returning a promise that determines a successful transaction:
         return t.batch([q1, q2]); // all of the queries are to be resolved;
     });

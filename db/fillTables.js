@@ -3,10 +3,10 @@ const { addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
 
 //(uid, name, username, salt, passwordHash)
 const Customers = [
-    [1, 'lala bin blabla', 'lalala', 'saltysplatoon', 'brown'],
-    [2, 'zhow qing tian', 'zhow', 'pepper', 'asdsad'],
-    [3, 'staff of wizardry', 'Knack2Babee', 'SeaSalt', '123'],
-    [4, 'the fork on the left', 'oheehee', 'Mother', 'Father'],
+    [1, 'lala bin blabla', 'lalala', 'saltysplatoon', 'brown', 300],
+    [2, 'zhow qing tian', 'zhow', 'pepper', 'asdsad', 1000],
+    [3, 'staff of wizardry', 'Knack2Babee', 'SeaSalt', '123', 500],
+    [4, 'the fork on the left', 'oheehee', 'Mother', 'Father', 20000],
 ];
 
 //(uid, name, username, salt, passwordHash)

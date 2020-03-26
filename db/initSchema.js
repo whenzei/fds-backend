@@ -58,7 +58,7 @@ TRIGGERS = {
         
         DROP TRIGGER IF EXISTS customer_trigger ON Customers CASCADE;
         CREATE TRIGGER customer_trigger
-        BEFORE INSERT OR UPDATE ON Customers
+        BEFORE INSERT ON Customers
         FOR EACH ROW
         EXECUTE FUNCTION check_subuser_constraint();
 
@@ -403,7 +403,7 @@ SQL_STATEMENTS = {
         `CREATE TABLE Customers (
             uid            SERIAL,
             creditCard        CHAR(16),
-            points            INTEGER,
+            points            INTEGER DEFAULT 0,
             primary key (uid),
             foreign key(uid) references Users on delete cascade
         );
