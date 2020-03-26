@@ -58,7 +58,7 @@ TRIGGERS = {
         
         DROP TRIGGER IF EXISTS customer_trigger ON Customers CASCADE;
         CREATE TRIGGER customer_trigger
-        BEFORE INSERT OR UPDATE ON Customers
+        BEFORE INSERT ON Customers
         FOR EACH ROW
         EXECUTE FUNCTION check_subuser_constraint();
 
@@ -252,13 +252,13 @@ TRIGGERS = {
 
         SELECT count(*) INTO addressCt
         FROM Frequents
-        GROUP BY NEW.uid;
+        WHERE NEW.uid = uid;
 
         IF addressCt >= 5 THEN
             DELETE FROM Frequents WHERE uid = NEW.uid AND lastUsed = (SELECT min(lastUsed) FROM Frequents WHERE NEW.uid = uid);
             RETURN NEW;
         END IF;
-        RETURN NULL;
+        RETURN NEW;
         END;
         $$ LANGUAGE plpgsql;
 
@@ -403,7 +403,7 @@ SQL_STATEMENTS = {
         `CREATE TABLE Customers (
             uid            SERIAL,
             creditCard        CHAR(16),
-            points            INTEGER,
+            points            INTEGER DEFAULT 0,
             primary key (uid),
             foreign key(uid) references Users on delete cascade
         );
