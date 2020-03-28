@@ -76,7 +76,7 @@ CidToName AS (
     SELECT uid as customerId, name as cname
     FROM Customers natural join Users
 )
-SELECT oid, rname, cname, orderTime, deliveredTime, finalPrice, (SELECT string_agg(fname, ', ') FROM COLLATES C WHERE C.oid = X.oid) as itemsOrdered
+SELECT oid, rname, cname, orderTime, deliveredTime, finalPrice, (SELECT array_agg(fname) FROM COLLATES C WHERE C.oid = X.oid) as itemsOrdered
 FROM (Orders natural join OrderRestaurantPair join RidToName using (riderId) join CidToName using (customerId)) as X
 WHERE rid = $1
 ORDER BY orderTime DESC, deliveredTime DESC;`});
