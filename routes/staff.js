@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const { getRestaurantId, getTotalOrdersAndCost, getMinMaxDate, getFoodCount } = require('../controllers/staff');
+const { getRestaurantId, getTotalOrdersAndCost, getMinMaxDate, getFoodCount, getPromoStats, getAllOrders } = require('../controllers/staff');
 const { check } = require('express-validator');
 const { validate } = require('../validate');
 
@@ -58,6 +58,36 @@ router.get("/order-summary/:rid",
             return next(err)
         }
         return res.send(foodList);
+    });
+
+    router.get("/promo-summary/:rid",
+    [
+        check('rid').isInt()
+    ],
+    validate
+    , async (req, res, next) => {
+        let promoStats = [];
+        try {
+            promoStats = await getPromoStats(req.params.rid);
+        } catch (err) {
+            return next(err)
+        }
+        return res.send(promoStats);
+    });
+    
+    router.get("/get-orders/:rid",
+    [
+        check('rid').isInt()
+    ],
+    validate
+    , async (req, res, next) => {
+        let orderList = [];
+        try {
+            orderList = await getAllOrders(req.params.rid);
+        } catch (err) {
+            return next(err)
+        }
+        return res.send(orderList);
     });
 
 module.exports = router;
