@@ -1,5 +1,5 @@
 const { addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
-    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts } = require('../db/fillTableMethods');
+    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts, addFTSchedule, addConsist, addFullTimer } = require('../db/fillTableMethods');
 
 //(uid, name, username, salt, passwordHash)
 const Customers = [
@@ -15,6 +15,12 @@ const Riders = [
     [6, 'Bobby', 'worm', 'qwerty', '2222'],
     [7, 'Alfred', 'batman', 'ytrewq', '33333'],
     [8, 'Penny', 'penny555', 'wiwiwi', 'pppppp'],
+]
+
+//(uid)
+const FullTimers = [
+    [5],
+    [6],
 ]
 
 //(uid, name, username, salt, passwordHash)
@@ -165,6 +171,21 @@ const Shifts = [
     [4, 13, 17, 18, 22],
 ]
 
+// (scheduleId, uid, month, year, startDayOfMonth)
+const FTSchedules = [
+    [1, 5, 'Mar', 2020, 2],
+    [2, 6, 'Feb', 2020, 3],
+]
+
+// (scheduleid, relativeDay, shiftId)
+const Consists = [
+    [1, 0, 4],
+    [1, 1, 3],
+    [1, 2, 1],
+    [1, 3, 4],
+    [1, 4, 2],
+]
+
 async function fill() {
     await deleteTables().then(()=> console.log('Tables cleared'));
 
@@ -179,6 +200,9 @@ async function fill() {
     }
     for (const rider of Riders) {
         await addRider(rider);
+    }
+    for (const fullTimer of FullTimers) {
+        await addFullTimer(fullTimer);
     }
     for (const staff of Staffs) {
         await addStaff(staff);
@@ -206,6 +230,12 @@ async function fill() {
     }
     for (const shift of Shifts) {
         await addShifts(shift)
+    }
+    for (const schedule of FTSchedules) {
+        await addFTSchedule(schedule)
+    }
+    for (const consist of Consists) {
+        await addConsist(consist)
     }
 };
 

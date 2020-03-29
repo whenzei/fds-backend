@@ -29,7 +29,7 @@ const psGetFTSchedule = new PS({
                  startDayOfMonth + relativeDay,
                  endTime1, 0, 0)
             as endTimeStamp
-            from Consists natural join Shifts natural join FTSchedule
+            from Consists natural join Shifts natural join FTSchedules
             where uid = $1
             union
             select 
@@ -43,7 +43,7 @@ const psGetFTSchedule = new PS({
                  startDayOfMonth + relativeDay,
                  endTime2, 0, 0)
             as endTimeStamp
-            from Consists natural join Shifts natural join FTSchedule
+            from Consists natural join Shifts natural join FTSchedules
             where uid = $1
             )
             select startTimeStamp + make_interval(weeks := week) as start, endTimeStamp + make_interval(weeks := week) as end

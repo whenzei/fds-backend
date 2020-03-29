@@ -8,11 +8,11 @@ async function addCustomer(arr) {
             const q1 = t.none(
                 `Insert into Users (uid, name, userName, salt, passwordhash) Values
                 (${arr[0]}, '${arr[1]}', '${arr[2]}', '${arr[3]}', '${arr[4]}')`);
-        const q2 = t.none(`Insert into Customers (uid, points) Values
+            const q2 = t.none(`Insert into Customers (uid, points) Values
                     (${arr[0]}, ${arr[5]})`);
-        // returning a promise that determines a successful transaction:
-        return t.batch([q1, q2]); // all of the queries are to be resolved;
-    });
+            // returning a promise that determines a successful transaction:
+            return t.batch([q1, q2]); // all of the queries are to be resolved;
+        });
     } catch (error) {
         console.log(error, "Failed to add customer");
     }
@@ -24,15 +24,23 @@ async function addRider(arr) {
             const q1 = t.none(
                 `Insert into Users (uid, name, userName, salt, passwordhash) Values
                 (${arr[0]}, '${arr[1]}', '${arr[2]}', '${arr[3]}', '${arr[4]}')`);
-        const q2 = t.none(
-            `Insert into Riders (uid) Values
+            const q2 = t.none(
+                `Insert into Riders (uid) Values
                 (${arr[0]})`);
-        return t.batch([q1, q2]); // all of the queries are to be resolved;
-    });
+            return t.batch([q1, q2]); // all of the queries are to be resolved;
+        });
     } catch (error) {
         console.log(error, 'Failed to add Rider');
     }
 
+}
+
+async function addFullTimer(arr) {
+    try {
+        await db.none(`Insert into FullTimers values (${arr[0]})`)
+    } catch (error) {
+        console.log(error, 'Failed to add Full Timer');
+    }
 }
 
 async function addManager(arr) {
@@ -42,11 +50,11 @@ async function addManager(arr) {
             const q1 = t.none(
                 `Insert into Users (uid, name, userName, salt, passwordhash) Values
                 (${arr[0]}, '${arr[1]}', '${arr[2]}', '${arr[3]}', '${arr[4]}')`);
-        const q2 = t.none(
-            `Insert into Managers (uid) Values
+            const q2 = t.none(
+                `Insert into Managers (uid) Values
                 (${arr[0]})`);
-        return t.batch([q1, q2]); // all of the queries are to be resolved;
-    });
+            return t.batch([q1, q2]); // all of the queries are to be resolved;
+        });
     } catch (error) {
         console.log(error, 'Failed to add manager')
     }
@@ -60,11 +68,11 @@ async function addStaff(arr) {
             const q1 = t.none(
                 `Insert into Users (uid, name, userName, salt, passwordhash) Values
                 (${arr[0]}, '${arr[1]}', '${arr[2]}', '${arr[3]}', '${arr[4]}')`);
-        const q2 = t.none(
-            `Insert into Staff (uid, rid) Values
+            const q2 = t.none(
+                `Insert into Staff (uid, rid) Values
                 (${arr[0]}, ${arr[5]})`);
-        return t.batch([q1, q2]); // all of the queries are to be resolved;
-    });
+            return t.batch([q1, q2]); // all of the queries are to be resolved;
+        });
     } catch (error) {
         console.log(error, 'Failed to add staff');
         throw (error)
@@ -99,11 +107,11 @@ async function addGlobalPromotion(arr) {
             const q1 = t.none(
                 `Insert into Promotions (pid, points, startDate, endDate, percentOff, minSpending, monthsWithNoOrders) Values
                 (${arr[0]}, ${arr[1]}, '${arr[2]}', '${arr[3]}', ${arr[4]}, ${arr[5]}, ${arr[6]})`);
-        const q2 = t.none(
-            `Insert into GlobalPromos (pid) Values
+            const q2 = t.none(
+                `Insert into GlobalPromos (pid) Values
                 (${arr[0]})`);
-        return t.batch([q1, q2]);
-    });
+            return t.batch([q1, q2]);
+        });
     } catch (error) {
         console.log(error, 'Failed to add global promotions');
     }
@@ -115,11 +123,11 @@ async function addRestaurantPromotion(arr) {
             const q1 = t.none(
                 `Insert into Promotions (pid, points, startDate, endDate, percentOff, minSpending, monthsWithNoOrders) Values
                 (${arr[0]}, ${arr[2]}, '${arr[3]}', '${arr[4]}', ${arr[5]}, ${arr[6]}, ${arr[7]})`);
-        const q2 = t.none(
-            `Insert into RestaurantPromos (pid, rid) Values
+            const q2 = t.none(
+                `Insert into RestaurantPromos (pid, rid) Values
                 (${arr[0]}, ${arr[1]})`);
-        return t.batch([q1, q2]);
-    });
+            return t.batch([q1, q2]);
+        });
     } catch (error) {
         console.log(error, 'Failed to add restaurant promotions');
     }
@@ -173,10 +181,33 @@ async function addShifts(arr) {
     try {
         await db.none(
             `Insert into Shifts (shiftid, starttime1, endtime1, starttime2, endtime2) Values
-            ('${arr[0]}', ${arr[1]}, ${arr[2]}, '${arr[3]}', '${arr[4]}')`
+            (${arr[0]}, ${arr[1]}, ${arr[2]}, ${arr[3]}, ${arr[4]})`
         );
     } catch (error) {
         console.log(error, 'Failed to add shifts');
+    }
+}
+
+async function addFTSchedule(arr) {
+    try {
+        await db.none(
+            `Insert into FTSchedules (scheduleId, uid, month, year, startDayOfMonth) Values
+            (${arr[0]}, ${arr[1]}, '${arr[2]}', ${arr[3]}, ${arr[4]})`
+        );
+    } catch (error) {
+        console.log(error, 'Failed to add ftschedule');
+    }
+}
+
+
+async function addConsist(arr) {
+    try {
+        await db.none(
+            `Insert into Consists (scheduleId, relativeDay, shiftId) Values
+            (${arr[0]}, '${arr[1]}', ${arr[2]})`
+        );
+    } catch (error) {
+        console.log(error, 'Failed to add consists');
     }
 }
 
@@ -201,5 +232,5 @@ async function deleteTables() {
 
 module.exports = {
     addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
-    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts
+    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts, addFullTimer, addConsist, addFTSchedule
 };

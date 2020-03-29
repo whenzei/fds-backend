@@ -61,7 +61,7 @@ CREATE TABLE FullTimers (
 	primary key (uid)
 );
 
-CREATE TABLE PTSchedule (
+CREATE TABLE PTSchedules (
 	uid			INTEGER,
 	date			DATE,
 	startTime		INTEGER check (startTime >= 10 and endTime - startTime >= 1 and endTime - startTime <= 4),
@@ -72,7 +72,7 @@ CREATE TABLE PTSchedule (
 	foreign key (uid) references PartTimers on delete cascade
 );
 
-CREATE TABLE FTSchedule (
+CREATE TABLE FTSchedules (
 	scheduleId		SERIAL primary key,
 	uid			INTEGER not null,
 	month			MONTH_ENUM not null,
@@ -92,10 +92,10 @@ CREATE TABLE Shifts (
 
 
 CREATE TABLE Consists (
-	scheduleId		INTEGER references FTSchedule on delete cascade,
+	scheduleId		INTEGER references FTSchedules on delete cascade,
 	relativeDay		INTEGER check (relativeDay in (0, 1, 2, 3, 4)),
 	shiftId		INTEGER references Shifts on delete cascade,
-	primary key (scheduleId, shiftId)
+	primary key (scheduleId, shiftId, relativeDay)
 );
 
 CREATE TABLE Payout (
