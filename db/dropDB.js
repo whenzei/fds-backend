@@ -12,7 +12,7 @@ const db = pgp(cn);
 const dbName = 'fds';
 db.none("DROP DATABASE " + dbName)
     .then(data => {
-        console.log("Dropped DB" + dbName);
+        console.log("Dropped DB " + dbName);
     })
     .catch(error => {
         console.log(error);
