@@ -367,7 +367,7 @@ SQL_STATEMENTS = {
             scheduleId        INTEGER references FTSchedule on delete cascade,
             relativeDay        INTEGER check (relativeDay in (0, 1, 2, 3, 4)),
             shiftId            INTEGER references Shifts on delete cascade,
-            primary key (scheduleId, shiftId)
+            primary key (scheduleId, shiftId, relativeDay)
             );
             `,
     Payout:
