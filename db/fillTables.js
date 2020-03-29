@@ -1,5 +1,5 @@
 const { addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
-    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables } = require('../db/fillTableMethods');
+    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts } = require('../db/fillTableMethods');
 
 //(uid, name, username, salt, passwordHash)
 const Customers = [
@@ -157,6 +157,14 @@ const Orders = [
     // deliveredTime = null signifies an incomplete order. unable to represent it here because statement will be prepared as 'null' string causing DateTimeParse error
 ];
 
+// (shiftid, starttime1, endtime1, starttime2, endtime2)
+const Shifts = [
+    [1, 10, 14, 15, 19],
+    [2, 11, 15, 16, 20],
+    [3, 12, 16, 17, 21],
+    [4, 13, 17, 18, 22],
+]
+
 async function fill() {
     await deleteTables().then(()=> console.log('Tables cleared'));
 
@@ -195,6 +203,9 @@ async function fill() {
     }
     for (const collate of Collates) {
         await addCollates(collate);
+    }
+    for (const shift of Shifts) {
+        await addShifts(shift)
     }
 };
 

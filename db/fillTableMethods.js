@@ -169,6 +169,17 @@ async function addOrders(arr) {
     }
 }
 
+async function addShifts(arr) {
+    try {
+        await db.none(
+            `Insert into Shifts (shiftid, starttime1, endtime1, starttime2, endtime2) Values
+            ('${arr[0]}', ${arr[1]}, ${arr[2]}, '${arr[3]}', '${arr[4]}')`
+        );
+    } catch (error) {
+        console.log(error, 'Failed to add shifts');
+    }
+}
+
 async function deleteTables() {
     try {
         await db.none(`
@@ -180,6 +191,7 @@ async function deleteTables() {
             DELETE FROM Restaurants;
             DELETE FROM Orders;
             DELETE FROM Collates;
+            DELETE FROM Shifts;
             `
         );
     } catch (error) {
@@ -189,5 +201,5 @@ async function deleteTables() {
 
 module.exports = {
     addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
-    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables
+    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts
 };
