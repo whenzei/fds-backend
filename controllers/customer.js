@@ -1,5 +1,6 @@
 const db = require('../db');
 const PS = require('pg-promise').PreparedStatement;
+const moment = require('moment');
 
 const psGetCustomers = new PS({ name: 'get-customers', text: 'SELECT * FROM Customers' });
 const psGetAccountInfo = new PS({
@@ -25,6 +26,31 @@ const psRemoveCreditCard = new PS({
     name: 'remove-credit-card',
     text: `UPDATE Customers set creditCard = null WHERE uid = $1`
 });
+const psGetElgiblePromos = new PS({
+    name: 'get-eligible-promos',
+    text: ` WITH FilteredPromos AS (
+                SELECT pid, startDate, endDate, percentOff, minSpending, monthsWithNoOrders
+                FROM GlobalPromos NATURAL JOIN Promotions
+                UNION
+                SELECT pid, startDate, endDate, percentOff, minSpending, monthsWithNoOrders
+                FROM RestaurantPromos R NATURAL JOIN Promotions WHERE R.rid = $3
+            ), EligibilePromos AS (
+                SELECT * FROM FilteredPromos WHERE startDate <= $1::DATE AND endDate >= $1::DATE
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM Orders
+                    WHERE customerId = $2
+                    AND EXTRACT(MONTH FROM age(NOW(), orderTime)) <= coalesce(monthsWithNoOrders, 0) 
+                )
+                EXCEPT
+                SELECT pid, startDate, endDate, percentOff, minSpending, monthsWithNoOrders
+                FROM Orders NATURAL JOIN Promotions
+                WHERE customerId = $2
+            ) 
+            SELECT pid, coalesce(percentOff, 0) as percentOff, coalesce(minSpending, 0) as minSpending
+            FROM EligibilePromos;
+            `
+}) 
 
 const getCustomers = async function () {
     return await db.any(psGetCustomers);
@@ -50,6 +76,11 @@ const addCreditCard = async function (uid, card) {
 const removeCreditCard = async function (uid) {
     await db.none(psRemoveCreditCard, [uid]);
 }
+
+const getEligiblePromos = async function (uid, rid) {
+    const today = moment().format('YYYY-MM-DD');
+    return await db.any(psGetElgiblePromos, [today, uid, rid]);
+}
 module.exports = {
-    getCustomers, getFrequents, getAccountInfo, addCreditCard, removeCreditCard
+    getCustomers, getFrequents, getAccountInfo, addCreditCard, removeCreditCard, getEligiblePromos
 }
