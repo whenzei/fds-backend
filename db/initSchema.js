@@ -27,7 +27,6 @@ DROP_TABLES = `
         DROP TABLE IF EXISTS Staff CASCADE;
         DROP TABLE IF EXISTS Food CASCADE;
         DROP TABLE IF EXISTS Collates CASCADE;
-        DROP TYPE IF EXISTS MONTH_ENUM CASCADE;
         DROP TYPE IF EXISTS CUISINE_ENUM CASCADE;
     `;
 
@@ -274,21 +273,7 @@ TRIGGERS = {
 
 SQL_STATEMENTS = {
     Enums:
-        `CREATE TYPE MONTH_ENUM AS ENUM
-    ('Jan', 
-     'Feb',
-     'Mar', 
-     'Apr',
-     'May',
-     'Jun',
-     'Jul',
-     'Aug',
-     'Sep',
-     'Oct',
-     'Nov',
-     'Dec'
-    );
-    CREATE TYPE CUISINE_ENUM AS ENUM
+    `CREATE TYPE CUISINE_ENUM AS ENUM
     ('Western', 
      'Chinese',
      'Japanese', 
@@ -346,7 +331,7 @@ SQL_STATEMENTS = {
         `CREATE TABLE FTSchedule (
             scheduleId        SERIAL primary key,
             uid            INTEGER not null,
-            month            MONTH_ENUM not null,
+            month            SMALLINT not NULL check (month > 0 and month < 13),
             year            INTEGER not null,
             startDayOfMonth    INTEGER
             check (startDayOfMonth > 0 and startDayOfMonth < 7),
@@ -381,7 +366,7 @@ SQL_STATEMENTS = {
         `,
     Rates:
         `CREATE TABLE Rates (
-            month            MONTH_ENUM not null,
+            month            SMALLINT not NULL check (month > 0 and month < 13),
             year            INTEGER check (year >= 0),
             isWeekend        BOOLEAN not NULL,
             hourlyPay        INTEGER check (hourlyPay >= 0),
@@ -391,7 +376,7 @@ SQL_STATEMENTS = {
     Receives:
         `CREATE TABLE Receives (
             payId            INTEGER references Payout,
-            month            MONTH_ENUM,
+            month            SMALLINT not NULL check (month > 0 and month < 13),
             year            INTEGER,
             uid            INTEGER references Riders on delete set null,
             foreign key (month, year)
