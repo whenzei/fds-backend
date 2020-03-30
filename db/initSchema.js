@@ -8,8 +8,8 @@ DROP_TABLES = `
         DROP TABLE IF EXISTS Customers CASCADE;
         DROP TABLE IF EXISTS PartTimers CASCADE;
         DROP TABLE IF EXISTS FullTimers CASCADE;
-        DROP TABLE IF EXISTS PTSchedule CASCADE;
-        DROP TABLE IF EXISTS FTSchedule CASCADE;
+        DROP TABLE IF EXISTS PTSchedules CASCADE;
+        DROP TABLE IF EXISTS FTSchedules CASCADE;
         DROP TABLE IF EXISTS Shifts CASCADE;
         DROP TABLE IF EXISTS Consists CASCADE;
         DROP TABLE IF EXISTS Payout CASCADE;
@@ -157,7 +157,7 @@ TRIGGERS = {
         BEGIN
         WITH SortPT AS (
             SELECT P1.uid, P1.date, P2.startTime - P1.endTime as break
-            FROM PTSchedule P1, PTSchedule P2
+            FROM PTSchedules P1, PTSchedules P2
             WHERE P1.uid = P2.uid AND P1.date = P2.date AND P1.startTime < P2.startTime
         )
         /*check breaks for each day, returns 1 if any of the days have a break that is < 1 hour*/
@@ -173,10 +173,10 @@ TRIGGERS = {
         END;
         $$ LANGUAGE plpgsql;
 
-        DROP TRIGGER IF EXISTS check_pt_schedule_trigger ON PTSchedule;
+        DROP TRIGGER IF EXISTS check_pt_schedule_trigger ON PTSchedules;
         CREATE CONSTRAINT TRIGGER check_pt_schedule_trigger
         AFTER INSERT OR UPDATE
-        ON PTSchedule
+        ON PTSchedules
         DEFERRABLE INITIALLY DEFERRED
         FOR EACH ROW
         EXECUTE FUNCTION check_pt_schedule();
@@ -190,7 +190,7 @@ TRIGGERS = {
         BEGIN
         /*check if total number of hours in each WWS is at least 10 and at most 48*/
         SELECT sum(endTime - startTime) INTO totalHours
-            FROM PTSchedule
+            FROM PTSchedules
             WHERE NEW.uid = uid AND date_part('year', date::date) = date_part('year', NEW.date::date) AND date_part('week', date::date) = date_part('week', NEW.date::date);
         
             IF totalHours < 10 OR  totalHours > 48 THEN
@@ -200,10 +200,10 @@ TRIGGERS = {
         END;
         $$ LANGUAGE plpgsql;
 
-        DROP TRIGGER IF EXISTS check_pt_total_hours_trigger ON PTSchedule;
+        DROP TRIGGER IF EXISTS check_pt_total_hours_trigger ON PTSchedules;
         CREATE CONSTRAINT TRIGGER check_pt_total_hours_trigger
         AFTER INSERT OR UPDATE OR DELETE
-        ON PTSchedule
+        ON PTSchedules
         DEFERRABLE INITIALLY DEFERRED
         FOR EACH ROW
         EXECUTE FUNCTION check_pt_total_hours ();
@@ -317,8 +317,8 @@ SQL_STATEMENTS = {
             primary key (uid)
         );
         `,
-    PTSchedule:
-        `CREATE TABLE PTSchedule (
+    PTSchedules:
+        `CREATE TABLE PTSchedules (
             uid            INTEGER,
             date            DATE,
             startTime        INTEGER check (startTime >= 10 and endTime - startTime >= 1 and endTime - startTime <= 4),
@@ -327,8 +327,8 @@ SQL_STATEMENTS = {
             foreign key (uid) references PartTimers on delete cascade
         );
         `,
-    FTSchedule:
-        `CREATE TABLE FTSchedule (
+    FTSchedules:
+        `CREATE TABLE FTSchedules (
             scheduleId        SERIAL primary key,
             uid            INTEGER not null,
             month            SMALLINT not NULL check (month > 0 and month < 13),
@@ -349,7 +349,7 @@ SQL_STATEMENTS = {
         `,
     Consists:
         `CREATE TABLE Consists (
-            scheduleId        INTEGER references FTSchedule on delete cascade,
+            scheduleId        INTEGER references FTSchedules on delete cascade,
             relativeDay        INTEGER check (relativeDay in (0, 1, 2, 3, 4)),
             shiftId            INTEGER references Shifts on delete cascade,
             primary key (scheduleId, shiftId, relativeDay)
