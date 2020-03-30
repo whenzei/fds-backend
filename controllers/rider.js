@@ -22,13 +22,13 @@ const psGetFTSchedule = new PS({
         with FirstWeek as (
             select 
                 make_timestamp(year, 
-                (select EXTRACT(MONTH FROM to_date(month::text || year, 'Mon YYYY')))::integer,
+                month,
                  startDayOfMonth + relativeDay,
                   startTime1, 0, 0)
             as startTimeStamp,
                 make_timestamp(year, 
-                (select EXTRACT(MONTH FROM to_date(month::text || year, 'Mon YYYY')))::integer,
-                 startDayOfMonth + relativeDay,
+                    month,
+                    startDayOfMonth + relativeDay,
                  endTime1, 0, 0)
             as endTimeStamp
             from Consists natural join Shifts natural join FTSchedules
@@ -36,13 +36,13 @@ const psGetFTSchedule = new PS({
             union
             select 
                 make_timestamp(year, 
-                (select EXTRACT(MONTH FROM to_date(month::text || year, 'Mon YYYY')))::integer,
-                 startDayOfMonth + relativeDay,
+                    month,
+                    startDayOfMonth + relativeDay,
                   startTime2, 0, 0)
             as startTimeStamp,
                 make_timestamp(year, 
-            (select EXTRACT(MONTH FROM to_date(month::text || year, 'Mon YYYY')))::integer,
-                 startDayOfMonth + relativeDay,
+                    month,
+                    startDayOfMonth + relativeDay,
                  endTime2, 0, 0)
             as endTimeStamp
             from Consists natural join Shifts natural join FTSchedules
