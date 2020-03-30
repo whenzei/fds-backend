@@ -3,32 +3,32 @@ const db = require('./index');
 
 async function addCustomer(arr) {
     try {
-        await db.tx(t => {
+        await db.tx(async t => {
             // creating a sequence of transaction queries:
-            const q1 = t.none(
-                `Insert into Users (uid, name, userName, salt, passwordhash) Values
-                (${arr[0]}, '${arr[1]}', '${arr[2]}', '${arr[3]}', '${arr[4]}')`);
-        const q2 = t.none(`Insert into Customers (uid, points) Values
-                    (${arr[0]}, ${arr[5]})`);
-        // returning a promise that determines a successful transaction:
-        return t.batch([q1, q2]); // all of the queries are to be resolved;
-    });
+            const q1 = await t.one(
+                `Insert into Users (name, userName, salt, passwordhash) Values
+                ('${arr[2]}', '${arr[3]}', '${arr[4]}', '${arr[5]}') RETURNING uid`, a => a.uid);
+            const q2 = await t.none(`Insert into Customers (uid, points) Values
+                    (${q1.uid}, ${arr[6]})`);
+            // returning a promise that determines a successful transaction:
+            return t.batch([q1, q2]); // all of the queries are to be resolved;
+        });
     } catch (error) {
         console.log(error, "Failed to add customer");
     }
 }
 async function addRider(arr) {
     try {
-        await db.tx(t => {
+        await db.tx(async t => {
             // creating a sequence of transaction queries:
-            const q1 = t.none(
-                `Insert into Users (uid, name, userName, salt, passwordhash) Values
-                (${arr[0]}, '${arr[1]}', '${arr[2]}', '${arr[3]}', '${arr[4]}')`);
-        const q2 = t.none(
-            `Insert into Riders (uid) Values
-                (${arr[0]})`);
-        return t.batch([q1, q2]); // all of the queries are to be resolved;
-    });
+            const q1 = await t.one(
+                `Insert into Users (name, userName, salt, passwordhash) Values
+                ('${arr[2]}', '${arr[3]}', '${arr[4]}', '${arr[5]}') RETURNING uid`, a => a.uid);
+            const q2 = await t.none(
+                `Insert into Riders (uid) Values
+                (${q1.uid})`);
+            return t.batch([q1, q2]); // all of the queries are to be resolved;
+        });
     } catch (error) {
         console.log(error, 'Failed to add Rider');
     }
@@ -37,16 +37,16 @@ async function addRider(arr) {
 
 async function addManager(arr) {
     try {
-        await db.tx(t => {
+        await db.tx(async t => {
             // creating a sequence of transaction queries:
-            const q1 = t.none(
-                `Insert into Users (uid, name, userName, salt, passwordhash) Values
-                (${arr[0]}, '${arr[1]}', '${arr[2]}', '${arr[3]}', '${arr[4]}')`);
-        const q2 = t.none(
-            `Insert into Managers (uid) Values
-                (${arr[0]})`);
-        return t.batch([q1, q2]); // all of the queries are to be resolved;
-    });
+            const q1 = await t.one(
+                `Insert into Users (name, userName, salt, passwordhash) Values
+                ('${arr[2]}', '${arr[3]}', '${arr[4]}', '${arr[5]}') RETURNING uid`, a => a.uid);
+            const q2 = await t.none(
+                `Insert into Managers (uid) Values
+                (${q1.uid})`);
+            return t.batch([q1, q2]); // all of the queries are to be resolved;
+        });
     } catch (error) {
         console.log(error, 'Failed to add manager')
     }
@@ -55,16 +55,16 @@ async function addManager(arr) {
 
 async function addStaff(arr) {
     try {
-        await db.tx(t => {
+        await db.tx(async t => {
             // creating a sequence of transaction queries:
-            const q1 = t.none(
-                `Insert into Users (uid, name, userName, salt, passwordhash) Values
-                (${arr[0]}, '${arr[1]}', '${arr[2]}', '${arr[3]}', '${arr[4]}')`);
-        const q2 = t.none(
-            `Insert into Staff (uid, rid) Values
-                (${arr[0]}, ${arr[5]})`);
-        return t.batch([q1, q2]); // all of the queries are to be resolved;
-    });
+            const q1 = await t.one(
+                `Insert into Users (name, userName, salt, passwordhash) Values
+                ('${arr[2]}', '${arr[3]}', '${arr[4]}', '${arr[5]}') RETURNING uid`, a => a.uid);
+            const q2 = await t.none(
+                `Insert into Staff (uid, rid) Values
+                (${q1.uid}, ${arr[6]})`);
+            return t.batch([q1, q2]); // all of the queries are to be resolved;
+        });
     } catch (error) {
         console.log(error, 'Failed to add staff');
         throw (error)
@@ -74,8 +74,8 @@ async function addStaff(arr) {
 async function addRestaurant(arr) {
     try {
         await db.none(
-            `Insert into Restaurants (rid, minSpending, rname) Values
-            (${arr[0]}, '${arr[1]}', '${arr[2]}')`
+            `Insert into Restaurants (minSpending, rname) Values
+            ('${arr[0]}', '${arr[1]}')`
         );
     } catch (error) {
         console.log(error, 'Failed to add restaurant');
@@ -95,15 +95,15 @@ async function addFood(arr) {
 
 async function addGlobalPromotion(arr) {
     try {
-        await db.tx(t => {
-            const q1 = t.none(
-                `Insert into Promotions (pid, points, startDate, endDate, percentOff, minSpending, monthsWithNoOrders) Values
-                (${arr[0]}, ${arr[1]}, '${arr[2]}', '${arr[3]}', ${arr[4]}, ${arr[5]}, ${arr[6]})`);
-        const q2 = t.none(
-            `Insert into GlobalPromos (pid) Values
-                (${arr[0]})`);
-        return t.batch([q1, q2]);
-    });
+        await db.tx(async t => {
+            const q1 = await t.one(
+                `Insert into Promotions (points, startDate, endDate, percentOff, minSpending, monthsWithNoOrders) Values
+                (${arr[2]}, '${arr[3]}', '${arr[4]}', ${arr[5]}, ${arr[6]}, ${arr[7]}) RETURNING pid`, a => a.pid);
+            const q2 = await t.none(
+                `Insert into GlobalPromos (pid) Values
+                (${q1.pid})`);
+            return t.batch([q1, q2]);
+        });
     } catch (error) {
         console.log(error, 'Failed to add global promotions');
     }
@@ -111,15 +111,15 @@ async function addGlobalPromotion(arr) {
 
 async function addRestaurantPromotion(arr) {
     try {
-        await db.tx(t => {
-            const q1 = t.none(
-                `Insert into Promotions (pid, points, startDate, endDate, percentOff, minSpending, monthsWithNoOrders) Values
-                (${arr[0]}, ${arr[2]}, '${arr[3]}', '${arr[4]}', ${arr[5]}, ${arr[6]}, ${arr[7]})`);
-        const q2 = t.none(
-            `Insert into RestaurantPromos (pid, rid) Values
-                (${arr[0]}, ${arr[1]})`);
-        return t.batch([q1, q2]);
-    });
+        await db.tx(async t => {
+            const q1 = await t.one(
+                `Insert into Promotions (points, startDate, endDate, percentOff, minSpending, monthsWithNoOrders) Values
+                (${arr[3]}, '${arr[4]}', '${arr[5]}', ${arr[6]}, ${arr[7]}, ${arr[8]}) RETURNING pid`, a => a.pid);
+            const q2 = await t.none(
+                `Insert into RestaurantPromos (pid, rid) Values
+                (${q1.pid}, ${arr[2]})`);
+            return t.batch([q1, q2]);
+        });
     } catch (error) {
         console.log(error, 'Failed to add restaurant promotions');
     }
@@ -128,8 +128,8 @@ async function addRestaurantPromotion(arr) {
 async function addAddress(arr) {
     try {
         await db.none(
-            `Insert into Address (addrId, unit, streetname, postalCode) Values
-            (${arr[0]}, '${arr[1]}', '${arr[2]}', ${arr[3]})`
+            `Insert into Address (unit, streetname, postalCode) Values
+            ('${arr[0]}', '${arr[1]}', ${arr[2]})`
         );
     } catch (error) {
         console.log(error, 'Failed to add address')
@@ -161,8 +161,8 @@ async function addCollates(arr) {
 async function addOrders(arr) {
     try {
         await db.none(
-            `Insert into Orders (oid, riderId, customerId, orderTime, deliveredTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, departFromR, finalPrice, addrId, pid) Values
-            (${arr[0]}, ${arr[1]}, ${arr[2]}, '${arr[3]}', '${arr[4]}', ${arr[5]}, ${arr[6]}, '${arr[7]}', '${arr[8]}', '${arr[9]}', ${arr[10]}, ${arr[11]}, ${arr[12]})`
+            `Insert into Orders (riderId, customerId, orderTime, deliveredTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, departFromR, finalPrice, addrId, pid) Values
+            (${arr[0]}, ${arr[1]}, '${arr[2]}', '${arr[3]}', ${arr[4]}, ${arr[5]}, '${arr[6]}', '${arr[7]}', '${arr[8]}', ${arr[9]}, ${arr[10]}, ${arr[11]})`
         );
     } catch (error) {
         console.log(error, 'Failed to add orders');
@@ -172,8 +172,8 @@ async function addOrders(arr) {
 async function addShifts(arr) {
     try {
         await db.none(
-            `Insert into Shifts (shiftid, starttime1, endtime1, starttime2, endtime2) Values
-            ('${arr[0]}', ${arr[1]}, ${arr[2]}, '${arr[3]}', '${arr[4]}')`
+            `Insert into Shifts (starttime1, endtime1, starttime2, endtime2) Values
+            (${arr[0]}, ${arr[1]}, ${arr[2]}, ${arr[3]})`
         );
     } catch (error) {
         console.log(error, 'Failed to add shifts');
