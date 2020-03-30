@@ -173,8 +173,8 @@ const Shifts = [
 
 // (scheduleId, uid, month, year, startDayOfMonth)
 const FTSchedules = [
-    [1, 5, 'Mar', 2020, 2],
-    [2, 6, 'Feb', 2020, 3],
+    [1, 5, 3, 2020, 2],
+    [2, 6, 2, 2020, 3],
 ]
 
 // (scheduleid, relativeDay, shiftId)

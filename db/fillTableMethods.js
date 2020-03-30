@@ -192,7 +192,7 @@ async function addFTSchedule(arr) {
     try {
         await db.none(
             `Insert into FTSchedules (scheduleId, uid, month, year, startDayOfMonth) Values
-            (${arr[0]}, ${arr[1]}, '${arr[2]}', ${arr[3]}, ${arr[4]})`
+            (${arr[0]}, ${arr[1]}, ${arr[2]}, ${arr[3]}, ${arr[4]})`
         );
     } catch (error) {
         console.log(error, 'Failed to add ftschedule');
