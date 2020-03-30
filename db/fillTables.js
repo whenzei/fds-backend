@@ -174,7 +174,8 @@ const Shifts = [
 // (scheduleId, uid, month, year, startDayOfMonth)
 const FTSchedules = [
     [1, 5, 3, 2020, 2],
-    [2, 6, 2, 2020, 3],
+    [2, 5, 2, 2020, 1],
+    [3, 6, 2, 2020, 3],
 ]
 
 // (scheduleid, relativeDay, shiftId)
@@ -184,10 +185,22 @@ const Consists = [
     [1, 2, 1],
     [1, 3, 4],
     [1, 4, 2],
+
+    [2, 0, 2],
+    [2, 1, 1],
+    [2, 2, 4],
+    [2, 3, 1],
+    [2, 4, 3],
+
+    [3, 0, 1],
+    [3, 1, 2],
+    [3, 2, 3],
+    [3, 3, 4],
+    [3, 4, 1],
 ]
 
 async function fill() {
-    await deleteTables().then(()=> console.log('Tables cleared'));
+    await deleteTables().then(() => console.log('Tables cleared'));
 
     for (const restaurant of Restaurants) {
         await addRestaurant(restaurant);
