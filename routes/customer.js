@@ -1,7 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const { getMenu, getRestaurants } = require('../controllers/restaurant')
-const { getFrequents, getAccountInfo, addCreditCard, removeCreditCard } = require('../controllers/customer')
+const { getFrequents, getAccountInfo, addCreditCard,
+    removeCreditCard, getEligiblePromos } = require('../controllers/customer')
 const { getAddresses } = require('../controllers/addressLookUp')
 const { check } = require('express-validator');
 const { validate } = require('../validate')
@@ -36,7 +37,12 @@ router.get("/restaurants/:rid",
 
 router.get("/addresses/", async (req, res, next) => {
     const searchStr = req.query.search;
-    let addresses = getAddresses(searchStr);
+    let addresses = [];
+    try {
+        addresses = getAddresses(searchStr);
+    } catch (error) {
+        return next(error);
+    }
     return res.send(addresses);
 })
 
@@ -78,4 +84,18 @@ router.post("/removeCreditCard", async (req, res, next) => {
     return res.status(200).send('Card removed');
 })
 
+// Get eligible promos
+router.get("/promos/:rid", [
+    check('rid').isInt()
+],
+    validate,
+    async (req, res, next) => {
+        let promos = []
+        try {
+            promos = await getEligiblePromos(req.user.uid, req.params.rid);
+        } catch (error) {
+            return next(error);
+        }
+        return res.json(promos);
+    })
 module.exports = router;

@@ -3,18 +3,18 @@ const { addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
 
 //(uid, name, username, salt, passwordHash)
 const Customers = [
-    [1, 'lala bin blabla', 'lalala', 'saltysplatoon', 'brown', 300],
-    [2, 'zhow qing tian', 'zhow', 'pepper', 'asdsad', 1000],
-    [3, 'staff of wizardry', 'Knack2Babee', 'SeaSalt', '123', 500],
-    [4, 'the fork on the left', 'oheehee', 'Mother', 'Father', 20000],
+    [1, 'C', 'lala bin blabla', 'lalala', 'saltysplatoon', 'brown', 300],
+    [2, 'C', 'zhow qing tian', 'zhow', 'pepper', 'asdsad', 1000],
+    [3, 'C', 'staff of wizardry', 'Knack2Babee', 'SeaSalt', '123', 500],
+    [4, 'C', 'the fork on the left', 'oheehee', 'Mother', 'Father', 20000],
 ];
 
 //(uid, name, username, salt, passwordHash)
 const Riders = [
-    [5, 'Tom', 'dragon', 'password', 'password123'],
-    [6, 'Bobby', 'worm', 'qwerty', '2222'],
-    [7, 'Alfred', 'batman', 'ytrewq', '33333'],
-    [8, 'Penny', 'penny555', 'wiwiwi', 'pppppp'],
+    [5, 'R', 'Tom', 'dragon', 'password', 'password123'],
+    [6, 'R', 'Bobby', 'worm', 'qwerty', '2222'],
+    [7, 'R', 'Alfred', 'batman', 'ytrewq', '33333'],
+    [8, 'R', 'Penny', 'penny555', 'wiwiwi', 'pppppp'],
 ]
 
 //(uid)
@@ -25,22 +25,26 @@ const FullTimers = [
 
 //(uid, name, username, salt, passwordHash)
 const Managers = [
-    [9, 'Martin', 'ihaveadream', 'hehehuhu', 'huhuhehe'],
-    [10, 'Victor', 'victory', 'lel1234', 'iamsecure'],
+    [9, 'M', 'Martin', 'ihaveadream', 'hehehuhu', 'huhuhehe'],
+    [10, 'M', 'Victor', 'victory', 'lel1234', 'iamsecure'],
 ];
 
 //(uid, name, username, salt, passwordHash, rid)
 const Staffs = [
-    [11, 'Macguire', 'flash', 'password11', 'safetosay', 1],
-    [12, 'Pom', 'iamvegan', 'password22', 'iambatman', 2],
+    [11, 'S', 'Macguire', 'flash', 'password11', 'safetosay', 1],
+    [12, 'S', 'Pom', 'iamvegan', 'password22', 'iambatman', 2],
 ];
 
 // (rid, minSpending (in cents), rname)
 const Restaurants = [
-    [1, 5, 'Fukuroku'],
-    [2, 10, 'MaMas Specials'],
-    [3, 11, 'WacDonalds'],
-    [4, 15, 'KFC']
+    // rid 1 
+    [5, 'Fukuroku'],
+    // rid 2
+    [10, 'MaMas Specials'],
+    // rid 3
+    [11, 'WacDonalds'],
+    // rid 4
+    [15, 'KFC']
 ];
 
 `
@@ -83,32 +87,44 @@ const Food = [
 // (pid, points, startDate, endDate, percentOff, minSpending (in cents), monthsWithNoOrders)
 const GlobalPromotions = [
     // 10% off all orders for one month with min spend $30
-    [1, null, '2018-06-01', '2019-07-01', 10, 1000, null],
-    [2, null, '2019-06-01', '2019-07-01', 10, 3000, null],
-    [3, null, '2019-06-01', '2019-07-01', 15, 3000, 2],
-    [4, 25, '2019-05-01', '2019-06-01', null, null, null],
-    [5, 35, '2019-05-01', '2019-06-01', null, null, 3]
+    [1, 'G', 0, '2018-06-01', '2019-07-01', 10, 1000, 0],
+    [2, 'G', 0, '2019-06-01', '2019-07-01', 10, 3000, 0],
+    [3, 'G', 0, '2019-06-01', '2019-07-01', 15, 3000, 2],
+    [4, 'G', 25, '2019-05-01', '2019-06-01', 0, 0, 0],
+    [5, 'G', 35, '2019-05-01', '2019-06-01', 0, 0, 3],
+    [15, 'G', 35, '2020-01-01', '2020-07-07', 10, 0, 3]
 ];
 
 // (pid, rid, points, startDate, endDate, percentOff, minSpending (in cents), monthsWithNoOrders)
 const RestaurantPromotions = [
-    [6, 2, null, '2019-06-01', '2019-07-01', 15, 3500, null],
-    [7, 2, null, '2019-06-01', '2019-07-01', 15, 3500, null],
-    [8, 2, 25, '2019-05-01', '2019-06-01', null, null, null],
-    [9, 4, null, '2019-06-01', '2019-07-01', 10, 3000, 1],
-    [10, 2, 10, '2019-05-01', '2019-11-01', null, null, 3],
-    [11, 2, 10, '2019-10-01', '2019-12-01', null, null, null]
+    [6, 'R', 2, 0, '2019-06-01', '2019-07-01', 15, 3500, 0],
+    [7, 'R', 2, 0, '2019-06-01', '2019-07-01', 15, 3500, 0],
+    [8, 'R', 2, 25, '2019-05-01', '2019-06-01', 0, 0, 0],
+    [9, 'R', 4, 0, '2019-06-01', '2019-07-01', 10, 3000, 1],
+    [10, 'R', 2, 10, '2019-05-01', '2019-11-01', 0, 0, 3],
+    [11, 'R', 2, 10, '2019-10-01', '2019-12-01', 0, 0, 0],
+    [12, 'R', 1, 0, '2020-01-01', '2020-12-12', 20, 0, 0],
+    [13, 'R', 1, 20, '2020-03-03', '2020-10-10', 10, 1000, 0],
+    [14, 'R', 1, 200, '2020-02-02', '2020-09-09', 5, 0, 2],
 ];
 
 const Addresses = [
-    [1, '12-34', '77 TREVOSE CRESCENT', 298091],
-    [2, '13-35', '512A THOMSON ROAD', 298137],
-    [3, '05-12', '11A NAROOMA ROAD DUNEARN ESTATE', 298306],
-    [4, '14-36', '37 BEECHWOOD GROVE', 738236],
-    [5, '09-11', '56 WOODGROVE WALK CENTURY WOODS', 738199],
-    [6, '03-22', '47 YUK TONG AVENUE', 596348],
-    [7, '05-55', '93B DUNBAR WALK', 459446],
-    [8, '05-11', '35 EAST COAST AVENUE', 459240]
+    //1 
+    ['12-34', '77 TREVOSE CRESCENT', 298091],
+    //2
+    ['13-35', '512A THOMSON ROAD', 298137],
+    //3
+    ['05-12', '11A NAROOMA ROAD DUNEARN ESTATE', 298306],
+    //4
+    ['14-36', '37 BEECHWOOD GROVE', 738236],
+    //5
+    ['09-11', '56 WOODGROVE WALK CENTURY WOODS', 738199],
+    //6
+    ['03-22', '47 YUK TONG AVENUE', 596348],
+    //7
+    ['05-55', '93B DUNBAR WALK', 459446],
+    //8
+    ['05-11', '35 EAST COAST AVENUE', 459240]
 ];
 
 // (uid, addrId, lastUsed)
@@ -149,26 +165,41 @@ const Collates = [
     // oid = 6
     ['Baked Cod', 2, 6, '1800', '2'],
     ['Chicken Shawarma', 2, 6, '900', '1'],
-    ['Seafood Paella', 2, 6, '800', '1']
+    ['Seafood Paella', 2, 6, '800', '1'],
+
+    // oid = 7
+    ['Chow Mein', 1, 7, '1500', '3']
 ];
 
 // (oid, riderId, customerId, orderTime, deliveredTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, departFromR, finalPrice, addrId, pid)
 const Orders = [
-    [1, 8, 2, '2018-10-19 10:23:54', '2018-10-19 12:23:54', 2, false, '2018-10-19 12:00:54', '2018-10-19 12:05:54', '2018-10-19 12:15:54', 1500, 1, 1],
-    [2, 7, 2, '2018-10-19 10:23:54', '2018-10-19 12:23:54', 2, false, '2018-10-19 12:00:54', '2018-10-19 12:05:54', '2018-10-19 12:15:54', 900, 1, null],
-    [3, 6, 2, '2018-11-19 10:23:54', '2018-11-19 12:23:54', 2, false, '2018-11-19 12:00:54', '2018-11-19 12:05:54', '2018-11-19 12:15:54', 1200, 1, null],
-    [4, 6, 2, '2019-10-01 10:23:54', '2019-10-01 12:23:54', 3, false, '2019-10-01 12:00:54', '2019-10-01 12:05:54', '2019-10-01 12:15:54', 2500, 2, 11],
-    [5, 7, 2, '2019-10-19 10:23:54', '2019-10-19 12:23:54', 3, false, '2019-10-19 12:00:54', '2019-10-19 12:05:54', '2019-10-19 12:15:54', 1900, 2, 11],
-    [6, 8, 3, '2019-10-20 10:23:54', '2019-10-20 12:23:54', 3, false, '2019-10-20 12:00:54', '2019-10-20 12:05:54', '2019-10-20 12:15:54', 3500, 4, 10]
+    //oid 1
+    [8, 2, '2018-10-19 10:23:54', '2018-10-19 12:23:54', 2, false, '2018-10-19 12:00:54', '2018-10-19 12:05:54', '2018-10-19 12:15:54', 1500, 1, 1],
+    //oid 2
+    [7, 2, '2018-10-19 10:23:54', '2018-10-19 12:23:54', 2, false, '2018-10-19 12:00:54', '2018-10-19 12:05:54', '2018-10-19 12:15:54', 900, 1, null],
+    //oid 3
+    [6, 2, '2018-11-19 10:23:54', '2018-11-19 12:23:54', 2, false, '2018-11-19 12:00:54', '2018-11-19 12:05:54', '2018-11-19 12:15:54', 1200, 1, null],
+    //oid 4
+    [6, 2, '2019-10-01 10:23:54', '2019-10-01 12:23:54', 3, false, '2019-10-01 12:00:54', '2019-10-01 12:05:54', '2019-10-01 12:15:54', 2500, 2, 11],
+    //oid 5
+    [7, 2, '2019-10-19 10:23:54', '2019-10-19 12:23:54', 3, false, '2019-10-19 12:00:54', '2019-10-19 12:05:54', '2019-10-19 12:15:54', 1900, 2, 11],
+    //oid 6
+    [8, 3, '2019-10-20 10:23:54', '2019-10-20 12:23:54', 3, false, '2019-10-20 12:00:54', '2019-10-20 12:05:54', '2019-10-20 12:15:54', 3500, 4, 10],
+    //oid 7
+    [7, 2, '2020-02-24 10:23:54', '2020-02-24 11:00:54', 2, false, '2020-02-24 10:24:54', '2020-02-24 10:40:54', '2020-02-24 10:45:54', 1500, 1, 15],
     // deliveredTime = null signifies an incomplete order. unable to represent it here because statement will be prepared as 'null' string causing DateTimeParse error
 ];
 
 // (shiftid, starttime1, endtime1, starttime2, endtime2)
 const Shifts = [
-    [1, 10, 14, 15, 19],
-    [2, 11, 15, 16, 20],
-    [3, 12, 16, 17, 21],
-    [4, 13, 17, 18, 22],
+    //1
+    [10, 14, 15, 19],
+    //2
+    [11, 15, 16, 20],
+    //3
+    [12, 16, 17, 21],
+    //4
+    [13, 17, 18, 22],
 ]
 
 // (scheduleId, uid, month, year, startDayOfMonth)
@@ -198,6 +229,11 @@ const Consists = [
     [3, 3, 4],
     [3, 4, 1],
 ]
+function Comparator(a, b) {
+    if (a[0] < b[0]) return -1;
+    if (a[0] > b[0]) return 1;
+    return 0;
+}
 
 async function fill() {
     await deleteTables().then(() => console.log('Tables cleared'));
@@ -208,32 +244,41 @@ async function fill() {
     for (const food of Food) {
         await addFood(food);
     }
-    for (const customer of Customers) {
-        await addCustomer(customer);
+
+    let users = [...Customers, ...Riders, ...Staffs, ...Managers];
+    users = users.sort(Comparator);
+    for (const user of users) {
+        let type = user[1];
+        if (type === 'C') {
+            await addCustomer(user);
+        } else if (type === 'S') {
+            await addStaff(user)
+        } else if (type === 'R') {
+            await addRider(user);
+        } else if (type === 'M') {
+            await addManager(user);
+        }
     }
-    for (const rider of Riders) {
-        await addRider(rider);
-    }
+
     for (const fullTimer of FullTimers) {
         await addFullTimer(fullTimer);
     }
-    for (const staff of Staffs) {
-        await addStaff(staff);
-    }
-    for (const manager of Managers) {
-        await addManager(manager);
+
+    let promos = [...GlobalPromotions, ...RestaurantPromotions];
+    promos = promos.sort(Comparator);
+    for (const promo of promos) {
+        let type = promo[1];
+        if (type === 'G') {
+            await addGlobalPromotion(promo);
+        } else if (type === 'R') {
+            await addRestaurantPromotion(promo);
+        }
     }
     for (const addr of Addresses) {
         await addAddress(addr);
     }
     for (const rec of Frequents) {
         await addFrequents(rec);
-    }
-    for (const promo of GlobalPromotions) {
-        await addGlobalPromotion(promo);
-    }
-    for (const promo of RestaurantPromotions) {
-        await addRestaurantPromotion(promo);
     }
     for (const order of Orders) {
         await addOrders(order);

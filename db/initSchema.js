@@ -412,21 +412,20 @@ SQL_STATEMENTS = {
         `,
     Restaurants:
         `CREATE TABLE Restaurants (
-            rid             INTEGER primary key,
+            rid             SERIAL primary key,
             minSpending        INTEGER not NULL,
-            rname            VARCHAR(100) not NULL
+            rname            VARCHAR(100) not NULL unique
         );
         `,
     Promotions:
         `CREATE TABLE Promotions (
-            pid                INTEGER primary key,
-            points                INTEGER,
+            pid                SERIAL primary key,
+            points                INTEGER not NULL DEFAULT 0,
             startDate            DATE not NULL,
-            endDate             DATE,
-            percentOff             INTEGER check ((percentOff > 0 and percentOff <= 100) 
-            or NULL),
-            minSpending            INTEGER,
-            monthsWithNoOrders     INTEGER
+            endDate             DATE not NULL,
+            percentOff             INTEGER check (percentOff >= 0 and percentOff <= 100) not NULL DEFAULT 0,
+            minSpending            INTEGER not NULL DEFAULT 0,
+            monthsWithNoOrders     INTEGER not NULL DEFAULT 0
             /*monthsWithNoOrders is the number of months with no order to be eligible for this promo. E.g. if monthsWithNoOrders = 3 then to be eligible for this promo, customer must not have ordered in the last 3 months*/
         );
         `,
