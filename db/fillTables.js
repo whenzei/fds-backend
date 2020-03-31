@@ -1,5 +1,6 @@
 const { addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
     addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts } = require('../db/fillTableMethods');
+const db = require('./index');
 
 //(uid, name, username, salt, passwordHash)
 const Customers = [
@@ -252,6 +253,36 @@ async function fill() {
     for (const shift of Shifts) {
         await addShifts(shift)
     }
+    console.log('Tables filled')
 };
 
-fill().then(() => console.log('Tables filled'));
+
+// Add tables you want to increment serial keys here
+async function setNextSerialKeys() {
+    const tableToKey = {
+        "Users": "uid",
+        // "FTSchedules": "scheduleId",
+        // "PTSchedules": "scheduleId"
+    }
+    for (const [table, idName] of Object.entries(tableToKey)) {
+        let maxId = await db.one(
+            `
+            SELECT max(${idName}) FROM ${table}
+            `
+        )
+        maxId = maxId.max
+        if (maxId != null) {
+            console.log(`Setting next id of ${table} to ${maxId + 1}`)
+            await db.oneOrNone(`SELECT setval('${table}_${idName}_seq', ${maxId}, true);`)
+        }
+    }
+    console.log("Serial keys Set!")
+}
+
+if (require.main === module) {
+    fill().then(() => setNextSerialKeys());
+}
+
+module.exports = {
+    fill, setNextSerialKeys
+}
