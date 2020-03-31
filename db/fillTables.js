@@ -253,6 +253,7 @@ async function fill() {
     for (const shift of Shifts) {
         await addShifts(shift)
     }
+    console.log('Tables filled')
 };
 
 
@@ -275,6 +276,13 @@ async function setNextSerialKeys() {
             await db.oneOrNone(`SELECT setval('${table}_${idName}_seq', ${maxId}, true);`)
         }
     }
+    console.log("Serial keys Set!")
 }
 
-fill().then(() => console.log('Tables filled')).then(() => setNextSerialKeys()).then(() => console.log("Serial keys Set!"));
+if (require.main === module) {
+    fill().then(() => setNextSerialKeys());
+}
+
+module.exports = {
+    fill, setNextSerialKeys
+}
