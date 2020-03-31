@@ -26,8 +26,9 @@ const getRole = async function (uid) {
 }
 
 const getUserByUid = async function (uid) {
-    user = await db.one(psGetUserByUid, [uid]);
-    user['role'] = (await db.one(psGetRole, [uid])).role
+    user = await db.one(psGetUserByUid, [uid])
+    let temp = await db.one(psGetRole, [uid])
+    user.role = temp.role
     return user
 }
 
