@@ -1,10 +1,10 @@
 var express = require('express');
 var router = express.Router();
-const { getRestaurantId, getTotalOrdersAndCost, getMinMaxDate, getFoodCount, getPromoStats, getAllOrders } = require('../controllers/staff');
+const { getRestaurantId, getTotalOrdersAndCost, getMinMaxDate, getFoodCount, getPromoStats, getAllOrders, getRestaurantPromos, insertRestaurantPromos, updateRestaurantPromos, deleteRestaurantPromos } = require('../controllers/staff');
 const { check } = require('express-validator');
 const { validate } = require('../validate');
 
-router.get("/", (req, res) => {console.log(req.user); res.send(`Hi I'm ${req.user.name}. I'm a ${req.user.role}.`)});
+router.get("/", (req, res) => { console.log(req.user); res.send(`Hi I'm ${req.user.name}. I'm a ${req.user.role}.`) });
 
 router.get("/get-rid", async (req, res, next) => {
     let rid;
@@ -31,17 +31,17 @@ router.get("/order-summary/:rid",
         return res.send(orderStatistics);
     });
 
-    router.get("/min-max-date", async (req, res, next) => {
-        let dates = [];
-        try {
-            dates = await getMinMaxDate();
-        } catch (err) {
-            return next(err)
-        }
-        return res.send(dates);
-    });
+router.get("/min-max-date", async (req, res, next) => {
+    let dates = [];
+    try {
+        dates = await getMinMaxDate();
+    } catch (err) {
+        return next(err)
+    }
+    return res.send(dates);
+});
 
-    router.get("/food-count",
+router.get("/food-count",
     [
         check('rid').isInt(),
         check('mth').isInt(),
@@ -60,7 +60,7 @@ router.get("/order-summary/:rid",
         return res.send(foodList);
     });
 
-    router.get("/promo-summary/:rid",
+router.get("/promo-summary/:rid",
     [
         check('rid').isInt()
     ],
@@ -74,8 +74,8 @@ router.get("/order-summary/:rid",
         }
         return res.send(promoStats);
     });
-    
-    router.get("/get-orders/:rid",
+
+router.get("/get-orders/:rid",
     [
         check('rid').isInt()
     ],
@@ -88,6 +88,59 @@ router.get("/order-summary/:rid",
             return next(err)
         }
         return res.send(orderList);
+    });
+
+router.get("/promos/:rid",
+    [
+        check('rid').isInt()
+    ],
+    validate
+    , async (req, res, next) => {
+        let promoList = [];
+        try {
+            promoList = await getRestaurantPromos(req.params.rid);
+        } catch (err) {
+            return next(err)
+        }
+        return res.send(promoList);
+    });
+
+router.post("/add-promos/",
+    [
+        check('rid').isInt()
+    ],
+    validate
+    , async (req, res, next) => {
+        let pid;
+        try {
+            pid = await insertRestaurantPromos(req.body.rid, req.body.item);
+        } catch (err) {
+            return next(err)
+        }
+        return res.status(200).send(pid.toString());
+    });
+
+    router.post("/edit-promos/", async (req, res, next) => {
+        try {
+            await updateRestaurantPromos(req.body.item);
+        } catch (err) {
+            return next(err)
+        }
+        return res.status(200).send("Updated promotion");
+    });
+
+router.delete("/delete-promos/",
+    [
+        check('pid').isInt()
+    ],
+    validate
+    , async (req, res, next) => {
+        try {
+            await deleteRestaurantPromos(req.body.pid);
+        } catch (err) {
+            return next(err)
+        }
+        return res.status(200).send('Promotion removed');
     });
 
 module.exports = router;

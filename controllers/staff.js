@@ -1,5 +1,5 @@
 const db = require('../db');
-const {Roles} = require('../auth')
+const { Roles } = require('../auth')
 const PS = require('pg-promise').PreparedStatement;
 
 const psGetStaff = new PS({ name: 'get-staff', text: 'SELECT * FROM Staff WHERE uid = $1;' });
@@ -50,7 +50,8 @@ LIMIT $4;
 
 const psGetMinMaxDate = new PS({ name: 'get-min-max-date', text: 'SELECT min(deliveredTime) as minDate, max(deliveredTime) as maxDate FROM Orders;' });
 
-const psGetPromoStats = new PS({ name: 'get-promo-stats', text: `
+const psGetPromoStats = new PS({ name: 'get-promo-stats', text: 
+`
 WITH PromoDuration AS (
 SELECT pid, startDate, endDate, (endDate - startDate + 1) as duration
 FROM RestaurantPromos natural join Promotions
@@ -62,7 +63,7 @@ WHERE orderTime >= startDate AND orderTime <= endDate
 GROUP BY pid, duration; 
 `});
 
-const psGetAllOrders = new PS({ name: 'get-all-orders', text: 
+const psGetAllOrders = new PS({ name: 'get-all-orders', text:
 `
 WITH OrderRestaurantPair AS (
     SELECT DISTINCT rid, oid
@@ -81,6 +82,26 @@ FROM (Orders natural join OrderRestaurantPair join RidToName using (riderId) joi
 WHERE rid = $1
 ORDER BY orderTime DESC, deliveredTime DESC;`});
 
+const psGetRestaurantPromos = new PS({ name: 'get-promos', text: `SELECT pid, points, startDate, endDate, percentOff, minSpending, monthsWithNoOrders from Promotions natural join RestaurantPromos WHERE rid = $1 ORDER BY pid;` });
+
+const psInsertPromo = new PS({ name: 'get-promo-by-id', text:
+`
+INSERT into Promotions (startDate, endDate, points, percentOff, minSpending, monthsWithNoOrders) values
+($1, $2, $3, $4, $5, $6) RETURNING pid;
+`});
+
+const psInsertRestaurantPromo = new PS({ name: 'insert-rest-promo', text: `INSERT into RestaurantPromos (rid, pid) values ($1, $2);` });
+
+const psEditRestaurantPromos = new PS({ name: 'edit-promo', text:
+`
+UPDATE Promotions
+SET
+startDate = $2, endDate = $3, points = $4, percentOff = $5, minSpending = $6, monthsWithNoOrders  = $7
+WHERE pid = $1;
+`});
+
+const psDeleteRestaurantPromos = new PS({ name: 'delete-promo', text: 'DELETE FROM Promotions WHERE pid = $1;' });
+
 const getStaff = async () => {
     return await db.any(psGetStaff, [uid]);
 };
@@ -93,7 +114,7 @@ const getTotalOrdersAndCost = async (rid) => {
     return await db.any(psGetTotalOrdersAndCost, [rid]);
 };
 
-const getFoodCount= async (rid, month, year, isDesc, limit) => {
+const getFoodCount = async (rid, month, year, isDesc, limit) => {
     if (isDesc === 'true') {
         return await db.any(psGetMostPopularFoodCount, [rid, month, year, limit]);
     }
@@ -112,6 +133,31 @@ const getAllOrders = async (rid) => {
     return await db.any(psGetAllOrders, [rid]);
 }
 
+const getRestaurantPromos = async (rid) => {
+    return await db.any(psGetRestaurantPromos, [rid]);
+}
+
+const insertRestaurantPromos = async (rid, item) => {
+    const pid = await db.one(psInsertPromo, [item.startdate, item.enddate, item.points, item.percentoff, item.minspending, item.monthswithnoorders])
+        .then((res) => {
+            db.none(psInsertRestaurantPromo, [rid, res.pid]);
+            return res.pid;
+        })
+        .catch(error => {
+            throw 500;
+        });
+    return pid;
+};
+
+const updateRestaurantPromos = async (item) => {
+    await db.none(psEditRestaurantPromos, [item.pid, item.startdate, item.enddate, item.points, item.percentoff, item.minspending, item.monthswithnoorders])
+};
+
+const deleteRestaurantPromos = async (pid) => {
+    await db.none(psDeleteRestaurantPromos, [pid]);
+};
+
 module.exports = {
-    getStaff, getRestaurantId, getTotalOrdersAndCost, getFoodCount, getMinMaxDate, getPromoStats, getAllOrders
+    getStaff, getRestaurantId, getTotalOrdersAndCost, getFoodCount, getMinMaxDate, getPromoStats, getAllOrders, getRestaurantPromos,
+    updateRestaurantPromos, deleteRestaurantPromos, insertRestaurantPromos
 }
