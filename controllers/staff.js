@@ -29,7 +29,7 @@ WITH FoodFreq AS (
 SELECT fname, totalQty
 FROM FoodFreq
 WHERE mth = $2 AND yr = $3
-ORDER BY totalQty DESC
+ORDER BY totalQty DESC, fname ASC
 LIMIT $4;
 `});
 
@@ -44,7 +44,7 @@ WITH FoodFreq AS (
 SELECT fname, totalQty
 FROM FoodFreq
 WHERE mth = $2 AND yr = $3
-ORDER BY totalQty ASC
+ORDER BY totalQty ASC, fname, ASC
 LIMIT $4;
 `});
 
