@@ -304,8 +304,8 @@ async function fill() {
 async function setNextSerialKeys() {
     const tableToKey = {
         "Users": "uid",
-        // "FTSchedules": "scheduleId",
-        // "PTSchedules": "scheduleId"
+        "FTSchedules": "scheduleid",
+        "Shifts": "shiftId"
     }
     for (const [table, idName] of Object.entries(tableToKey)) {
         let maxId = await db.one(
