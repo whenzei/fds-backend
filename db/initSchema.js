@@ -31,7 +31,7 @@ DROP_TABLES = `
     `;
 
 TRIGGERS = {
-        user_subclass_overlap_check: 
+    user_subclass_overlap_check:
         `CREATE OR REPLACE FUNCTION check_subuser_constraint() RETURNS TRIGGER AS $$
         DECLARE 
         user 		INTEGER;
@@ -79,7 +79,7 @@ TRIGGERS = {
         FOR EACH ROW
         EXECUTE FUNCTION check_subuser_constraint();
         `,
-    riders_subclass_overlap_check: 
+    riders_subclass_overlap_check:
         `
         CREATE OR REPLACE FUNCTION check_subrider_constraint() RETURNS TRIGGER AS $$
         DECLARE
@@ -268,12 +268,12 @@ TRIGGERS = {
         FOR EACH ROW
         EXECUTE FUNCTION  is_address_count_in_limit();
         `,
-        // rider_schedule_check:
+    // rider_schedule_check:
 };
 
 SQL_STATEMENTS = {
     Enums:
-    `CREATE TYPE CUISINE_ENUM AS ENUM
+        `CREATE TYPE CUISINE_ENUM AS ENUM
     ('Western', 
      'Chinese',
      'Japanese', 
@@ -529,5 +529,13 @@ async function init() {
             break;
         }
     }
+    console.log("Schema Init Done!")
 };
-init().then(() => console.log("DONE"))
+
+if (require.main === module) {
+    init()
+}
+
+module.exports = {
+    init
+}
