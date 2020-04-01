@@ -52,12 +52,21 @@ const psGetFTSchedule = new PS({
         `
 })
 
-const psUpdateSchedule = new PS({
-    name: 'update-schedule', text: `
-    begin;
-
-    commit;
+const upsertFTSchedules = new PS({
+    name: 'upsert-ft-schedules', text: `
+    insert into ftschedules (uid, month, year, startdayofmonth)
+    values ($1, $2, $3, $4)
+        on conflict (uid, month, year)
+        do update set startdayofmonth=EXCLUDED.startdayofmonth returning scheduleid
     `
+})
+
+const upsertConsists = new PS({
+    name: 'upsert-consists', text: `
+    insert into consists (scheduleid, relativeday, shiftid)
+    values ($1, $2, $3)
+        on conflict (scheduleid, relativeday)
+        do update set shiftid=EXCLUDED.shiftid`
 })
 
 async function getRiderType(uid) {
@@ -88,24 +97,19 @@ async function getShifts() {
 
 async function updateSchedule(year, month, uid, startDayOfMonth, shiftIds) {
     if (!shiftIds || shiftIds.length != 5) {
-
+        throw new Error("5 shiftIds for 5 days should be given")
     }
-    let { scheduleid } = await db.one(`
-    insert into ftschedules (uid, month, year, startdayofmonth)
-    values ($1, $2, $3, $4)
-        on conflict (uid, month, year)
-        do update set startdayofmonth=EXCLUDED.startdayofmonth returning scheduleid`,
-        [uid, month, year, startDayOfMonth])
-    shiftIds.forEach(async (shiftId, relativeDay) => {
-        await db.none(`
-        insert into consists (scheduleid, relativeday, shiftid)
-        values ($1, $2, $3)
-            on conflict (scheduleid, relativeday)
-            do update set shiftid=EXCLUDED.shiftid`,
-            [scheduleid, relativeDay, shiftId]
-        )
-    });
-
+    db.tx(async t => {
+        const { scheduleid } = await t.one(
+            upsertFTSchedules,
+            [uid, month, year, startDayOfMonth])
+        shiftIds.forEach(async (shiftId, relativeDay) => {
+            await t.none(
+                upsertConsists,
+                [scheduleid, relativeDay, shiftId]
+            )
+        });
+    })
 }
 
 module.exports = {
