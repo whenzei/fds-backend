@@ -54,7 +54,6 @@ const addOrder = async function (user, order) {
             [order.addrInfo.address, order.addrInfo.unit, order.addrInfo.postal]);
         addrId = q.addrid;
     }
-    console.log(order);
     if (order.pid != null) {
         const { discountedPrice, points } = await getDiscountedPriceAndPoints(total, order.pid)
         awardedPoints = points;
@@ -157,10 +156,6 @@ async function getDiscountedPriceAndPoints(price, pid) {
     };
 }
 
-const dummy = async function (uid, order) {
-    addOrder(uid, order);
-}
-
 module.exports = {
-    dummy
+    addOrder
 }

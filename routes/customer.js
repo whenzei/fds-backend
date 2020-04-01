@@ -3,7 +3,7 @@ const router = express.Router()
 const { getMenu, getRestaurants } = require('../controllers/restaurant')
 const { getFrequents, getAccountInfo, addCreditCard,
     removeCreditCard, getEligiblePromos } = require('../controllers/customer')
-const {dummy} = require('../controllers/orders')
+const {addOrder} = require('../controllers/orders')
 const { getAddresses } = require('../controllers/addressLookUp')
 const { check } = require('express-validator');
 const { validate } = require('../validate')
@@ -99,7 +99,7 @@ router.get("/promos/:rid", [check('rid').isInt()], validate,
 
 router.post("/checkout", async (req, res, next) => {
     try {
-        dummy(req.user.uid, req.body);
+        addOrder(req.user.uid, req.body);
     } catch (error) {
         return next(error)
     }
