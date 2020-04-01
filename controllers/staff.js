@@ -143,7 +143,7 @@ const insertRestaurantPromos = async (rid, item) => {
         const q2 = await t.none(psInsertRestaurantPromo, [rid, q1.pid]);
         return t.batch([q1, q2]);
     });
-    return res.pid;
+    return res[0].pid;
 };
 
 const updateRestaurantPromos = async (item) => {
