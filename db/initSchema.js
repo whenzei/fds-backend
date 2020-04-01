@@ -333,7 +333,8 @@ SQL_STATEMENTS = {
             uid            INTEGER not null,
             month            SMALLINT not NULL check (month > 0 and month < 13),
             year            INTEGER not null,
-            startDayOfMonth    INTEGER
+            startDayOfMonth    INTEGER,
+            unique (uid, year, month),
             check (startDayOfMonth > 0 and startDayOfMonth < 7),
             foreign key (uid) references FullTimers on delete cascade
         );
@@ -352,7 +353,7 @@ SQL_STATEMENTS = {
             scheduleId        INTEGER references FTSchedules on delete cascade,
             relativeDay        INTEGER check (relativeDay in (0, 1, 2, 3, 4)),
             shiftId            INTEGER references Shifts on delete cascade,
-            primary key (scheduleId, shiftId, relativeDay)
+            primary key (scheduleId, relativeDay)
             );
             `,
     Payout:

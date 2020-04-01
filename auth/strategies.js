@@ -42,7 +42,6 @@ const jwtStrategyRider = new passportJWT.Strategy({
             return done(null, false)
         } else {
             user.riderType = await getRiderType(user.uid);
-            console.log(user.riderType)
             return done(null, user);
         }
     }
@@ -59,7 +58,6 @@ const jwtStrategyCustomer = new passportJWT.Strategy({
         } catch (err) {
             return done(null, false)
         }
-        console.log(user)
         if (!user || user.role != Roles.customer) {
             return done(null, false)
         } else {
