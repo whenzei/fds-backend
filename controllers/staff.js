@@ -138,15 +138,12 @@ const getRestaurantPromos = async (rid) => {
 }
 
 const insertRestaurantPromos = async (rid, item) => {
-    const pid = await db.one(psInsertPromo, [item.startdate, item.enddate, item.points, item.percentoff, item.minspending, item.monthswithnoorders])
-        .then((res) => {
-            db.none(psInsertRestaurantPromo, [rid, res.pid]);
-            return res.pid;
-        })
-        .catch(error => {
-            throw 500;
-        });
-    return pid;
+    const res = await db.tx(async t => {
+        const q1 = await t.one(psInsertPromo, [item.startdate, item.enddate, item.points, item.percentoff, item.minspending, item.monthswithnoorders])
+        const q2 = await t.none(psInsertRestaurantPromo, [rid, q1.pid]);
+        return t.batch([q1, q2]);
+    });
+    return res.pid;
 };
 
 const updateRestaurantPromos = async (item) => {
