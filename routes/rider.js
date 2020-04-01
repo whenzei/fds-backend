@@ -10,7 +10,7 @@ router.get("/", (req, res) => {
 
 router.get("/schedule/:year/:month",
     [
-        check('year').isInt({ min: 2010 }),
+        check('year').isInt({ min: 2020 }),
         check('month').isInt({ min: 1, max: 12 })
     ],
     validate
@@ -24,9 +24,9 @@ router.get("/schedule/:year/:month",
 
 router.post("/update-schedule",
     [
-        check('year').isInt(),
+        check('year').isInt({min: 2020}),
         check('month').isInt({ min: 1, max: 12 }), // 1 indexed
-        check('startDayOfMonth').isInt(),
+        check('startDayOfMonth').isInt({min: 1}),
         check('firstDayShiftId').isInt(),
         check('secondDayShiftId').isInt(),
         check('thirdDayShiftId').isInt(),
@@ -75,6 +75,33 @@ router.post("/update-schedule",
             return next(e)
         }
         return res.status(201).send()
+    }
+)
+
+router.get("/shifts",
+    async (req, res, next) => {
+        try {
+            let shifts = await getShifts()
+            return res.send(shifts)
+        } catch (e) {
+            return next(e)
+        }
+    }
+)
+
+router.get('/startDaysOfMonths/:year/:month',
+    [
+        check('year').isInt({min: 2020}),
+        check('month').isInt({ min: 1, max: 12 })
+    ],
+    validate,
+    async (req, res, next) => {
+        try {
+            let startDaysOfMonth = await getStartDaysOfMonth(req.params.year, req.params.month)
+            return res.send(startDaysOfMonth)
+        } catch (e) {
+            return next(e)
+        }
     }
 )
 
