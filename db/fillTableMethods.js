@@ -35,6 +35,14 @@ async function addRider(arr) {
 
 }
 
+async function addFullTimer(arr) {
+    try {
+        await db.none(`Insert into FullTimers values (${arr[0]})`)
+    } catch (error) {
+        console.log(error, 'Failed to add Full Timer');
+    }
+}
+
 async function addManager(arr) {
     try {
         await db.tx(async t => {
@@ -180,6 +188,29 @@ async function addShifts(arr) {
     }
 }
 
+async function addFTSchedule(arr) {
+    try {
+        await db.none(
+            `Insert into FTSchedules (scheduleId, uid, month, year, startDayOfMonth) Values
+            (${arr[0]}, ${arr[1]}, ${arr[2]}, ${arr[3]}, ${arr[4]})`
+        );
+    } catch (error) {
+        console.log(error, 'Failed to add ftschedule');
+    }
+}
+
+
+async function addConsist(arr) {
+    try {
+        await db.none(
+            `Insert into Consists (scheduleId, relativeDay, shiftId) Values
+            (${arr[0]}, '${arr[1]}', ${arr[2]})`
+        );
+    } catch (error) {
+        console.log(error, 'Failed to add consists');
+    }
+}
+
 async function deleteTables() {
     try {
         await db.none(`
@@ -201,5 +232,5 @@ async function deleteTables() {
 
 module.exports = {
     addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
-    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts
+    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts, addFullTimer, addConsist, addFTSchedule
 };

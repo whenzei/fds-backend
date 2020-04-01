@@ -1,5 +1,5 @@
 const { addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
-    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts } = require('../db/fillTableMethods');
+    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts, addFTSchedule, addConsist, addFullTimer } = require('../db/fillTableMethods');
 const db = require('./index');
 
 //(uid, name, username, salt, passwordHash)
@@ -16,6 +16,12 @@ const Riders = [
     [6, 'R', 'Bobby', 'worm', 'qwerty', '2222'],
     [7, 'R', 'Alfred', 'batman', 'ytrewq', '33333'],
     [8, 'R', 'Penny', 'penny555', 'wiwiwi', 'pppppp'],
+]
+
+//(uid)
+const FullTimers = [
+    [5],
+    [6],
 ]
 
 //(uid, name, username, salt, passwordHash)
@@ -197,6 +203,33 @@ const Shifts = [
     [13, 17, 18, 22],
 ]
 
+// (scheduleId, uid, month, year, startDayOfMonth)
+const FTSchedules = [
+    [1, 5, 3, 2020, 2],
+    [2, 5, 2, 2020, 1],
+    [3, 6, 2, 2020, 3],
+]
+
+// (scheduleid, relativeDay, shiftId)
+const Consists = [
+    [1, 0, 4],
+    [1, 1, 3],
+    [1, 2, 1],
+    [1, 3, 4],
+    [1, 4, 2],
+
+    [2, 0, 2],
+    [2, 1, 1],
+    [2, 2, 4],
+    [2, 3, 1],
+    [2, 4, 3],
+
+    [3, 0, 1],
+    [3, 1, 2],
+    [3, 2, 3],
+    [3, 3, 4],
+    [3, 4, 1],
+]
 function Comparator(a, b) {
     if (a[0] < b[0]) return -1;
     if (a[0] > b[0]) return 1;
@@ -228,6 +261,10 @@ async function fill() {
         }
     }
 
+    for (const fullTimer of FullTimers) {
+        await addFullTimer(fullTimer);
+    }
+
     let promos = [...GlobalPromotions, ...RestaurantPromotions];
     promos = promos.sort(Comparator);
     for (const promo of promos) {
@@ -253,6 +290,12 @@ async function fill() {
     for (const shift of Shifts) {
         await addShifts(shift)
     }
+    for (const schedule of FTSchedules) {
+        await addFTSchedule(schedule)
+    }
+    for (const consist of Consists) {
+        await addConsist(consist)
+    }
     console.log('Tables filled')
 };
 
@@ -261,8 +304,8 @@ async function fill() {
 async function setNextSerialKeys() {
     const tableToKey = {
         "Users": "uid",
-        // "FTSchedules": "scheduleId",
-        // "PTSchedules": "scheduleId"
+        "FTSchedules": "scheduleid",
+        "Shifts": "shiftId"
     }
     for (const [table, idName] of Object.entries(tableToKey)) {
         let maxId = await db.one(
