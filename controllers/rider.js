@@ -52,6 +52,23 @@ const psGetFTSchedule = new PS({
         `
 })
 
+const upsertFTSchedules = new PS({
+    name: 'upsert-ft-schedules', text: `
+    insert into ftschedules (uid, month, year, startdayofmonth)
+    values ($1, $2, $3, $4)
+        on conflict (uid, month, year)
+        do update set startdayofmonth=EXCLUDED.startdayofmonth returning scheduleid
+    `
+})
+
+const upsertConsists = new PS({
+    name: 'upsert-consists', text: `
+    insert into consists (scheduleid, relativeday, shiftid)
+    values ($1, $2, $3)
+        on conflict (scheduleid, relativeday)
+        do update set shiftid=EXCLUDED.shiftid`
+})
+
 async function getRiderType(uid) {
     return (await db.one(psGetRiderType, [uid])).ridertype
 }
@@ -64,6 +81,37 @@ async function getFullTimeSchedule(uid, year, month) {
     return temp
 }
 
+function getStartDaysOfMonth(year, month) {
+    const daysInMonth = new Date(year, month, 0).getDate()
+    const spanOfWorkingDays = 7 * 3 + 5;
+    const startDays = []
+    for (let i = 0; i <= daysInMonth - spanOfWorkingDays; i++) {
+        startDays.push(i + 1);
+    }
+    return startDays;
+}
+
+async function getShifts() {
+    return await db.any('SELECT * FROM Shifts')
+}
+
+async function updateSchedule(year, month, uid, startDayOfMonth, shiftIds) {
+    if (!shiftIds || shiftIds.length != 5) {
+        throw new Error("5 shiftIds for 5 days should be given")
+    }
+    db.tx(async t => {
+        const { scheduleid } = await t.one(
+            upsertFTSchedules,
+            [uid, month, year, startDayOfMonth])
+        shiftIds.forEach(async (shiftId, relativeDay) => {
+            await t.none(
+                upsertConsists,
+                [scheduleid, relativeDay, shiftId]
+            )
+        });
+    })
+}
+
 module.exports = {
-    getRiderType, getFullTimeSchedule
+    getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateSchedule
 }
