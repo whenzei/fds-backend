@@ -105,15 +105,10 @@ router.get("/promos/:rid",
         return res.send(promoList);
     });
 
-router.post("/add-promos/",
-    [
-        check('rid').isInt()
-    ],
-    validate
-    , async (req, res, next) => {
+router.post("/add-promos/", async (req, res, next) => {
         let pid;
         try {
-            pid = await insertRestaurantPromos(req.body.rid, req.body.item);
+            pid = await insertRestaurantPromos(req.user.uid, req.body.item);
         } catch (err) {
             return next(err)
         }
@@ -136,7 +131,7 @@ router.delete("/delete-promos/",
     validate
     , async (req, res, next) => {
         try {
-            await deleteRestaurantPromos(req.body.pid);
+            await deleteRestaurantPromos(req.body.pid, req.user.uid);
         } catch (err) {
             return next(err)
         }
