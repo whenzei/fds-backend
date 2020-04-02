@@ -114,5 +114,5 @@ async function updateSchedule(year, month, uid, startDayOfMonth, shiftIds) {
 }
 
 module.exports = {
-    getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateSchedule
+    getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateSchedule, RiderTypes
 }

@@ -3,6 +3,8 @@ const router = express.Router();
 const { getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateSchedule } = require('../controllers/rider')
 const { check } = require('express-validator');
 const { validate } = require('../validate')
+const { RiderTypes } = require('../controllers/rider')
+const moment = require('moment')
 
 router.get("/rider-type", async (req, res, next) => {
     try {
@@ -27,7 +29,46 @@ router.get("/schedule/:year/:month",
         }
     })
 
-router.post("/update-schedule",
+router.post("/update-pt-schedule",
+    [
+        check('year').isInt({ min: 2020 }),
+        check('week').isInt({ min: 1, max: 53 }),
+        check('dailySchedules').isArray().isLength(7)
+    ],
+    validate,
+    async function (req, res, next) {
+        if (req.user.riderType != RiderTypes.partTime) {
+            return next("Not Part Time rider")
+        }
+        const year = req.body.year;
+        const week = req.body.week;
+        const dailySchedules = req.body.dailySchedules;
+
+        // Check future
+        const nextWeek = moment(new Date()).add(1, 'week')
+        if (year < nextWeek.isoWeekYear() || (year == nextWeek.isoWeekYear() && week < nextWeek.isoWeek())) {
+            return next("Too late to update")
+        }
+
+        // Check min and max
+        const totalHours = dailySchedules.map(x => x.slots).flat().map(y => (y.endTime - y.startTime)).reduce((a, b) => a + b)
+        if (totalHours < 10) {
+            res.status(422)
+            return next("Need to work at least 10 hours in a week")
+        }
+        else if (totalHours > 48) {
+            res.status(422)
+            return next("Weekly work hours cannot exceed 48")
+        }
+        // Update schedule
+
+
+        return res.status(200).send()
+    }
+)
+
+
+router.post("/update-ft-schedule",
     [
         check('year').isInt({ min: 2020 }),
         check('month').isInt({ min: 1, max: 12 }), // 1 indexed
@@ -40,6 +81,9 @@ router.post("/update-schedule",
     ],
     validate,
     async function (req, res, next) {
+        if (req.user.riderType != RiderTypes.fullTime) {
+            return next("Not Full Time rider")
+        }
         const shiftIds = [
             req.body.firstDayShiftId,
             req.body.secondDayShiftId,
