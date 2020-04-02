@@ -70,7 +70,8 @@ const upsertConsists = new PS({
 })
 
 async function getRiderType(uid) {
-    return (await db.one(psGetRiderType, [uid])).ridertype
+    const {ridertype} = await db.one(psGetRiderType, [uid])
+    return ridertype
 }
 async function getFullTimeSchedule(uid, year, month) {
     let temp = await db.any(psGetFTSchedule, [uid, year, month])

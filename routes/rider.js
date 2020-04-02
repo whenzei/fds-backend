@@ -1,11 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateSchedule } = require('../controllers/rider')
+const { getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateSchedule } = require('../controllers/rider')
 const { check } = require('express-validator');
 const { validate } = require('../validate')
-const logger = require('morgan')
-router.get("/", (req, res) => {
-    res.send(req.user);
+
+router.get("/rider-type", async (req, res, next) => {
+    try {
+        const riderType = await getRiderType(req.user.uid)
+        return res.send(riderType)
+    } catch (e) {
+        return next(e)
+    }
 })
 
 router.get("/schedule/:year/:month",
@@ -24,9 +29,9 @@ router.get("/schedule/:year/:month",
 
 router.post("/update-schedule",
     [
-        check('year').isInt({min: 2020}),
+        check('year').isInt({ min: 2020 }),
         check('month').isInt({ min: 1, max: 12 }), // 1 indexed
-        check('startDayOfMonth').isInt({min: 1}),
+        check('startDayOfMonth').isInt({ min: 1 }),
         check('firstDayShiftId').isInt(),
         check('secondDayShiftId').isInt(),
         check('thirdDayShiftId').isInt(),
@@ -91,7 +96,7 @@ router.get("/shifts",
 
 router.get('/startDaysOfMonths/:year/:month',
     [
-        check('year').isInt({min: 2020}),
+        check('year').isInt({ min: 2020 }),
         check('month').isInt({ min: 1, max: 12 })
     ],
     validate,
