@@ -37,6 +37,10 @@ const psMinusWaivePoints = new PS({
     name: 'minus-waive-points',
     text: `UPDATE Customers set points = (points - $2) WHERE uid = $1 AND points >= $2`
 })
+const psUpdateFoodCount = new PS({
+    name: 'update-food-count',
+    text: `UPDATE Food set numOrders = (numOrders + $3) WHERE fname = $1 and rid = $2`
+})
 
 const addOrder = async function (user, order) {
     let total = await totalPrice(order.rid, order.items);
@@ -77,9 +81,10 @@ async function processOrder(uid, order, addrId, total, awardedPoints) {
             let oid = qAddOrder.oid;
             queries.push(qAddOrder);
 
-            // Add Collates
+            // Add Collates and update Food count
             order.items.forEach(item => {
                 queries.push(t.none(psAddCollates, [item.fname, order.rid, oid, item.qty]));
+                queries.push(t.none(psUpdateFoodCount, [item.fname, order.rid, item.qty]))
             })
 
             // Minus points for waive
