@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateSchedule } = require('../controllers/rider')
+const { getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule } = require('../controllers/rider')
 const { check } = require('express-validator');
 const { validate } = require('../validate')
 const { RiderTypes } = require('../controllers/rider')
@@ -61,9 +61,13 @@ router.post("/update-pt-schedule",
             return next("Weekly work hours cannot exceed 48")
         }
         // Update schedule
+        try {
+            updatePTSchedule(req.user.uid, year, week, dailySchedules)
+        } catch (e) {
+            return next(e)
+        }
 
-
-        return res.status(200).send()
+        return res.status(201).send()
     }
 )
 
@@ -119,7 +123,7 @@ router.post("/update-ft-schedule",
 
         // Insert/Update
         try {
-            await updateSchedule(year, month, req.user.uid, startDayOfMonth, shiftIds)
+            await updateFTSchedule(year, month, req.user.uid, startDayOfMonth, shiftIds)
         } catch (e) {
             return next(e)
         }
