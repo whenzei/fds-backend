@@ -79,7 +79,6 @@ async function processOrder(uid, order, addrId, total, awardedPoints) {
             //Add order
             const qAddOrder = await t.one(psAddOrder, [uid, 3, order.waiveFee, total, addrId, order.pid])
             let oid = qAddOrder.oid;
-            queries.push(qAddOrder);
 
             // Add Collates and update Food count
             order.items.forEach(item => {
