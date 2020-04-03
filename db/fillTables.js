@@ -305,7 +305,12 @@ async function setNextSerialKeys() {
     const tableToKey = {
         "Users": "uid",
         "FTSchedules": "scheduleid",
-        "Shifts": "shiftId"
+        "Shifts": "shiftId",
+        "Payout": "payId",
+        "Address": "addrId",
+        "Restaurants": "rid",
+        "Promotions": "pid",
+        "Orders": "oid",
     }
     for (const [table, idName] of Object.entries(tableToKey)) {
         let maxId = await db.one(
