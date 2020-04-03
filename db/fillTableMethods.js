@@ -43,6 +43,14 @@ async function addFullTimer(arr) {
     }
 }
 
+async function addPartTimer(arr) {
+    try {
+        await db.none(`Insert into PartTimers values (${arr[0]})`)
+    } catch (error) {
+        console.log(error, 'Failed to add Part Timer');
+    }
+}
+
 async function addManager(arr) {
     try {
         await db.tx(async t => {
@@ -232,5 +240,5 @@ async function deleteTables() {
 
 module.exports = {
     addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
-    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts, addFullTimer, addConsist, addFTSchedule
+    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts, addFullTimer, addPartTimer, addConsist, addFTSchedule
 };

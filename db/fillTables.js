@@ -1,5 +1,5 @@
 const { addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
-    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts, addFTSchedule, addConsist, addFullTimer } = require('../db/fillTableMethods');
+    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts, addFTSchedule, addConsist, addFullTimer, addPartTimer } = require('../db/fillTableMethods');
 const db = require('./index');
 
 //(uid, name, username, salt, passwordHash)
@@ -22,6 +22,12 @@ const Riders = [
 const FullTimers = [
     [5],
     [6],
+]
+
+//(uid)
+const PartTimers = [
+    [7],
+    [8],
 ]
 
 //(uid, name, username, salt, passwordHash)
@@ -263,6 +269,10 @@ async function fill() {
 
     for (const fullTimer of FullTimers) {
         await addFullTimer(fullTimer);
+    }
+
+    for (const partTimer of PartTimers) {
+        await addPartTimer(partTimer);
     }
 
     let promos = [...GlobalPromotions, ...RestaurantPromotions];
