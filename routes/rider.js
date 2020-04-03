@@ -5,15 +5,21 @@ const { check } = require('express-validator');
 const { validate } = require('../validate')
 const { RiderTypes } = require('../controllers/rider')
 const moment = require('moment')
+const axios = require('axios')
 
 router.get("/rider-type", (req, res, next) => {
     return res.send(req.user.riderType);
 })
 
-router.get("/available-orders",
+router.get("/available-orders/:lng/:lat",
+    [
+        check('lng').isFloat(),
+        check('lat').isFloat()
+    ],
+    validate,
     async (req, res, next) => {
         try {
-            const availableOrders = await getAvailableOrders();
+            const availableOrders = await getAvailableOrders(req.params.lng, req.params.lat)
             return res.send(availableOrders)
         } catch (e) {
             return next(e)

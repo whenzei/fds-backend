@@ -1,10 +1,12 @@
 const db = require('../db');
 const PS = require('pg-promise').PreparedStatement
 const moment = require('moment-timezone')
+const turf = require('@turf/turf')
 const RiderTypes = {
     fullTime: "Full Timer",
     partTime: "Part Timer"
 }
+const axios = require('axios')
 
 const psGetRiderType = new PS({
     name: 'get-rider-type', text:
@@ -179,18 +181,50 @@ async function updatePTSchedule(uid, year, week, dailyschedules) {
     })
 }
 
-async function getAvailableOrders() {
+async function getAvailableOrders(lng, lat) {
     const res = await db.any(psGetAvailableOrders)
-    return res.map(item => ({
-        oid: item.oid,
-        rName: item.rname,
-        rStreetName: item.rstreetname,
-        rPostalCode: item.rpostalcode,
-        cStreetName: item.cstreetname,
-        cPostalcode: item.cpostalcode,
-        totalPrice: item.totalprice,
-        paymentMethod: "Credit Card"
-    }))
+    return Promise.all(res.map(async item => {
+        const rLoc = await getLocation(item.rpostalcode)
+        const cLoc = await getLocation(item.cpostalcode)
+        const rDist = await getDistance(lng, lat, rLoc.LONGITUDE, rLoc.LATITUDE)
+        const cDist = await getDistance(lng, lat, cLoc.LONGITUDE, cLoc.LATITUDE)
+        return {
+            oid: item.oid,
+            Restaurant: item.rname,
+            "Restaurant Address": item.rstreetname,
+            rPostalCode: item.rpostalcode,
+            "Distance To Restaurant": rDist,
+            "Customer Address": item.cstreetname,
+            cPostalcode: item.cpostalcode,
+            "Distance to Customer": cDist,
+            "Total Price": item.totalprice,
+            "Payment Method": "Credit Card"
+        }
+    })
+    )
+}
+
+async function getLocation(postalCode) {
+    let resp;
+    try {
+        resp = await axios.get(`https://developers.onemap.sg/commonapi/search?searchVal=${postalCode}&returnGeom=Y&getAddrDetails=N`)
+    } catch (e) {
+        console.log(e)
+        // In case API fails
+        return {
+            LONGITUDE: Math.random() * (1.4290000 - 1.29) + 1.29,
+            LATITUDE: Math.random() * (463.971569 - 463.662377) + 463.662377,
+        }
+    }
+    return resp.data.results[0]
+}
+
+async function getDistance(lng1, lat1, lng2, lat2) {
+    const from = turf.point([lng1, lat1]);
+    const to = turf.point([lng2, lat2]);
+    const options = { units: 'meters' };
+    const distance = turf.distance(from, to, options);
+    return distance
 }
 
 module.exports = {
