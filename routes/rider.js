@@ -6,13 +6,8 @@ const { validate } = require('../validate')
 const { RiderTypes } = require('../controllers/rider')
 const moment = require('moment')
 
-router.get("/rider-type", async (req, res, next) => {
-    try {
-        const riderType = await getRiderType(req.user.uid)
-        return res.send(riderType)
-    } catch (e) {
-        return next(e)
-    }
+router.get("/rider-type", (req, res, next) => {
+    return res.send(req.user.riderType);
 })
 
 router.get("/schedule/:year/:month",
