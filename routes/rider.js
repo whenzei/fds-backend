@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule } = require('../controllers/rider')
+const { getRiderType, getFullTimeSchedule, getPartTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule } = require('../controllers/rider')
 const { check } = require('express-validator');
 const { validate } = require('../validate')
 const { RiderTypes } = require('../controllers/rider')
@@ -23,7 +23,11 @@ router.get("/schedule/:year/:month",
     validate
     , async function (req, res, next) {
         try {
-            return res.send(await getFullTimeSchedule(req.user.uid, req.params.year, req.params.month))
+            if (req.user.riderType == RiderTypes.fullTime) {
+                return res.send(await getFullTimeSchedule(req.user.uid, req.params.year, req.params.month))
+            } else {
+                return res.send(await getPartTimeSchedule(req.user.uid, req.params.year, req.params.month))
+            }
         } catch (e) {
             return next(e)
         }

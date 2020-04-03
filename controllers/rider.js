@@ -52,6 +52,16 @@ const psGetFTSchedule = new PS({
         `
 })
 
+const psGetPTSchedule = new PS({
+    name: 'get-pt-schedule', text:
+        `
+        select P.date + make_interval(hours := P.starttime) as start, P.date + make_interval(hours := P.endtime) as end
+        from ptschedules P
+        where uid = $1 and extract(year from P.date) = $2 and extract(month from P.date) = $3
+        `
+})
+
+
 const psUpsertFTSchedule = new PS({
     name: 'upsert-ft-schedules', text: `
     insert into ftschedules (uid, month, year, startdayofmonth)
@@ -97,6 +107,15 @@ async function getRiderType(uid) {
 }
 async function getFullTimeSchedule(uid, year, month) {
     let temp = await db.any(psGetFTSchedule, [uid, year, month])
+    temp = temp.map(x => ({
+        start: moment(x.start).tz('Asia/Singapore').format("YYYY-MM-DD HH:mm"),
+        end: moment(x.end).tz('Asia/Singapore').format("YYYY-MM-DD HH:mm"),
+    }))
+    return temp
+}
+
+async function getPartTimeSchedule(uid, year, month) {
+    let temp = await db.any(psGetPTSchedule, [uid, year, month])
     temp = temp.map(x => ({
         start: moment(x.start).tz('Asia/Singapore').format("YYYY-MM-DD HH:mm"),
         end: moment(x.end).tz('Asia/Singapore').format("YYYY-MM-DD HH:mm"),
@@ -150,5 +169,5 @@ async function updatePTSchedule(uid, year, week, dailyschedules) {
 }
 
 module.exports = {
-    getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule, RiderTypes
+    getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule, RiderTypes, getPartTimeSchedule
 }
