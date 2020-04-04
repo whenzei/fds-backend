@@ -39,13 +39,13 @@ const Staffs = [
 // (rid, minSpending (in cents), rname)
 const Restaurants = [
     // rid 1 
-    [5, 'Fukuroku'],
+    [500, 'Fukuroku'],
     // rid 2
-    [10, 'MaMas Specials'],
+    [1000, 'MaMas Specials'],
     // rid 3
-    [11, 'WacDonalds'],
+    [1100, 'WacDonalds'],
     // rid 4
-    [15, 'KFC']
+    [1500, 'KFC']
 ];
 
 `
