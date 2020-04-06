@@ -26,6 +26,12 @@ const FullTimers = [
     [6],
 ]
 
+//(uid)
+const PartTimers = [
+    [7],
+    [8],
+]
+
 //(uid, name, username, salt, passwordHash)
 const Managers = [
     [9, 'M', 'Martin', 'ihaveadream', 'hehehuhu', 'huhuhehe'],
@@ -295,6 +301,10 @@ async function fill() {
 
     for (const fullTimer of FullTimers) {
         await addFullTimer(fullTimer);
+    }
+
+    for (const partTimer of PartTimers) {
+        await addPartTimer(partTimer);
     }
 
     let promos = [...GlobalPromotions, ...RestaurantPromotions];

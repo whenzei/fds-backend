@@ -43,6 +43,14 @@ async function addFullTimer(arr) {
     }
 }
 
+async function addPartTimer(arr) {
+    try {
+        await db.none(`Insert into PartTimers values (${arr[0]})`)
+    } catch (error) {
+        console.log(error, 'Failed to add Part Timer');
+    }
+}
+
 async function addManager(arr) {
     try {
         await db.tx(async t => {

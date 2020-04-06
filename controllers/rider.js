@@ -52,7 +52,17 @@ const psGetFTSchedule = new PS({
         `
 })
 
-const upsertFTSchedules = new PS({
+const psGetPTSchedule = new PS({
+    name: 'get-pt-schedule', text:
+        `
+        select P.date + make_interval(hours := P.starttime) as start, P.date + make_interval(hours := P.endtime) as end
+        from ptschedules P
+        where uid = $1 and extract(year from P.date) = $2 and extract(month from P.date) = $3
+        `
+})
+
+
+const psUpsertFTSchedule = new PS({
     name: 'upsert-ft-schedules', text: `
     insert into ftschedules (uid, month, year, startdayofmonth)
     values ($1, $2, $3, $4)
@@ -61,7 +71,29 @@ const upsertFTSchedules = new PS({
     `
 })
 
-const upsertConsists = new PS({
+const psDeleteWeeklySchedules = new PS({
+    name: 'delete-weekly-pt-schedules', text: `
+    delete from
+        ptschedules P
+    where
+        uid = $1
+        and P.date in (
+            select
+                to_date($2 :: TEXT || $3 :: TEXT, 'iyyyiw') + make_interval(days := day)
+            from
+                unnest(ARRAY [0,1,2,3,4,5,6]) as day
+        )
+    `
+})
+
+const psInsertPTSchedule = new PS({
+    name: 'insert-pt-schedule', text: `
+    insert into ptschedules (uid, date, startTime, endTime)
+    values ($1, to_date($2 || $3, 'iyyyiw') + make_interval(days := $4), $5, $6);
+    `
+})
+
+const psUpsertConsists = new PS({
     name: 'upsert-consists', text: `
     insert into consists (scheduleid, relativeday, shiftid)
     values ($1, $2, $3)
@@ -70,10 +102,20 @@ const upsertConsists = new PS({
 })
 
 async function getRiderType(uid) {
-    return (await db.one(psGetRiderType, [uid])).ridertype
+    const { ridertype } = await db.one(psGetRiderType, [uid])
+    return ridertype
 }
 async function getFullTimeSchedule(uid, year, month) {
     let temp = await db.any(psGetFTSchedule, [uid, year, month])
+    temp = temp.map(x => ({
+        start: moment(x.start).tz('Asia/Singapore').format("YYYY-MM-DD HH:mm"),
+        end: moment(x.end).tz('Asia/Singapore').format("YYYY-MM-DD HH:mm"),
+    }))
+    return temp
+}
+
+async function getPartTimeSchedule(uid, year, month) {
+    let temp = await db.any(psGetPTSchedule, [uid, year, month])
     temp = temp.map(x => ({
         start: moment(x.start).tz('Asia/Singapore').format("YYYY-MM-DD HH:mm"),
         end: moment(x.end).tz('Asia/Singapore').format("YYYY-MM-DD HH:mm"),
@@ -95,23 +137,37 @@ async function getShifts() {
     return await db.any('SELECT * FROM Shifts')
 }
 
-async function updateSchedule(year, month, uid, startDayOfMonth, shiftIds) {
+async function updateFTSchedule(year, month, uid, startDayOfMonth, shiftIds) {
     if (!shiftIds || shiftIds.length != 5) {
         throw new Error("5 shiftIds for 5 days should be given")
     }
     db.tx(async t => {
         const { scheduleid } = await t.one(
-            upsertFTSchedules,
+            psUpsertFTSchedule,
             [uid, month, year, startDayOfMonth])
         shiftIds.forEach(async (shiftId, relativeDay) => {
             await t.none(
-                upsertConsists,
+                psUpsertConsists,
                 [scheduleid, relativeDay, shiftId]
             )
         });
     })
 }
 
+async function updatePTSchedule(uid, year, week, dailyschedules) {
+    db.tx(async t => {
+        await db.none(psDeleteWeeklySchedules, [uid, year, week])
+        dailyschedules.forEach(async (dailyschedule, day) => {
+            dailyschedule.slots.forEach((async slot => {
+                await t.none(
+                    psInsertPTSchedule,
+                    [uid, year, week, day, slot.startTime, slot.endTime]
+                )
+            }))
+        });
+    })
+}
+
 module.exports = {
-    getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateSchedule
+    getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule, RiderTypes, getPartTimeSchedule
 }
