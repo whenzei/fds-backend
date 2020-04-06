@@ -3,7 +3,8 @@ const router = express.Router()
 const { getMenu, getRestaurants } = require('../controllers/restaurant')
 const { getFrequents, getAccountInfo, addCreditCard,
     removeCreditCard, getEligiblePromos } = require('../controllers/customer')
-const {addOrder} = require('../controllers/orders')
+const { addOrder, getOrders } = require('../controllers/orders')
+const { addFoodReview, addRiderRating } = require('../controllers/review')
 const { getAddresses } = require('../controllers/addressLookUp')
 const { check } = require('express-validator');
 const { validate } = require('../validate')
@@ -67,24 +68,6 @@ router.get("/account", async (req, res, next) => {
     return res.send(accountInfo);
 })
 
-router.post("/addCreditCard", async (req, res, next) => {
-    try {
-        await addCreditCard(req.user.uid, req.body.creditCard)
-    } catch (error) {
-        return next(error)
-    }
-    return res.status(200).send('Card added');
-})
-
-router.post("/removeCreditCard", async (req, res, next) => {
-    try {
-        await removeCreditCard(req.user.uid)
-    } catch (error) {
-        return next(error)
-    }
-    return res.status(200).send('Card removed');
-})
-
 // Get eligible promos
 router.get("/promos/:rid", [check('rid').isInt()], validate,
     async (req, res, next) => {
@@ -97,6 +80,16 @@ router.get("/promos/:rid", [check('rid').isInt()], validate,
         return res.json(promos);
     });
 
+router.get("/orders", async (req, res, next) => {
+    let orders = [];
+    try {
+        orders = await getOrders(req.user.uid);
+    } catch (error) {
+        return next(error);
+    }
+    return res.send(orders);
+})
+
 router.post("/checkout", async (req, res, next) => {
     try {
         addOrder(req.user.uid, req.body);
@@ -104,5 +97,41 @@ router.post("/checkout", async (req, res, next) => {
         return next(error)
     }
     return res.status(200).send('Order Submitted');
+})
+
+router.post("/add-cc", async (req, res, next) => {
+    try {
+        await addCreditCard(req.user.uid, req.body.creditCard)
+    } catch (error) {
+        return next(error)
+    }
+    return res.status(200).send('Card added');
+})
+
+router.post("/remove-cc", async (req, res, next) => {
+    try {
+        await removeCreditCard(req.user.uid)
+    } catch (error) {
+        return next(error)
+    }
+    return res.status(200).send('Card removed');
+})
+
+router.post("/review-food", async (req, res, next) => {
+    try {
+        await addFoodReview(req.body)
+    } catch (error) {
+        return next(error)
+    }
+    return res.status(200).send('Food reviewed');
+})
+
+router.post("/rate-rider", async (req, res, next) => {
+    try {
+        await addRiderRating(req.body)
+    } catch (error) {
+        return next(error)
+    }
+    return res.status(200).send('Rider rated');
 })
 module.exports = router;

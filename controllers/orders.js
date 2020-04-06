@@ -8,6 +8,23 @@ const psGetFoodStatus = new PS({ name: 'get-food-status', text: `SELECT (dailyLi
 const psGetAddrId = new PS({ name: 'get-addr-id', text: `SELECT addrId FROM Address WHERE streetName = $1 AND unit = $2 AND postalCode = $3` })
 const psCheckFrequents = new PS({ name: 'check-freq', text: `SELECT true as found FROM Frequents WHERE uid = $1 and addrId = $2` })
 const psGetPromo = new PS({ name: 'get-promo', text: `SELECT percentOff, points FROM Promotions WHERE pid = $1` })
+const psGetOrders = new PS({
+    name: 'get-orders',
+    text: ` SELECT oid, to_char(orderTime, 'DD-Mon-YYYY HH24:MI') as orderTime, to_char(deliveredTime, 'DD-Mon-YYYY HH24:MI') as deliverTime,
+            streetName, unit, postalCode,
+            case 
+                when (isDeliveryFeeWaived = true) then (finalPrice)
+                else (finalPrice + deliveryFee)
+            end as payablePrice,
+            (SELECT STRING_AGG(fname || ' (x' || qty || ')', ',') FROM Collates where oid = O.oid) foodList,
+            coalesce(P.points, 0) points, coalesce(P.percentOff, 0) discount, P.pid, O.isDeliveryFeeWaived as waived,
+            (SELECT distinct rname FROM Collates JOIN Restaurants using (rid) WHERE oid = O.oid) rname,
+            coalesce((SELECT TRUE FROM Reviews WHERE oid = O.oid), FALSE) reviewed,
+            coalesce((Select TRUE FROM Ratings WHERE oid = O.oid), FALSE) rated
+            FROM Orders O JOIN Address using (addrId)
+            LEFT JOIN Promotions P on P.pid = O.pid
+            WHERE customerId = $1`
+})
 
 const psAddFrequents = new PS({ name: 'add-freq', text: `INSERT INTO Frequents(uid, addrId, lastUsed) VALUES ($1, $2, CURRENT_TIMESTAMP)` })
 const psUpdateFrequents = new PS({ name: 'update-freq', text: `UPDATE Frequents set lastUsed = CURRENT_TIMESTAMP WHERE uid = $1 AND addrId = $2` })
@@ -160,6 +177,10 @@ async function getDiscountedPriceAndPoints(price, pid) {
     };
 }
 
+const getOrders = async function(uid) {
+    return await db.any(psGetOrders, [uid])
+}
+
 module.exports = {
-    addOrder
+    addOrder, getOrders
 }
