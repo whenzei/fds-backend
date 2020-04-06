@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
-const { getMenu, getRestaurants } = require('../controllers/restaurant')
+const { getMenu, getRestaurants, getRestaurantRating,
+    getRestaurantReviews } = require('../controllers/restaurant')
 const { getFrequents, getAccountInfo, addCreditCard,
     removeCreditCard, getEligiblePromos } = require('../controllers/customer')
 const { addOrder, getOrders } = require('../controllers/orders')
@@ -89,6 +90,30 @@ router.get("/orders", async (req, res, next) => {
     }
     return res.send(orders);
 })
+
+router.get("/restaurant-rating/:rid", [check('rid').isInt()], validate
+    , async (req, res, next) => {
+        let rating = {};
+        try {
+            console.log(req.params.rid)
+            rating = await getRestaurantRating(req.params.rid)
+        } catch (error) {
+            return next(error);
+        }
+        return res.send(rating);
+    })
+
+router.get("/restaurant-reviews/:rid", [check('rid').isInt()], validate
+    , async (req, res, next) => {
+        let reviews = [];
+        try {
+            console.log(req.params.rid)
+            reviews = await getRestaurantReviews(req.params.rid)
+        } catch (error) {
+            return next(error);
+        }
+        return res.send(reviews);
+    })
 
 router.post("/checkout", async (req, res, next) => {
     try {
