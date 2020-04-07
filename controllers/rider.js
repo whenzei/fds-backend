@@ -229,7 +229,10 @@ async function getAvailableOrders(lng, lat) {
 }
 
 async function getCurrentOrder(uid, lng, lat) {
-    let order = await db.oneOrNone(psGetCurrentOrder);
+    let order;
+    let orders = await db.any(psGetCurrentOrder);
+    if (orders.length < 1) return {}
+    order = orders[0]
     const food = await db.any(getOrderedFood, [order.oid])
     const rLoc = await getLocation(order.rpostalcode)
     const cLoc = await getLocation(order.cpostalcode)
@@ -274,17 +277,23 @@ function getDistance(lng1, lat1, lng2, lat2) {
 }
 
 async function selectOrder(uid, oid) {
-    const res = db.tx(async t => {
-        const currOrder = await db.any(psGetCurrentOrder)
-        if (currOrder.length > 0) {
-            throw Error("Cannot select order while delivery is in progress")
-        }
-        const count = await db.result(psSelectOrder, [uid, oid], r => r.rowCount)
-        if (count < 1) {
-            throw Error("Order not available")
-        }
-    })
-    return res
+    let count;
+    try {
+        count = await db.tx(async t => {
+            const currOrder = await db.any(psGetCurrentOrder)
+            if (currOrder.length > 0) {
+                return 0
+            }
+            const count = await db.result(psSelectOrder, [uid, oid], r => r.rowCount)
+            return count
+        })
+    } catch (e) {
+        throw e;
+    }
+    if (count < 1) {
+        throw "Failed to select order"
+    }
+    return
 }
 
 module.exports = {

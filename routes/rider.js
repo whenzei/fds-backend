@@ -24,13 +24,13 @@ router.get("/current-order/:lng/:lat", [
     }
 )
 
-router.get("/select-order/:oid", [
+router.post("/select-order/", [
     check('oid').isInt(),
 ],
     validate,
     async (req, res, next) => {
         try {
-            (await selectOrder(req.user.uid, req.params.oid))
+            (await selectOrder(req.user.uid, req.body.oid))
         } catch (e) {
             return next(e)
         }
