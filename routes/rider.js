@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getAvailableOrders, getFullTimeSchedule, getPartTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule } = require('../controllers/rider')
+const { getCurrentOrder, getAvailableOrders, getFullTimeSchedule, getPartTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule } = require('../controllers/rider')
 const { check } = require('express-validator');
 const { validate } = require('../validate')
 const { RiderTypes } = require('../controllers/rider')
@@ -10,6 +10,20 @@ const axios = require('axios')
 router.get("/rider-type", (req, res, next) => {
     return res.send(req.user.riderType);
 })
+
+router.get("/current-order", [
+    check('lng').isFloat(),
+    check('lat').isFloat()
+],
+    validate,
+    async (req, res, next) => {
+        try {
+            res.send(await getCurrentOrder(req.user.uid, lng, lat))
+        } catch (e) {
+            return next(e)
+        }
+    }
+)
 
 router.get("/available-orders/:lng/:lat",
     [

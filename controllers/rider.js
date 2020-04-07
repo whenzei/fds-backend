@@ -28,6 +28,15 @@ const psGetAvailableOrders = new PS({
     `
 });
 
+const psGetCurrentOrder = new PS({
+    name: 'get-current-order', text: `
+    Select distinct O.oid, R.rname, A1.streetname as rstreetname, A1.postalcode as rpostalcode,
+        A2.streetname as cstreetname, A2.postalcode as cpostalcode, O.finalprice + O.deliveryfee as totalprice, ()
+    from Orders O natural join Collates C join Restaurants R on C.rid = R.rid join Address A1 on R.addrid = A1.addrid join Address A2 on O.addrid = A2.addrid
+    where riderid = $1 and O.deliveredtime IS NULL
+    `
+});
+
 const psGetFTSchedule = new PS({
     name: 'get-ft-schedule', text:
         `
@@ -202,6 +211,10 @@ async function getAvailableOrders(lng, lat) {
         }
     })
     )
+}
+
+async function getCurrentOrder(uid, lng, lat) {
+
 }
 
 async function getLocation(postalCode) {
