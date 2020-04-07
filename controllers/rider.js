@@ -17,6 +17,13 @@ const psGetRiderType = new PS({
         end as ridertype FROM Riders`
 });
 
+const psSelectOrder = new PS({
+    name: 'select-order', text: `
+    UPDATE orders
+    set riderid = $1, departforr = now()
+    where riderid IS NULL and oid = $2
+    `
+})
 
 
 const psGetAvailableOrders = new PS({
@@ -30,8 +37,8 @@ const psGetAvailableOrders = new PS({
 
 const psGetCurrentOrder = new PS({
     name: 'get-current-order', text: `
-    Select O.oid, R.rname, A1.streetname as rstreetname, A1.postalcode as rpostalcode,
-        A2.streetname as cstreetname, A2.postalcode as cpostalcode, O.finalprice + O.deliveryfee as totalprice, C.fname, C.qty
+    Select distinct O.oid, R.rname, A1.streetname as rstreetname, A1.postalcode as rpostalcode,
+        A2.streetname as cstreetname, A2.postalcode as cpostalcode, O.finalprice + O.deliveryfee as totalprice
     from Orders O natural join Collates C join Restaurants R on C.rid = R.rid join Address A1 on R.addrid = A1.addrid join Address A2 on O.addrid = A2.addrid
     where deliveredtime IS NULL
     `
@@ -222,7 +229,6 @@ async function getAvailableOrders(lng, lat) {
 }
 
 async function getCurrentOrder(uid, lng, lat) {
-    console.log(uid)
     let order = await db.oneOrNone(psGetCurrentOrder);
     const food = await db.any(getOrderedFood, [order.oid])
     const rLoc = await getLocation(order.rpostalcode)
@@ -267,6 +273,20 @@ function getDistance(lng1, lat1, lng2, lat2) {
     return distance
 }
 
+async function selectOrder(uid, oid) {
+    const res = db.tx(async t => {
+        const currOrder = await db.any(psGetCurrentOrder)
+        if (currOrder.length > 0) {
+            throw Error("Cannot select order while delivery is in progress")
+        }
+        const count = await db.result(psSelectOrder, [uid, oid], r => r.rowCount)
+        if (count < 1) {
+            throw Error("Order not available")
+        }
+    })
+    return res
+}
+
 module.exports = {
-    getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule, RiderTypes, getPartTimeSchedule, getAvailableOrders, getCurrentOrder
+    getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule, RiderTypes, getPartTimeSchedule, getAvailableOrders, getCurrentOrder, selectOrder
 }
