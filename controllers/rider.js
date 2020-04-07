@@ -30,12 +30,20 @@ const psGetAvailableOrders = new PS({
 
 const psGetCurrentOrder = new PS({
     name: 'get-current-order', text: `
-    Select distinct O.oid, R.rname, A1.streetname as rstreetname, A1.postalcode as rpostalcode,
-        A2.streetname as cstreetname, A2.postalcode as cpostalcode, O.finalprice + O.deliveryfee as totalprice, ()
+    Select O.oid, R.rname, A1.streetname as rstreetname, A1.postalcode as rpostalcode,
+        A2.streetname as cstreetname, A2.postalcode as cpostalcode, O.finalprice + O.deliveryfee as totalprice, C.fname, C.qty
     from Orders O natural join Collates C join Restaurants R on C.rid = R.rid join Address A1 on R.addrid = A1.addrid join Address A2 on O.addrid = A2.addrid
-    where riderid = $1 and O.deliveredtime IS NULL
+    where deliveredtime IS NULL
     `
 });
+
+const getOrderedFood = new PS({
+    name: 'get-ordered-food', text: `
+    Select fname, qty
+    from Collates
+    where oid = $1
+    `
+})
 
 const psGetFTSchedule = new PS({
     name: 'get-ft-schedule', text:
@@ -195,8 +203,8 @@ async function getAvailableOrders(lng, lat) {
     return Promise.all(res.map(async item => {
         const rLoc = await getLocation(item.rpostalcode)
         const cLoc = await getLocation(item.cpostalcode)
-        const rDist = await getDistance(lng, lat, rLoc.LONGITUDE, rLoc.LATITUDE)
-        const cDist = await getDistance(lng, lat, cLoc.LONGITUDE, cLoc.LATITUDE)
+        const rDist = getDistance(lng, lat, rLoc.LONGITUDE, rLoc.LATITUDE)
+        const cDist = getDistance(lng, lat, cLoc.LONGITUDE, cLoc.LATITUDE)
         return {
             oid: item.oid,
             Restaurant: item.rname,
@@ -214,7 +222,26 @@ async function getAvailableOrders(lng, lat) {
 }
 
 async function getCurrentOrder(uid, lng, lat) {
-
+    console.log(uid)
+    let order = await db.oneOrNone(psGetCurrentOrder);
+    const food = await db.any(getOrderedFood, [order.oid])
+    const rLoc = await getLocation(order.rpostalcode)
+    const cLoc = await getLocation(order.cpostalcode)
+    const rDist = getDistance(lng, lat, rLoc.LONGITUDE, rLoc.LATITUDE)
+    const cDist = getDistance(lng, lat, cLoc.LONGITUDE, cLoc.LATITUDE)
+    return {
+        oid: order.oid,
+        Restaurant: order.rname,
+        "Restaurant Address": order.rstreetname,
+        rPostalCode: order.rpostalcode,
+        "Distance To Restaurant": rDist,
+        "Customer Address": order.cstreetname,
+        cPostalcode: order.cpostalcode,
+        "Distance to Customer": cDist,
+        "Total Price": order.totalprice,
+        "Payment Method": "Credit Card",
+        food,
+    }
 }
 
 async function getLocation(postalCode) {
@@ -232,7 +259,7 @@ async function getLocation(postalCode) {
     return resp.data.results[0]
 }
 
-async function getDistance(lng1, lat1, lng2, lat2) {
+function getDistance(lng1, lat1, lng2, lat2) {
     const from = turf.point([lng1, lat1]);
     const to = turf.point([lng2, lat2]);
     const options = { units: 'meters' };
@@ -241,5 +268,5 @@ async function getDistance(lng1, lat1, lng2, lat2) {
 }
 
 module.exports = {
-    getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule, RiderTypes, getPartTimeSchedule, getAvailableOrders
+    getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule, RiderTypes, getPartTimeSchedule, getAvailableOrders, getCurrentOrder
 }
