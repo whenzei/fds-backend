@@ -1,5 +1,7 @@
 const { addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
-    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts, addFTSchedule, addConsist, addFullTimer, addPartTimer } = require('../db/fillTableMethods');
+    addGlobalPromotion, addRestaurantPromotion, addAddress,
+    addFrequents, addCollates, addOrders, deleteTables, addShifts,
+    addFTSchedule, addConsist, addFullTimer, addReview, addRating } = require('../db/fillTableMethods');
 const db = require('./index');
 
 //(uid, name, username, salt, passwordHash)
@@ -150,50 +152,58 @@ const Frequents = [
 // (fname, rid, oid, totalPrice, qty)
 const Collates = [
     // oid = 1
-    ['Fried Rice', 1, 1, '1000', '2'],
-    ['Chow Mein', 1, 1, '500', '1'],
+    ['Fried Rice', 1, 1, '1000', 2],
+    ['Chow Mein', 1, 1, '500', 1],
 
     // oid = 2
-    ['Chow Mein', 1, 2, '500', '1'],
-    ['Chicken Congee', 1, 2, '400', '1'],
+    ['Chow Mein', 1, 2, '500', 1],
+    ['Chicken Congee', 1, 2, '400', 1],
 
     // oid = 3
-    ['Hor Fun', 1, 3, '1200', '2'],
+    ['Hor Fun', 1, 3, '1200', 2],
 
     // oid = 4
-    ['Chicken Chop', 2, 4, '1800', '3'],
-    ['Pork Chop', 2, 4, '700', '1'],
+    ['Chicken Chop', 2, 4, '1800', 3],
+    ['Pork Chop', 2, 4, '700', 1],
 
     // oid = 5
-    ['Fish n Chips', 2, 5, '700', '1'],
-    ['Mediterranean Burrito', 2, 5, '500', '1'],
-    ['Pork Chop', 2, 5, '700', '1'],
+    ['Fish n Chips', 2, 5, '700', 1],
+    ['Mediterranean Burrito', 2, 5, '500', 1],
+    ['Pork Chop', 2, 5, '700', 1],
 
     // oid = 6
-    ['Baked Cod', 2, 6, '1800', '2'],
-    ['Chicken Shawarma', 2, 6, '900', '1'],
-    ['Seafood Paella', 2, 6, '800', '1'],
+    ['Baked Cod', 2, 6, '1800', 2],
+    ['Chicken Shawarma', 2, 6, '900', 1],
+    ['Seafood Paella', 2, 6, '800', 1],
 
     // oid = 7
-    ['Chow Mein', 1, 7, '1500', '3']
+    ['Chow Mein', 1, 7, '1500', 3],
+
+    // oid = 8
+    ['Tom Yum Soup', 1, 8, '600', 1],
+    ['Pad Thai', 1, 8, '300', 1],
+    ['Basil Chicken Rice', 1, 8, '650', 1],
+
 ];
 
-// (oid, riderId, customerId, orderTime, deliveredTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, departFromR, finalPrice, addrId, pid)
+// (riderId, customerId, orderTime, deliveredTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, departFromR, finalPrice, addrId, pid)
 const Orders = [
     //oid 1
-    [8, 2, '2018-10-19 10:23:54', '2018-10-19 12:23:54', 2, false, '2018-10-19 12:00:54', '2018-10-19 12:05:54', '2018-10-19 12:15:54', 1500, 1, 1],
+    [8, 2, '2018-10-19 10:23:54', '2018-10-19 12:23:54', 200, false, '2018-10-19 12:00:54', '2018-10-19 12:05:54', '2018-10-19 12:15:54', 1500, 1, 1],
     //oid 2
-    [7, 2, '2018-10-19 10:23:54', '2018-10-19 12:23:54', 2, false, '2018-10-19 12:00:54', '2018-10-19 12:05:54', '2018-10-19 12:15:54', 900, 1, null],
+    [7, 2, '2018-10-19 10:23:54', '2018-10-19 12:23:54', 200, false, '2018-10-19 12:00:54', '2018-10-19 12:05:54', '2018-10-19 12:15:54', 900, 1, null],
     //oid 3
-    [6, 2, '2018-11-19 10:23:54', '2018-11-19 12:23:54', 2, false, '2018-11-19 12:00:54', '2018-11-19 12:05:54', '2018-11-19 12:15:54', 1200, 1, null],
+    [6, 2, '2018-11-19 10:23:54', '2018-11-19 12:23:54', 200, false, '2018-11-19 12:00:54', '2018-11-19 12:05:54', '2018-11-19 12:15:54', 1200, 1, null],
     //oid 4
-    [6, 2, '2019-10-01 10:23:54', '2019-10-01 12:23:54', 3, false, '2019-10-01 12:00:54', '2019-10-01 12:05:54', '2019-10-01 12:15:54', 2500, 2, 11],
+    [6, 2, '2019-10-01 10:23:54', '2019-10-01 12:23:54', 300, false, '2019-10-01 12:00:54', '2019-10-01 12:05:54', '2019-10-01 12:15:54', 2500, 2, 11],
     //oid 5
-    [7, 2, '2019-10-19 10:23:54', '2019-10-19 12:23:54', 3, false, '2019-10-19 12:00:54', '2019-10-19 12:05:54', '2019-10-19 12:15:54', 1900, 2, 11],
+    [7, 2, '2019-10-19 10:23:54', '2019-10-19 12:23:54', 300, false, '2019-10-19 12:00:54', '2019-10-19 12:05:54', '2019-10-19 12:15:54', 1900, 2, 11],
     //oid 6
-    [8, 3, '2019-10-20 10:23:54', '2019-10-20 12:23:54', 3, false, '2019-10-20 12:00:54', '2019-10-20 12:05:54', '2019-10-20 12:15:54', 3500, 4, 10],
+    [8, 3, '2019-10-20 10:23:54', '2019-10-20 12:23:54', 300, false, '2019-10-20 12:00:54', '2019-10-20 12:05:54', '2019-10-20 12:15:54', 3500, 4, 10],
     //oid 7
-    [7, 2, '2020-02-24 10:23:54', '2020-02-24 11:00:54', 2, false, '2020-02-24 10:24:54', '2020-02-24 10:40:54', '2020-02-24 10:45:54', 1500, 1, 15],
+    [7, 2, '2020-02-24 10:23:54', '2020-02-24 11:00:54', 300, false, '2020-02-24 10:24:54', '2020-02-24 10:40:54', '2020-02-24 10:45:54', 1500, 1, 15],
+    //oid 8
+    [6, 2, '2020-02-25 11:23:54', '2020-02-25 12:30:54', 300, false, '2020-02-25 11:40:54', '2020-02-25 12:00:54', '2020-02-25 12:15:54', 1550, 1, null],
     // deliveredTime = null signifies an incomplete order. unable to represent it here because statement will be prepared as 'null' string causing DateTimeParse error
 ];
 
@@ -236,6 +246,28 @@ const Consists = [
     [3, 3, 4],
     [3, 4, 1],
 ]
+
+// (oid, comment, stars, date)
+const Reviews = [
+    [1, 'Food is decent, would buy again', 4, '2018-10-19 13:50:54'],
+    [2, 'Wished that the Chow Mein is spicier, otherwise all is good!', 5, '2018-10-19 13:20:22'],
+    [3, 'Food is below average', 2, '2018-11-19 14:10:22'],
+    [4, 'One of the best places for Chicken Chop', 5, '2019-10-01 16:10:54'],
+    [5, '', 5, '2019-10-19 14:44:54'],
+    [6, 'Average food', 3, '2019-10-20 16:23:22'],
+    [7, 'Pretty good for the price', 5, '2020-02-24 18:21:11'],
+]
+
+// (oid, value, date)
+const Ratings = [
+    [1, 5, '2018-10-19 13:51:54'],
+    [2, 4, '2018-10-19 13:25:22'],
+    [3, 4, '2018-11-19 14:11:22'],
+    [4, 3, '2019-10-01 16:09:54'],
+    [5, 5, '2019-10-19 14:40:54'],
+    [6, 4, '2019-10-20 16:24:22'],
+]
+
 function Comparator(a, b) {
     if (a[0] < b[0]) return -1;
     if (a[0] > b[0]) return 1;
@@ -298,6 +330,12 @@ async function fill() {
     }
     for (const collate of Collates) {
         await addCollates(collate);
+    }
+    for (const review of Reviews) {
+        await addReview(review);
+    }
+    for (const rating of Ratings) {
+        await addRating(rating);
     }
     for (const shift of Shifts) {
         await addShifts(shift)

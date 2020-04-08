@@ -219,6 +219,26 @@ async function addConsist(arr) {
     }
 }
 
+async function addReview(arr) {
+    try {
+        await db.none(
+            `Insert into Reviews (oid, comment, stars, date) VALUES
+            (${arr[0]}, '${arr[1]}', ${arr[2]}, '${arr[3]}')`);
+    } catch (error) {
+        console.log(error, 'Failed to add reviews')
+    }
+}
+
+async function addRating(arr) {
+    try {
+        await db.none(
+            `Insert into Ratings (oid, value, date) VALUES
+            (${arr[0]}, ${arr[1]}, '${arr[2]}')`);
+    } catch (error) {
+        console.log(error, 'Failed to add reviews')
+    }
+}
+
 async function deleteTables() {
     try {
         await db.none(`
@@ -240,5 +260,7 @@ async function deleteTables() {
 
 module.exports = {
     addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
-    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts, addFullTimer, addPartTimer, addConsist, addFTSchedule
+    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents,
+    addCollates, addOrders, deleteTables, addShifts, addFullTimer, addConsist,
+    addFTSchedule, addRating, addReview
 };
