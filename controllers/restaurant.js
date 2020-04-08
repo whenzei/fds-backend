@@ -2,7 +2,7 @@ const db = require('../db');
 const PS = require('pg-promise').PreparedStatement;
 
 const psGetRestaurants = new PS({ name: 'get-retaurants', text: 'SELECT * FROM Restaurants' })
-const psGetMenu = new PS({ name: 'get-menu', text: 'SELECT * FROM Food WHERE rid = $1' });
+const psGetMenu = new PS({ name: 'get-menu', text: 'SELECT * FROM Food WHERE rid = $1 ORDER BY fname' });
 const psGetRestaurant = new PS({ name: 'get-restaurant', text: 'SELECT * FROM Restaurants WHERE rid = $1' });
 const psGetCuisines = new PS({ name: 'get-cuisines', text: 'SELECT unnest(enum_range(NULL::CUISINE_ENUM))' });
 const psGetRestaurantRating = new PS({
