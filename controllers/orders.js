@@ -16,7 +16,7 @@ const psGetOrders = new PS({
                 when (isDeliveryFeeWaived = true) then (finalPrice)
                 else (finalPrice + deliveryFee)
             end as payablePrice,
-            (SELECT STRING_AGG(fname || ' (x' || qty || ')', ',') FROM Collates where oid = O.oid) foodList,
+            (SELECT ARRAY_AGG(fname || ' (x' || qty || ')') FROM Collates where oid = O.oid) foodList,
             coalesce(P.points, 0) points, coalesce(P.percentOff, 0) discount, P.pid, O.isDeliveryFeeWaived as waived,
             (SELECT distinct rname FROM Collates JOIN Restaurants using (rid) WHERE oid = O.oid) rname,
             coalesce((SELECT TRUE FROM Reviews WHERE oid = O.oid), FALSE) reviewed,
