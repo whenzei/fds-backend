@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { selectOrder, getCurrentOrder, getAvailableOrders, getFullTimeSchedule, getPartTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule } = require('../controllers/rider')
+const { orderStatuses, updateOrderStatus, selectOrder, getCurrentOrder, getAvailableOrders, getFullTimeSchedule, getPartTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule } = require('../controllers/rider')
 const { check } = require('express-validator');
 const { validate } = require('../validate')
 const { RiderTypes } = require('../controllers/rider')
@@ -18,6 +18,21 @@ router.get("/current-order/:lng/:lat", [
     async (req, res, next) => {
         try {
             return res.send(await getCurrentOrder(req.user.uid, req.params.lng, req.params.lat))
+        } catch (e) {
+            return next(e)
+        }
+    }
+)
+
+router.post("/update-order-status", [
+    check('oid').isInt(),
+    check('currStatus').isIn(Object.values(orderStatuses))
+],
+    validate,
+    async (req, res, next) => {
+        try {
+            await updateOrderStatus(req.user.uid, req.body.oid, req.body.currStatus)
+            return res.status(200).send()
         } catch (e) {
             return next(e)
         }

@@ -52,7 +52,7 @@ const psGetCurrentOrder = new PS({
         )
         as status
     from Orders O natural join Collates C join Restaurants R on C.rid = R.rid join Address A1 on R.addrid = A1.addrid join Address A2 on O.addrid = A2.addrid
-    where deliveredtime IS NULL
+    where deliveredtime IS NULL and riderid = $1
     `
 });
 
@@ -150,6 +150,30 @@ const psUpsertConsists = new PS({
         do update set shiftid=EXCLUDED.shiftid`
 })
 
+const psUpdateToArrivedAtRest = new PS({
+    name: 'update-to-arrive-at-restaurant', text: `
+    update orders
+    set arriveatr = now()
+    where riderid = $1 and oid = $2 and departforr IS NOT NULL and arriveatr IS NULL
+    `
+})
+
+const psUpdateToOrderCollected = new PS({
+    name: 'update-to-order-collected', text: `
+    update orders
+    set departfromr = now()
+    where riderid = $1 and oid = $2 and departforr IS NOT NULL and arriveatr IS NOT NULL and departfromr IS NULL
+    `
+})
+
+const psUpdateToDelivered = new PS({
+    name: 'update-to-delivered', text: `
+    update orders
+    set deliveredtime = now()
+    where riderid = $1 and oid = $2 and departforr IS NOT NULL and arriveatr IS NOT NULL and departfromr IS NOT NULL and deliveredtime IS NULL
+    `
+})
+
 async function getRiderType(uid) {
     const { ridertype } = await db.one(psGetRiderType, [uid])
     return ridertype
@@ -242,7 +266,7 @@ async function getAvailableOrders(lng, lat) {
 
 async function getCurrentOrder(uid, lng, lat) {
     let order;
-    let orders = await db.any(psGetCurrentOrder);
+    let orders = await db.any(psGetCurrentOrder, [uid]);
     if (orders.length < 1) return {}
     order = orders[0]
     const food = await db.any(getOrderedFood, [order.oid])
@@ -309,6 +333,24 @@ async function selectOrder(uid, oid) {
     return
 }
 
+async function updateOrderStatus(uid, oid, currStatus) {
+    let count = 0
+    if (currStatus == orderStatuses.toRest) {
+        count = await db.result(psUpdateToArrivedAtRest, [uid, oid], (r => r.rowCount))
+    } else if (currStatus == orderStatuses.waiting) {
+        count = await db.result(psUpdateToOrderCollected, [uid, oid], (r => r.rowCount))
+    } else if (currStatus == orderStatuses.toCust) {
+        count = await db.result(psUpdateToDelivered, [uid, oid], (r => r.rowCount))
+    } else {
+        throw "Invalid order status: " + currStatus
+    }
+    if (count < 1) {
+        throw 'No order to update'
+    }
+    return
+}
+
 module.exports = {
-    getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule, RiderTypes, getPartTimeSchedule, getAvailableOrders, getCurrentOrder, selectOrder
+    getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule,
+    RiderTypes, getPartTimeSchedule, getAvailableOrders, getCurrentOrder, selectOrder, updateOrderStatus, orderStatuses
 }
