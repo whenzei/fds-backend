@@ -1,7 +1,7 @@
 const { addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
     addGlobalPromotion, addRestaurantPromotion, addAddress,
     addFrequents, addCollates, addOrders, deleteTables, addShifts,
-    addFTSchedule, addConsist, addFullTimer, addReview, addRating } = require('../db/fillTableMethods');
+    addFTSchedule, addConsist, addFullTimer, addReview, addRating, addPartTimer } = require('../db/fillTableMethods');
 const db = require('./index');
 
 //(uid, name, username, salt, passwordHash)
@@ -10,6 +10,14 @@ const Customers = [
     [2, 'C', 'zhow qing tian', 'zhow', 'pepper', 'asdsad', 1000],
     [3, 'C', 'staff of wizardry', 'Knack2Babee', 'SeaSalt', '123', 500],
     [4, 'C', 'the fork on the left', 'oheehee', 'Mother', 'Father', 20000],
+    [13, 'C', 'John Doe', 'jdoe', 'please', 'password', 20000],
+    [14, 'C', 'Tan Ah Kau', 'tahkau', 'give', 'password', 20000],
+    [15, 'C', 'Lim Bee Bee', 'lbeebee', 'me', 'password', 5000],
+    [16, 'C', 'Kamal Lama', 'kamalama', 'an', 'password', 5000],
+    [17, 'C', 'Jaleney', 'jujuje', 'A', 'password', 10000],
+    [18, 'C', 'Lu Lu', 'lulu', 'for', 'password', 20000],
+    [19, 'C', 'Hebe Fu', 'youthefool', 'this', 'password', 15000],
+    [20, 'C', 'Shimmy shammy', 'shimsham', 'module', 'password', 20000]
 ];
 
 //(uid, name, username, salt, passwordHash)
@@ -53,7 +61,33 @@ const Restaurants = [
     // rid 3
     [1100, 'WacDonalds', 8],
     // rid 4
-    [1500, 'KFC', 5]
+    [1500, 'KFC', 5],
+    // rid 5
+    [1000, 'Asian Kitchen', 9],
+    // rid 6
+    [500, 'La Fela', 10],
+    // rid 7
+    [500, 'Bobby BBQ', 11],
+    // rid 8
+    [1000, 'Asian Fusion', 12],
+    // rid 9
+    [1500, 'Tempura Don', 13],
+    // rid 10
+    [1500, 'Ramen House', 14],
+    // rid 11
+    [1000, 'Sushi Craze', 15],
+    // rid 12
+    [1000, 'Vietnam Hut', 16],
+    // rid 13
+    [800, 'Fu Zhou Eatery', 17],
+    // rid 14
+    [600, 'North Indian Delights', 18],
+    // rid 15
+    [500, 'Kimchi Love', 19],
+    // rid 16
+    [1000, 'Nakon House', 20],
+    // rid 17
+    [1000, 'Grill N Meal', 21],
 ];
 
 `
@@ -74,7 +108,7 @@ const Food = [
     [1, 'Chow Mein', 'Chinese', '500', '200'],
     [1, 'Hor Fun', 'Chinese', '600', '300'],
     [1, 'Chicken Congee', 'Chinese', '400', '100'],
-    [1, 'Tomyum Soup', 'Thai', '600', '150'],
+    [1, 'Tom Yum Soup', 'Thai', '600', '150'],
     [1, 'Pad Thai', 'Thai', '300', '150'],
     [1, 'Basil Chicken Rice', 'Thai', '650', '100'],
     [2, 'Chicken Chop', 'Western', '600', '100'],
@@ -91,6 +125,99 @@ const Food = [
     [4, 'Mushroom Burger', 'Western', '300', '200'],
     [4, 'Chicken Burger', 'Western', '400', '300'],
     [4, '2pc Chicken', 'Western', '600', '400'],
+    [5, 'Omelette Rice', 'Chinese', '300', '400'],
+    [5, 'Mala Chicken Set', 'Chinese', '600', '200'],
+    [5, 'Cantonese Beef Rice', 'Chinese', '500', '400'],
+    [5, 'Teochew Noodle', 'Chinese', '400', '400'],
+    [5, 'Hokkien Mee', 'Chinese', '500', '300'],
+    [5, 'Spring Rolls x5', 'Chinese', '400', '200'],
+    [6, 'Cream Fusili', 'Western', '400', '200'],
+    [6, 'Aglio Olio', 'Western', '400', '200'],
+    [6, 'Aglio Olio With Salmon', 'Western', '700', '200'],
+    [6, 'Pepporoni Pizza', 'Western', '800', '200'],
+    [6, 'English Breakfast', 'Western', '700', '200'],
+    [6, 'Smoked Salmon', 'Western', '1000', '200'],
+    [7, 'BBQ Pork Ribs', 'Western', '1100', '200'],
+    [7, 'BBQ Sirloin', 'Western', '1000', '200'],
+    [7, 'BBQ Ribeye', 'Western', '1200', '200'],
+    [7, 'Truffle Fries', 'Western', '700', '200'],
+    [7, 'Honey Chicken Wings', 'Western', '800', '200'],
+    [7, 'Cheese Fries', 'Western', '800', '200'],
+    [8, 'Chicken Fusion Bowl', 'Chinese', '900', '200'],
+    [8, 'Chicken Fusion Noodle', 'Chinese', '800', '200'],
+    [8, 'Beef Bowl', 'Chinese', '1000', '200'],
+    [8, 'Salmon n Beef Bowl', 'Chinese', '1500', '100'],
+    [8, 'Wagyu Bowl', 'Western', '2000', '100'],
+    [8, 'Healthy Salmon Bowl', 'Western', '2500', '100'],
+    [8, 'Fusion Bowl', 'Western', '2500', '100'],
+    [8, 'Original Beef Bowl', 'Western', '2000', '100'],
+    [8, 'Spicy Special Bowl', 'Western', '1900', '100'],
+    [8, 'House Recipe Salmon', 'Western', '2500', '100'],
+    [9, 'Original Tendon', 'Japanese', '1500', '400'],
+    [9, 'Ebi Tendon', 'Japanese', '1500', '400'],
+    [9, 'Mentaiko Special Tendon', 'Japanese', '2000', '400'],
+    [9, 'Spicy Mix Don', 'Japanese', '2000', '400'],
+    [9, 'Kakiage Don', 'Japanese', '1000', '400'],
+    [10, 'Chashu Ramen', 'Japanese', '1200', '400'],
+    [10, 'Squid Ink Ramen', 'Japanese', '1000', '400'],
+    [10, 'Original Ramen', 'Japanese', '1400', '400'],
+    [10, 'Spicy Chashu Ramen', 'Japanese', '1500', '100'],
+    [10, 'Hokkaido Ramen', 'Japanese', '1400', '200'],
+    [10, 'Soba Special', 'Japanese', '1200', '100'],
+    [11, 'Dragon Roll', 'Japanese', '700', '300'],
+    [11, 'Mango Roll', 'Japanese', '900', '200'],
+    [11, 'Inari Roll', 'Japanese', '400', '150'],
+    [11, 'Salmon Gunkan', 'Japanese', '500', '200'],
+    [11, 'Tamago Gunkan', 'Japanese', '300', '200'],
+    [11, 'Lobster Gunkan', 'Japanese', '500', '200'],
+    [11, 'Salmon Sashimi', 'Japanese', '600', '400'],
+    [11, 'Salmon Mentaiko', 'Japanese', '700', '200'],
+    [11, 'Tuna Sashimi', 'Japanese', '600', '300'],
+    [11, 'Tempura', 'Japanese', '600', '200'],
+    [11, 'Chawanmushi', 'Japanese', '300', '400'],
+    [11, 'Crab Meat Chawanmushi', 'Japanese', '500', '300'],
+    [11, 'Agedashi Tofu', 'Japanese', '400', '300'],
+    [12, 'Banh Xeo', 'Vietnamese', '600', '300'],
+    [12, 'Cha Ca', 'Vietnamese', '600', '300'],
+    [12, 'Cao Lau', 'Vietnamese', '500', '300'],
+    [12, 'Pho Xao', 'Vietnamese', '700', '300'],
+    [12, 'Banh Cuon', 'Vietnamese', '500', '200'],
+    [12, 'Bun Ca Cay', 'Vietnamese', '400', '300'],
+    [12, 'Ban Canh He', 'Vietnamese', '700', '100'],
+    [12, 'Com Goi La Sen', 'Vietnamese', '800', '200'],
+    [13, 'Ding Bian Hu', 'Chinese', '800', '200'],
+    [13, 'Gua Bao', 'Chinese', '800', '200'],
+    [13, 'Hujiao Bing', 'Chinese', '300', '200'],
+    [13, 'Fish Ball Noodle', 'Chinese', '700', '200'],
+    [13, 'Li Bing', 'Chinese', '600', '200'],
+    [13, 'Qi Jiguang Cake', 'Chinese', '500', '200'],
+    [14, 'Butter Chicken', 'Indian', '600', '200'],
+    [14, 'Rogan Josh Recipe', 'Indian', '700', '200'],
+    [14, 'Fish Amritsari', 'Indian', '800', '200'],
+    [14, 'Lacha Paratha', 'Indian', '400', '200'],
+    [14, 'Mutter Paneer', 'Indian', '600', '200'],
+    [14, 'Rajma Dal', 'Indian', '600', '200'],
+    [14, 'Kheer', 'Indian', '400', '200'],
+    [15, 'Kimchi Fried Rice', 'Korean', '550', '200'],
+    [15, 'Kimchi Ramen', 'Korean', '550', '200'],
+    [15, 'Spicy Chicken Hotplate', 'Korean', '550', '200'],
+    [15, 'Bulgogi', 'Korean', '600', '200'],
+    [15, 'Ginseng Chicken', 'Korean', '700', '200'],
+    [15, 'Bibimbap', 'Korean', '700', '200'],
+    [15, 'Beef Hotplate', 'Korean', '800', '200'],
+    [16, 'Green Curry', 'Thai', '900', '200'],
+    [16, 'Basil Pork Rice', 'Thai', '800', '300'],
+    [16, 'Stir Fried Beef', 'Thai', '800', '200'],
+    [16, 'Sticky Mango Rice', 'Thai', '600', '400'],
+    [16, 'Tom Yum Fried Rice', 'Thai', '700', '300'],
+    [16, 'Spicy Salad', 'Thai', '300', '200'],
+    [16, 'Stir-fried Pumpkin', 'Thai', '500', '200'],
+    [17, 'Sticks N Bones', 'Western', '1000', '200'],
+    [17, 'Finger Licking Wings', 'Western', '800', '200'],
+    [17, 'Pork Knuckle', 'Western', '1800', '200'],
+    [17, 'Steaks for 2', 'Western', '1200', '100'],
+    [17, 'Grilled Fish', 'Western', '1000', '200'],
+    [17, 'House Grilled Chicken', 'Western', '1900', '200'],
 ]
 
 // (pid, points, startDate, endDate, percentOff, minSpending (in cents), monthsWithNoOrders)
@@ -101,7 +228,12 @@ const GlobalPromotions = [
     [3, 'G', 0, '2019-06-01', '2019-07-01', 15, 3000, 2],
     [4, 'G', 25, '2019-05-01', '2019-06-01', 0, 0, 0],
     [5, 'G', 35, '2019-05-01', '2019-06-01', 0, 0, 3],
-    [15, 'G', 35, '2020-01-01', '2020-07-07', 10, 0, 3]
+    [15, 'G', 35, '2020-01-01', '2020-07-07', 10, 0, 3],
+    [16, 'G', 100, '2020-01-01', '2020-09-02', 5, 0, 0],
+    [17, 'G', 100, '2020-01-01', '2020-05-03', 15, 0, 2],
+    [18, 'G', 50, '2020-01-01', '2020-07-07', 20, 300, 1],
+    [19, 'G', 70, '2020-01-01', '2020-08-07', 25, 0, 3],
+    [20, 'G', 1000, '2020-01-01', '2020-09-07', 0, 500, 0]
 ];
 
 // (pid, rid, points, startDate, endDate, percentOff, minSpending (in cents), monthsWithNoOrders)
@@ -133,7 +265,54 @@ const Addresses = [
     //7
     ['05-55', '93B DUNBAR WALK', 459446],
     //8
-    ['05-11', '35 EAST COAST AVENUE', 459240]
+    ['05-11', '35 EAST COAST AVENUE', 459240],
+    //9
+    ['20-10', '361A TAMPINES STREET 34', 521361],
+    //10
+    ['03-17', '37F LORONG STANGEE', 425018],
+    //11
+    ['07-02', '8 HAPPY AVENUE NORTH', 369756],
+    //12
+    ['11-23', '6 JALAN SOO BEE', 488129],
+    //13
+    ['04-31', '5 WILKINSON ROAD', 436658],
+    //14
+    ['16-12', '29D POH HUAT ROAD', 546753],
+    //15
+    ['04-33', '477 SEGAR ROAD SEGAR GARDENS', 670477],
+    //16
+    ['18-01', '222 SUMANG LANE MATILDA EDGE', 820222],
+    //17
+    ['09-09', '4 SEA AVENUE', 424221],
+    //18
+    ['02-21', '36A SIAK KEW AVENUE SENNETT ESTATE', 348075],
+    //19
+    ['11-21', '260 JALAN BESAR', 208935],
+    //20
+    ['07-15', '46 TANGLIN HALT ROAD', 142046],
+    //21
+    ['09-19', '192A SERANGOON ROAD', 218066],
+    //22
+    ['15-04', '64 TAMAN NAKHODA VILLA DELLE ROSE', 257775],
+    //23
+    ['04-04', '304 ORCHARD ROAD UOB LUCKY PLAZA', 238863],
+    //24
+    ['07-07', '18 JALAN NOVENA RESIDENCES @ NOVENA', 308679],
+    //25
+    ['02-22', '38A LENGKONG TIGA', 417460],
+    //26
+    ['03-03', '7 JALAN SEAVIEW SEA VIEW PARK', 438321],
+    //27
+    ['10-11', '6 MARIA AVENUE OPERA ESTATE', 456738],
+    //28
+    ['09-08', '5 PARRY ROAD', 547190],
+    //29
+    ['08-15', '7 JALAN LAYANG LAYANG', 598474],
+    //30
+    ['05-55', '66 JALAN MALU-MALU SEMBAWANG SPRINGS ESTATE', 769681],
+    //31
+    ['02-02', '104 BUTTERFLY AVENUE SENNETT ESTATE', 349841]
+
 ];
 
 // (uid, addrId, lastUsed)

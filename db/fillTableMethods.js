@@ -262,5 +262,5 @@ module.exports = {
     addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
     addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents,
     addCollates, addOrders, deleteTables, addShifts, addFullTimer, addConsist,
-    addFTSchedule, addRating, addReview
+    addFTSchedule, addRating, addReview, addPartTimer
 };
