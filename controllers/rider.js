@@ -56,8 +56,8 @@ const psGetCurrentOrder = new PS({
     `
 });
 
-const getOrderedFood = new PS({
-    name: 'get-ordered-food', text: `
+const getOrderedItems = new PS({
+    name: 'get-ordered-items', text: `
     Select fname, qty
     from Collates
     where oid = $1
@@ -269,7 +269,7 @@ async function getCurrentOrder(uid, lng, lat) {
     let orders = await db.any(psGetCurrentOrder, [uid]);
     if (orders.length < 1) return {}
     order = orders[0]
-    const food = await db.any(getOrderedFood, [order.oid])
+    const orderedItems = await db.any(getOrderedItems, [order.oid])
     const rLoc = await getLocation(order.rpostalcode)
     const cLoc = await getLocation(order.cpostalcode)
     const rDist = getDistance(lng, lat, rLoc.LONGITUDE, rLoc.LATITUDE)
@@ -285,7 +285,7 @@ async function getCurrentOrder(uid, lng, lat) {
         "Distance to Customer": cDist,
         "Total Price": order.totalprice,
         "Payment Method": "Credit Card",
-        food,
+        orderedItems,
         status: order.status
     }
 }
