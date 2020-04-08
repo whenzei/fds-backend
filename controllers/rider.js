@@ -1,10 +1,17 @@
 const db = require('../db');
 const PS = require('pg-promise').PreparedStatement
 const moment = require('moment-timezone')
+const turf = require('@turf/turf')
 const RiderTypes = {
     fullTime: "Full Timer",
     partTime: "Part Timer"
 }
+const orderStatuses = {
+    toRest: "Moving to restaurant",
+    waiting: "Waiting for order",
+    toCust: "Moving to customer"
+}
+const axios = require('axios')
 
 const psGetRiderType = new PS({
     name: 'get-rider-type', text:
@@ -14,6 +21,48 @@ const psGetRiderType = new PS({
             else null
         end as ridertype FROM Riders`
 });
+
+const psSelectOrder = new PS({
+    name: 'select-order', text: `
+    UPDATE orders
+    set riderid = $1, departforr = now()
+    where riderid IS NULL and oid = $2
+    `
+})
+
+
+const psGetAvailableOrders = new PS({
+    name: 'get-available-orders', text: `
+    Select distinct O.oid, R.rname, A1.streetname as rstreetname, A1.postalcode as rpostalcode,
+        A2.streetname as cstreetname, A2.postalcode as cpostalcode, O.finalprice + O.deliveryfee as totalprice
+    from Orders O natural join Collates C join Restaurants R on C.rid = R.rid join Address A1 on R.addrid = A1.addrid join Address A2 on O.addrid = A2.addrid
+    where riderid IS NULL;
+    `
+});
+
+const psGetCurrentOrder = new PS({
+    name: 'get-current-order', text: `
+    Select distinct O.oid, R.rname, A1.streetname as rstreetname, A1.postalcode as rpostalcode,
+        A2.streetname as cstreetname, A2.postalcode as cpostalcode, O.finalprice + O.deliveryfee as totalprice, (
+            case
+                WHEN O.arriveatr IS NULL THEN '${orderStatuses.toRest}'
+                WHEN O.departfromr IS NULL THEN '${orderStatuses.waiting}'
+                ELSE '${orderStatuses.toCust}'
+            END
+        )
+        as status
+    from Orders O natural join Collates C join Restaurants R on C.rid = R.rid join Address A1 on R.addrid = A1.addrid join Address A2 on O.addrid = A2.addrid
+    where deliveredtime IS NULL and riderid = $1
+    `
+});
+
+const getOrderedFood = new PS({
+    name: 'get-ordered-food', text: `
+    Select fname, qty
+    from Collates
+    where oid = $1
+    `
+})
 
 const psGetFTSchedule = new PS({
     name: 'get-ft-schedule', text:
@@ -101,6 +150,30 @@ const psUpsertConsists = new PS({
         do update set shiftid=EXCLUDED.shiftid`
 })
 
+const psUpdateToArrivedAtRest = new PS({
+    name: 'update-to-arrive-at-restaurant', text: `
+    update orders
+    set arriveatr = now()
+    where riderid = $1 and oid = $2 and departforr IS NOT NULL and arriveatr IS NULL
+    `
+})
+
+const psUpdateToOrderCollected = new PS({
+    name: 'update-to-order-collected', text: `
+    update orders
+    set departfromr = now()
+    where riderid = $1 and oid = $2 and departforr IS NOT NULL and arriveatr IS NOT NULL and departfromr IS NULL
+    `
+})
+
+const psUpdateToDelivered = new PS({
+    name: 'update-to-delivered', text: `
+    update orders
+    set deliveredtime = now()
+    where riderid = $1 and oid = $2 and departforr IS NOT NULL and arriveatr IS NOT NULL and departfromr IS NOT NULL and deliveredtime IS NULL
+    `
+})
+
 async function getRiderType(uid) {
     const { ridertype } = await db.one(psGetRiderType, [uid])
     return ridertype
@@ -168,6 +241,116 @@ async function updatePTSchedule(uid, year, week, dailyschedules) {
     })
 }
 
+async function getAvailableOrders(lng, lat) {
+    const res = await db.any(psGetAvailableOrders)
+    return Promise.all(res.map(async item => {
+        const rLoc = await getLocation(item.rpostalcode)
+        const cLoc = await getLocation(item.cpostalcode)
+        const rDist = getDistance(lng, lat, rLoc.LONGITUDE, rLoc.LATITUDE)
+        const cDist = getDistance(lng, lat, cLoc.LONGITUDE, cLoc.LATITUDE)
+        return {
+            oid: item.oid,
+            Restaurant: item.rname,
+            "Restaurant Address": item.rstreetname,
+            rPostalCode: item.rpostalcode,
+            "Distance To Restaurant": rDist,
+            "Customer Address": item.cstreetname,
+            cPostalcode: item.cpostalcode,
+            "Distance to Customer": cDist,
+            "Total Price": item.totalprice,
+            "Payment Method": "Credit Card"
+        }
+    })
+    )
+}
+
+async function getCurrentOrder(uid, lng, lat) {
+    let order;
+    let orders = await db.any(psGetCurrentOrder, [uid]);
+    if (orders.length < 1) return {}
+    order = orders[0]
+    const food = await db.any(getOrderedFood, [order.oid])
+    const rLoc = await getLocation(order.rpostalcode)
+    const cLoc = await getLocation(order.cpostalcode)
+    const rDist = getDistance(lng, lat, rLoc.LONGITUDE, rLoc.LATITUDE)
+    const cDist = getDistance(lng, lat, cLoc.LONGITUDE, cLoc.LATITUDE)
+    return {
+        oid: order.oid,
+        Restaurant: order.rname,
+        "Restaurant Address": order.rstreetname,
+        rPostalCode: order.rpostalcode,
+        "Distance To Restaurant": rDist,
+        "Customer Address": order.cstreetname,
+        cPostalcode: order.cpostalcode,
+        "Distance to Customer": cDist,
+        "Total Price": order.totalprice,
+        "Payment Method": "Credit Card",
+        food,
+        status: order.status
+    }
+}
+
+async function getLocation(postalCode) {
+    let resp;
+    try {
+        resp = await axios.get(`https://developers.onemap.sg/commonapi/search?searchVal=${postalCode}&returnGeom=Y&getAddrDetails=N`)
+    } catch (e) {
+        console.log(e)
+        // In case API fails
+        return {
+            LONGITUDE: Math.random() * (1.4290000 - 1.29) + 1.29,
+            LATITUDE: Math.random() * (463.971569 - 463.662377) + 463.662377,
+        }
+    }
+    return resp.data.results[0]
+}
+
+function getDistance(lng1, lat1, lng2, lat2) {
+    const from = turf.point([lng1, lat1]);
+    const to = turf.point([lng2, lat2]);
+    const options = { units: 'meters' };
+    const distance = turf.distance(from, to, options);
+    return distance
+}
+
+async function selectOrder(uid, oid) {
+    let count;
+    try {
+        count = await db.tx(async t => {
+            const currOrder = await db.any(psGetCurrentOrder)
+            if (currOrder.length > 0) {
+                return 0
+            }
+            const count = await db.result(psSelectOrder, [uid, oid], r => r.rowCount)
+            return count
+        })
+    } catch (e) {
+        throw e;
+    }
+    if (count < 1) {
+        throw "Failed to select order"
+    }
+    return
+}
+
+async function updateOrderStatus(uid, oid, currStatus) {
+    let count = 0
+    if (currStatus == orderStatuses.toRest) {
+        count = await db.result(psUpdateToArrivedAtRest, [uid, oid], (r => r.rowCount))
+    } else if (currStatus == orderStatuses.waiting) {
+        count = await db.result(psUpdateToOrderCollected, [uid, oid], (r => r.rowCount))
+    } else if (currStatus == orderStatuses.toCust) {
+        count = await db.result(psUpdateToDelivered, [uid, oid], (r => r.rowCount))
+    } else {
+        throw "Invalid order status: " + currStatus
+    }
+    if (count < 1) {
+        throw 'No order to update'
+    }
+    return
+}
+
 module.exports = {
-    getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule, RiderTypes, getPartTimeSchedule
+    getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule,
+    RiderTypes, getPartTimeSchedule, getAvailableOrders, getCurrentOrder, selectOrder, updateOrderStatus, orderStatuses
 }

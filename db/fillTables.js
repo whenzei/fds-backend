@@ -45,13 +45,13 @@ const Staffs = [
 // (minSpending (in cents), rname)
 const Restaurants = [
     // rid 1 
-    [500, 'Fukuroku'],
+    [500, 'Fukuroku', 6],
     // rid 2
-    [1000, 'MaMas Specials'],
+    [1000, 'MaMas Specials', 7],
     // rid 3
-    [1100, 'WacDonalds'],
+    [1100, 'WacDonalds', 8],
     // rid 4
-    [1500, 'KFC']
+    [1500, 'KFC', 5]
 ];
 
 `
@@ -245,6 +245,10 @@ function Comparator(a, b) {
 async function fill() {
     await deleteTables().then(() => console.log('Tables cleared'));
 
+    for (const addr of Addresses) {
+        await addAddress(addr);
+    }
+
     for (const restaurant of Restaurants) {
         await addRestaurant(restaurant);
     }
@@ -285,9 +289,7 @@ async function fill() {
             await addRestaurantPromotion(promo);
         }
     }
-    for (const addr of Addresses) {
-        await addAddress(addr);
-    }
+
     for (const rec of Frequents) {
         await addFrequents(rec);
     }
