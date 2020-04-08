@@ -1,5 +1,5 @@
 const { addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
-    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts, addFTSchedule, addConsist, addFullTimer } = require('../db/fillTableMethods');
+    addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents, addCollates, addOrders, deleteTables, addShifts, addFTSchedule, addConsist, addFullTimer, addPartTimer } = require('../db/fillTableMethods');
 const db = require('./index');
 
 //(uid, name, username, salt, passwordHash)
@@ -24,6 +24,12 @@ const FullTimers = [
     [6],
 ]
 
+//(uid)
+const PartTimers = [
+    [7],
+    [8],
+]
+
 //(uid, name, username, salt, passwordHash)
 const Managers = [
     [9, 'M', 'Martin', 'ihaveadream', 'hehehuhu', 'huhuhehe'],
@@ -36,16 +42,16 @@ const Staffs = [
     [12, 'S', 'Pom', 'iamvegan', 'password22', 'iambatman', 2],
 ];
 
-// (rid, minSpending (in cents), rname)
+// (minSpending (in cents), rname)
 const Restaurants = [
     // rid 1 
-    [500, 'Fukuroku'],
+    [500, 'Fukuroku', 6],
     // rid 2
-    [1000, 'MaMas Specials'],
+    [1000, 'MaMas Specials', 7],
     // rid 3
-    [1100, 'WacDonalds'],
+    [1100, 'WacDonalds', 8],
     // rid 4
-    [1500, 'KFC']
+    [1500, 'KFC', 5]
 ];
 
 `
@@ -239,6 +245,10 @@ function Comparator(a, b) {
 async function fill() {
     await deleteTables().then(() => console.log('Tables cleared'));
 
+    for (const addr of Addresses) {
+        await addAddress(addr);
+    }
+
     for (const restaurant of Restaurants) {
         await addRestaurant(restaurant);
     }
@@ -265,6 +275,10 @@ async function fill() {
         await addFullTimer(fullTimer);
     }
 
+    for (const partTimer of PartTimers) {
+        await addPartTimer(partTimer);
+    }
+
     let promos = [...GlobalPromotions, ...RestaurantPromotions];
     promos = promos.sort(Comparator);
     for (const promo of promos) {
@@ -275,9 +289,7 @@ async function fill() {
             await addRestaurantPromotion(promo);
         }
     }
-    for (const addr of Addresses) {
-        await addAddress(addr);
-    }
+
     for (const rec of Frequents) {
         await addFrequents(rec);
     }

@@ -3,6 +3,7 @@ const router = express.Router()
 const { getMenu, getRestaurants } = require('../controllers/restaurant')
 const { getFrequents, getAccountInfo, addCreditCard,
     removeCreditCard, getEligiblePromos } = require('../controllers/customer')
+const {addOrder} = require('../controllers/orders')
 const { getAddresses } = require('../controllers/addressLookUp')
 const { check } = require('express-validator');
 const { validate } = require('../validate')
@@ -85,10 +86,7 @@ router.post("/removeCreditCard", async (req, res, next) => {
 })
 
 // Get eligible promos
-router.get("/promos/:rid", [
-    check('rid').isInt()
-],
-    validate,
+router.get("/promos/:rid", [check('rid').isInt()], validate,
     async (req, res, next) => {
         let promos = []
         try {
@@ -97,5 +95,14 @@ router.get("/promos/:rid", [
             return next(error);
         }
         return res.json(promos);
-    })
+    });
+
+router.post("/checkout", async (req, res, next) => {
+    try {
+        addOrder(req.user.uid, req.body);
+    } catch (error) {
+        return next(error)
+    }
+    return res.status(200).send('Order Submitted');
+})
 module.exports = router;

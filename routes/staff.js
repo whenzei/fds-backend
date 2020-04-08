@@ -5,7 +5,7 @@ const { getMinSpending, getCuisines, getMenu, insertFoodItem, updateFoodItem, de
 const { check } = require('express-validator');
 const { validate } = require('../validate');
 
-router.get("/", (req, res) => { console.log(req.user); res.send(`Hi I'm ${req.user.name}. I'm a ${req.user.role}.`) });
+router.get("/", (req, res) => { res.send(`Hi I'm ${req.user.name}. I'm a ${req.user.role}.`) });
 
 router.get("/get-rid", async (req, res, next) => {
     let rid;

@@ -399,7 +399,7 @@ SQL_STATEMENTS = {
             addrId          SERIAL primary key,
             unit            VARCHAR(10) not NULL,
             streetName        VARCHAR(100) not NULL,
-            postalCode         INTEGER check (postalCode > 99999 and postalCode < 10000000) not NULL,
+            postalCode         INTEGER check (postalCode > 9999 and postalCode < 10000000) not NULL,
             unique(unit, streetName, postalCode)
         );
         `,
@@ -416,6 +416,7 @@ SQL_STATEMENTS = {
             rid             SERIAL primary key,
             minSpending        INTEGER not NULL check (minSpending >= 0),
             rname            VARCHAR(100) not NULL unique
+            addrId       Integer references Address on delete cascade
         );
         `,
     Promotions:
