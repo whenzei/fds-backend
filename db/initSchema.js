@@ -415,7 +415,7 @@ SQL_STATEMENTS = {
         `CREATE TABLE Restaurants (
             rid             SERIAL primary key,
             minSpending        INTEGER not NULL check (minSpending >= 0),
-            rname            VARCHAR(100) not NULL unique
+            rname            VARCHAR(100) not NULL unique,
             addrId       Integer references Address on delete cascade
         );
         `,
