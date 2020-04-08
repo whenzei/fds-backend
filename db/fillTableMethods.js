@@ -90,8 +90,8 @@ async function addStaff(arr) {
 async function addRestaurant(arr) {
     try {
         await db.none(
-            `Insert into Restaurants (minSpending, rname) Values
-            ('${arr[0]}', '${arr[1]}')`
+            `Insert into Restaurants (minSpending, rname, addrId) Values
+            ('${arr[0]}', '${arr[1]}', ${arr[2]})`
         );
     } catch (error) {
         console.log(error, 'Failed to add restaurant');

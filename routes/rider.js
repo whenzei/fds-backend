@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getRiderType, getFullTimeSchedule, getPartTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule } = require('../controllers/rider')
+const { orderStatuses, updateOrderStatus, selectOrder, getCurrentOrder, getAvailableOrders, getFullTimeSchedule, getPartTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule } = require('../controllers/rider')
 const { check } = require('express-validator');
 const { validate } = require('../validate')
 const { RiderTypes } = require('../controllers/rider')
@@ -9,6 +9,65 @@ const moment = require('moment')
 router.get("/rider-type", (req, res, next) => {
     return res.send(req.user.riderType);
 })
+
+router.get("/current-order/:lng/:lat", [
+    check('lng').isFloat(),
+    check('lat').isFloat()
+],
+    validate,
+    async (req, res, next) => {
+        try {
+            return res.send(await getCurrentOrder(req.user.uid, req.params.lng, req.params.lat))
+        } catch (e) {
+            return next(e)
+        }
+    }
+)
+
+router.post("/update-order-status", [
+    check('oid').isInt(),
+    check('currStatus').isIn(Object.values(orderStatuses))
+],
+    validate,
+    async (req, res, next) => {
+        try {
+            await updateOrderStatus(req.user.uid, req.body.oid, req.body.currStatus)
+            return res.status(200).send()
+        } catch (e) {
+            return next(e)
+        }
+    }
+)
+
+router.post("/select-order/", [
+    check('oid').isInt(),
+],
+    validate,
+    async (req, res, next) => {
+        try {
+            (await selectOrder(req.user.uid, req.body.oid))
+        } catch (e) {
+            return next(e)
+        }
+        return res.status(200).send()
+    }
+)
+
+router.get("/available-orders/:lng/:lat",
+    [
+        check('lng').isFloat(),
+        check('lat').isFloat()
+    ],
+    validate,
+    async (req, res, next) => {
+        try {
+            const availableOrders = await getAvailableOrders(req.params.lng, req.params.lat)
+            return res.send(availableOrders)
+        } catch (e) {
+            return next(e)
+        }
+    }
+)
 
 router.get("/schedule/:year/:month",
     [

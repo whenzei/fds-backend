@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const { getRestaurantId, getTotalOrdersAndCost, getMinMaxDate, getFoodCount, getPromoStats, getAllOrders, getRestaurantPromos, insertRestaurantPromos, updateRestaurantPromos, deleteRestaurantPromos } = require('../controllers/staff');
+const { getMinSpending, getCuisines, getMenu, insertFoodItem, updateFoodItem, deleteFoodItem, updateMinSpending } = require('../controllers/restaurant')
 const { check } = require('express-validator');
 const { validate } = require('../validate');
 
@@ -106,23 +107,23 @@ router.get("/promos/:rid",
     });
 
 router.post("/add-promos/", async (req, res, next) => {
-        let pid;
-        try {
-            pid = await insertRestaurantPromos(req.user.uid, req.body.item);
-        } catch (err) {
-            return next(err)
-        }
-        return res.status(200).send(pid.toString());
-    });
+    let pid;
+    try {
+        pid = await insertRestaurantPromos(req.user.uid, req.body.item);
+    } catch (err) {
+        return next(err)
+    }
+    return res.status(200).send(pid.toString());
+});
 
-    router.post("/edit-promos/", async (req, res, next) => {
-        try {
-            await updateRestaurantPromos(req.body.item);
-        } catch (err) {
-            return next(err)
-        }
-        return res.status(200).send("Updated promotion");
-    });
+router.post("/edit-promos/", async (req, res, next) => {
+    try {
+        await updateRestaurantPromos(req.body.item);
+    } catch (err) {
+        return next(err)
+    }
+    return res.status(200).send("Updated promotion");
+});
 
 router.delete("/delete-promos/",
     [
@@ -137,5 +138,81 @@ router.delete("/delete-promos/",
         }
         return res.status(200).send('Promotion removed');
     });
+
+router.get("/food/:rid",
+    [
+        check('rid').isInt()
+    ],
+    validate
+    , async (req, res, next) => {
+        let foodList = [];
+        try {
+            foodList = await getMenu(req.params.rid);
+        } catch (err) {
+            return next(err)
+        }
+        return res.send(foodList);
+    });
+
+router.get("/cuisine/", async (req, res, next) => {
+    let cuisines = [];
+    try {
+        cuisines = await getCuisines();
+    } catch (err) {
+        return next(err)
+    }
+    return res.send(cuisines);
+});
+
+router.get("/min-spending/:rid",
+    [
+        check('rid').isInt()
+    ],
+    validate
+    , async (req, res, next) => {
+        let minSpending;
+        try {
+            minSpending = await getMinSpending(req.params.rid);
+        } catch (err) {
+            return next(err)
+        }
+        return res.send(minSpending);
+    });
+
+router.post("/add-food-item/", async (req, res, next) => {
+    try {
+        await insertFoodItem(req.user.uid, req.body.item);
+    } catch (err) {
+        return next(err)
+    }
+    return res.status(200).send('Added food item to menu');
+});
+
+router.post("/edit-food-item/", async (req, res, next) => {
+    try {
+        await updateFoodItem(req.user.uid, req.body.fname, req.body.item);
+    } catch (err) {
+        return next(err)
+    }
+    return res.status(200).send("Updated food item");
+});
+
+router.delete("/delete-food-item/", async (req, res, next) => {
+    try {
+        await deleteFoodItem(req.user.uid, req.body.fname);
+    } catch (err) {
+        return next(err)
+    }
+    return res.status(200).send('Removed food item');
+});
+
+router.post("/update-minspending/", async (req, res, next) => {
+    try {
+        await updateMinSpending(req.user.uid, req.body.minspending);
+    } catch (err) {
+        return next(err)
+    }
+    return res.status(200).send("Updated minimum spending");
+});
 
 module.exports = router;
