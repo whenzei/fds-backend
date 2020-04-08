@@ -6,6 +6,11 @@ const RiderTypes = {
     fullTime: "Full Timer",
     partTime: "Part Timer"
 }
+const orderStatuses = {
+    toRest: "Moving to restaurant",
+    waiting: "Waiting for order",
+    toCust: "Moving to customer"
+}
 const axios = require('axios')
 
 const psGetRiderType = new PS({
@@ -38,7 +43,14 @@ const psGetAvailableOrders = new PS({
 const psGetCurrentOrder = new PS({
     name: 'get-current-order', text: `
     Select distinct O.oid, R.rname, A1.streetname as rstreetname, A1.postalcode as rpostalcode,
-        A2.streetname as cstreetname, A2.postalcode as cpostalcode, O.finalprice + O.deliveryfee as totalprice
+        A2.streetname as cstreetname, A2.postalcode as cpostalcode, O.finalprice + O.deliveryfee as totalprice, (
+            case
+                WHEN O.arriveatr IS NULL THEN '${orderStatuses.toRest}'
+                WHEN O.departfromr IS NULL THEN '${orderStatuses.waiting}'
+                ELSE '${orderStatuses.toCust}'
+            END
+        )
+        as status
     from Orders O natural join Collates C join Restaurants R on C.rid = R.rid join Address A1 on R.addrid = A1.addrid join Address A2 on O.addrid = A2.addrid
     where deliveredtime IS NULL
     `
@@ -250,6 +262,7 @@ async function getCurrentOrder(uid, lng, lat) {
         "Total Price": order.totalprice,
         "Payment Method": "Credit Card",
         food,
+        status: order.status
     }
 }
 
