@@ -10,7 +10,7 @@ const psCheckFrequents = new PS({ name: 'check-freq', text: `SELECT true as foun
 const psGetPromo = new PS({ name: 'get-promo', text: `SELECT percentOff, points FROM Promotions WHERE pid = $1` })
 const psGetOrders = new PS({
     name: 'get-orders',
-    text: ` SELECT oid, to_char(orderTime, 'DD-Mon-YYYY HH24:MI') as orderTime, to_char(deliveredTime, 'DD-Mon-YYYY HH24:MI') as deliverTime,
+    text: ` SELECT oid, to_char(orderTime, 'YYYY-MM-DD HH24:MI') as orderTime, to_char(deliveredTime, 'YYYY-MM-DD HH24:MI') as deliverTime,
             streetName, unit, postalCode,
             case 
                 when (isDeliveryFeeWaived = true) then (finalPrice)

@@ -95,7 +95,6 @@ router.get("/restaurant-rating/:rid", [check('rid').isInt()], validate
     , async (req, res, next) => {
         let rating = {};
         try {
-            console.log(req.params.rid)
             rating = await getRestaurantRating(req.params.rid)
         } catch (error) {
             return next(error);
@@ -107,7 +106,6 @@ router.get("/restaurant-reviews/:rid", [check('rid').isInt()], validate
     , async (req, res, next) => {
         let reviews = [];
         try {
-            console.log(req.params.rid)
             reviews = await getRestaurantReviews(req.params.rid)
         } catch (error) {
             return next(error);
