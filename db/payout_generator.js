@@ -6,12 +6,12 @@ function generate_payouts_receives_rates(FullTimers, PartTimers, startYear, star
 
     //Rates
     let time = [startYear, startMonth]
-    for (let i = 0; i < durationInMonths; i++) {
-        time[1] += 1
+    for (let i = 0; i <= durationInMonths; i++) {
         if (time[1] > 12) {
             time = [time[0] + 1, 1]
         }
         Rates.push([time[1], time[0], weekendhourlyPay, weekdayhourlyPay])
+        time[1] += 1
     }
     // FT Payout and Receives
     let payId = 1
@@ -53,7 +53,7 @@ function generate_payouts_receives_rates(FullTimers, PartTimers, startYear, star
         while (curr.isBefore(end)) {
             const hoursClocked = Math.floor(Math.random() * 39) + 10
             const baseSalary = Math.floor(hoursClocked * (5 / 7 * weekdayhourlyPay + 2 / 7 * weekendhourlyPay))
-            Receives.push([payId, time[1], time[0], rider[0]])
+            Receives.push([payId, curr.month() + 1, curr.year(), rider[0]])
             Payouts.push([payId++, curr.format("YYYY-MM-DD"), curr.clone().add(6, 'day').format("YYYY-MM-DD"), curr.add(1, 'week').format("YYYY-MM-DD"), baseSalary, commission, hoursClocked])
         }
     }
