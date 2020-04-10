@@ -20,7 +20,8 @@ const psGetOrders = new PS({
             coalesce(P.points, 0) points, coalesce(P.percentOff, 0) discount, P.pid, O.isDeliveryFeeWaived as waived,
             (SELECT distinct rname FROM Collates JOIN Restaurants using (rid) WHERE oid = O.oid) rname,
             coalesce((SELECT TRUE FROM Reviews WHERE oid = O.oid), FALSE) reviewed,
-            coalesce((Select TRUE FROM Ratings WHERE oid = O.oid), FALSE) rated
+            coalesce((Select TRUE FROM Ratings WHERE oid = O.oid), FALSE) rated,
+            O.isCod
             FROM Orders O JOIN Address using (addrId)
             LEFT JOIN Promotions P on P.pid = O.pid
             WHERE customerId = $1`
@@ -37,8 +38,8 @@ const psAddAddress = new PS({
             RETURNING addrId`})
 const psAddOrder = new PS({
     name: 'add-order',
-    text: `Insert INTO Orders(customerId, orderTime, deliveryFee, isDeliveryFeeWaived, finalPrice, addrId, pid) VALUES
-            ($1, CURRENT_TIMESTAMP, $2, $3, $4, $5, $6) RETURNING oid` })
+    text: `Insert INTO Orders(customerId, orderTime, deliveryFee, isDeliveryFeeWaived, finalPrice, addrId, pid, isCod) VALUES
+            ($1, CURRENT_TIMESTAMP, $2, $3, $4, $5, $6, $7) RETURNING oid` })
 const psAddPoints = new PS({
     name: 'add-points',
     text: `UPDATE Customers set points = (points + $2) WHERE uid = $1`
@@ -58,6 +59,8 @@ const psUpdateFoodCount = new PS({
     name: 'update-food-count',
     text: `UPDATE Food set numOrders = (numOrders + $3) WHERE fname = $1 and rid = $2`
 })
+
+const DELIVERY_FEE = 300;
 
 const addOrder = async function (user, order) {
     let total = await totalPrice(order.rid, order.items);
@@ -94,7 +97,7 @@ async function processOrder(uid, order, addrId, total, awardedPoints) {
                 queries.push(t.none(psAddFrequents, [uid, addrId]));
             }
             //Add order
-            const qAddOrder = await t.one(psAddOrder, [uid, 3, order.waiveFee, total, addrId, order.pid])
+            const qAddOrder = await t.one(psAddOrder, [uid, DELIVERY_FEE, order.waiveFee, total, addrId, order.pid, order.isCod])
             let oid = qAddOrder.oid;
 
             // Add Collates and update Food count

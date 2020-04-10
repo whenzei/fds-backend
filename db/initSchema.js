@@ -459,7 +459,8 @@ SQL_STATEMENTS = {
             finalPrice        INTEGER not NULL,
             addrId          INTEGER not null,
             pid            INTEGER references Promotions,
-            foreign key (addrId) references Address
+            foreign key (addrId) references Address,
+            isCod           BOOLEAN not NULL DEFAULT TRUE
         );
         `,
     Reviews:
