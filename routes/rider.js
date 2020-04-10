@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getFTGetSalaryInfo, orderStatuses, updateOrderStatus, selectOrder, getCurrentOrder, getAvailableOrders, getFullTimeSchedule, getPartTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule } = require('../controllers/rider')
+const { getGetFTSalaryInfo, getPTSalaryInfo, orderStatuses, updateOrderStatus, selectOrder, getCurrentOrder, getAvailableOrders, getFullTimeSchedule, getPartTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule } = require('../controllers/rider')
 const { check } = require('express-validator');
 const { validate } = require('../validate')
 const { RiderTypes } = require('../controllers/rider')
@@ -16,7 +16,13 @@ router.get("/salary/:year", [
     validate,
     async (req, res, next) => {
         try {
-            return res.send(await getFTGetSalaryInfo(req.user.uid, req.params.year))
+            if (req.user.riderType == RiderTypes.fullTime) {
+                return res.send(await getGetFTSalaryInfo(req.user.uid, req.params.year))
+            } else if (req.user.riderType == RiderTypes.partTime) {
+                return res.send(await getPTSalaryInfo(req.user.uid, req.params.year))
+            } else {
+                throw "Rider has to be either full-timer or part timer"
+            }
         } catch (e) {
             return next(e)
         }
