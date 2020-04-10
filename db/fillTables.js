@@ -1,7 +1,8 @@
-const { addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
+const { addRate, addPayout, addReceive, addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
     addGlobalPromotion, addRestaurantPromotion, addAddress,
     addFrequents, addCollates, addOrders, deleteTables, addShifts,
     addFTSchedule, addConsist, addFullTimer, addReview, addRating, addPartTimer } = require('../db/fillTableMethods');
+const { generate_payouts_receives_rates } = require('./payout_generator')
 const db = require('./index');
 
 //(uid, name, username, salt, passwordHash)
@@ -39,6 +40,8 @@ const PartTimers = [
     [7],
     [8],
 ]
+
+const [Rates, Payouts, Receives] = generate_payouts_receives_rates(FullTimers, PartTimers, 2019, 1, 16, 12, 10)
 
 //(uid, name, username, salt, passwordHash)
 const Managers = [
@@ -447,32 +450,6 @@ const Ratings = [
     [6, 4, '2019-10-20 16:24:22'],
 ]
 
-// month, year, weekendhourlyPay, weekdayhourlyPay
-const Rates = [
-    [1, 2019, 1200, 1000],
-    [2, 2019, 1200, 1000],
-    [3, 2019, 1200, 1000],
-    [4, 2019, 1200, 1000],
-    [5, 2019, 1200, 1000],
-    [6, 2019, 1200, 1000],
-    [7, 2019, 1200, 1000],
-    [8, 2019, 1200, 1000],
-    [9, 2019, 1200, 1000],
-    [10, 2019, 1200, 1000],
-    [11, 2019, 1200, 1000],
-    [12, 2019, 1200, 1000],
-    [1, 2020, 1200, 1000],
-    [2, 2020, 1200, 1000],
-    [3, 2020, 1300, 1100],
-    [4, 2020, 1300, 1100],
-    [5, 2020, 1300, 1100],
-]
-
-// payId, startDate, endDate, payoutDate, baseSalary, commission, hoursClocked     
-const Payouts = [
-    [1, "", "", "", ,,,160],
-]
-
 function Comparator(a, b) {
     if (a[0] < b[0]) return -1;
     if (a[0] > b[0]) return 1;
@@ -514,6 +491,18 @@ async function fill() {
 
     for (const partTimer of PartTimers) {
         await addPartTimer(partTimer);
+    }
+
+    for (const rate of Rates) {
+        await addRate(rate)
+    }
+
+    for (const payout of Payouts) {
+        await addPayout(payout)
+    }
+
+    for (const receive of Receives) {
+        await addReceive(receive)
     }
 
     let promos = [...GlobalPromotions, ...RestaurantPromotions];
