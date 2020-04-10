@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { orderStatuses, updateOrderStatus, selectOrder, getCurrentOrder, getAvailableOrders, getFullTimeSchedule, getPartTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule } = require('../controllers/rider')
+const { getFTGetSalaryInfo, orderStatuses, updateOrderStatus, selectOrder, getCurrentOrder, getAvailableOrders, getFullTimeSchedule, getPartTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule } = require('../controllers/rider')
 const { check } = require('express-validator');
 const { validate } = require('../validate')
 const { RiderTypes } = require('../controllers/rider')
@@ -9,6 +9,19 @@ const moment = require('moment')
 router.get("/rider-type", (req, res, next) => {
     return res.send(req.user.riderType);
 })
+
+router.get("/salary/:year", [
+    check('year').isInt(),
+],
+    validate,
+    async (req, res, next) => {
+        try {
+            return res.send(await getFTGetSalaryInfo(req.user.uid, req.params.year))
+        } catch (e) {
+            return next(e)
+        }
+    }
+)
 
 router.get("/current-order/:lng/:lat", [
     check('lng').isFloat(),
