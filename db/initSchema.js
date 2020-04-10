@@ -371,8 +371,8 @@ SQL_STATEMENTS = {
         `CREATE TABLE Rates (
             month            SMALLINT not NULL check (month > 0 and month < 13),
             year            INTEGER check (year >= 0),
-            weekendhourlyPay        INTEGER check (hourlyPay >= 0),
-            weekdayhourlyPay        INTEGER check (hourlyPay >= 0),
+            weekendhourlyPay        INTEGER check (weekendhourlyPay >= 0),
+            weekdayhourlyPay        INTEGER check (weekdayhourlyPay >= 0),
             primary key (month, year)
         );
         `,
