@@ -200,7 +200,7 @@ const psGetPTSalaryInfo = new PS({
     select
         json_agg(
             json_build_object(
-                'weekNumber', R.month,
+                'weekNumber', EXTRACT(WEEK FROM P.startdate),
                 'baseSalary', P.basesalary,
                 'commission', P.commission,
                 'totalSalary', P.basesalary + P.commission,
