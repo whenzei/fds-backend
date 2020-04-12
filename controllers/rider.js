@@ -392,11 +392,11 @@ async function updateOrderStatus(uid, oid, currStatus) {
 }
 
 async function getGetFTSalaryInfo(uid, year) {
-    return await db.oneOrNone(psGetFTSalaryInfo, [uid, year])
+    return await db.oneOrNone(psGetFTSalaryInfo, [uid, year]) || { months: [] }
 }
 
 async function getPTSalaryInfo(uid, year) {
-    return await db.oneOrNone(psGetPTSalaryInfo, [uid, year])
+    return await db.oneOrNone(psGetPTSalaryInfo, [uid, year]) || { weeks: [] }
 }
 
 module.exports = {
