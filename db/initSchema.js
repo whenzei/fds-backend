@@ -359,18 +359,20 @@ SQL_STATEMENTS = {
     Payout:
         `CREATE TABLE Payout (
             payId            SERIAL primary key,
-            date            DATE,
-            baseSalary        INTEGER check (baseSalary >= 0),
-            commission        INTEGER check (commission >= 0),
-            hoursClocked        INTEGER check (hoursClocked >= 0)
+            startDate        DATE,
+            endDate          DATE,
+            payoutDate       DATE,
+            baseSalary       INTEGER check (baseSalary >= 0),
+            commission       INTEGER check (commission >= 0),
+            hoursClocked     INTEGER check (hoursClocked >= 0)
         );
         `,
     Rates:
         `CREATE TABLE Rates (
             month            SMALLINT not NULL check (month > 0 and month < 13),
             year            INTEGER check (year >= 0),
-            isWeekend        BOOLEAN not NULL,
-            hourlyPay        INTEGER check (hourlyPay >= 0),
+            weekendhourlyPay        INTEGER check (weekendhourlyPay >= 0),
+            weekdayhourlyPay        INTEGER check (weekdayhourlyPay >= 0),
             primary key (month, year)
         );
         `,

@@ -31,6 +31,7 @@ async function addRider(arr) {
         });
     } catch (error) {
         console.log(error, 'Failed to add Rider');
+        throw error
     }
 
 }
@@ -258,9 +259,36 @@ async function deleteTables() {
     }
 }
 
+async function addRate(arr) {
+    return db.none(`
+        insert into rates values (${arr[0]}, ${arr[1]}, ${arr[2]}, ${arr[3]})
+    `).catch(e => {
+        console.log("Failed to insert into Rates")
+        throw e
+    })
+}
+
+async function addPayout(arr) {
+    return db.none(`
+        insert into Payout values (${arr[0]}, '${arr[1]}', '${arr[2]}', '${arr[3]}', ${arr[4]}, ${arr[5]}, ${arr[6]} )
+    `).catch(e => {
+        console.log("Failed to insert into Payout")
+        throw e
+    })
+}
+
+async function addReceive(arr) {
+    return db.none(`
+        insert into Receives values (${arr[0]}, ${arr[1]}, ${arr[2]}, ${arr[3]})
+    `).catch(e => {
+        console.log("Failed to insert into Receives")
+        throw e
+    })
+}
+
 module.exports = {
     addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
     addGlobalPromotion, addRestaurantPromotion, addAddress, addFrequents,
     addCollates, addOrders, deleteTables, addShifts, addFullTimer, addConsist,
-    addFTSchedule, addRating, addReview, addPartTimer
+    addFTSchedule, addRating, addReview, addPartTimer, addRate, addPayout, addReceive
 };

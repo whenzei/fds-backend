@@ -1,7 +1,8 @@
-const { addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
+const { addRate, addPayout, addReceive, addCustomer, addRider, addStaff, addManager, addRestaurant, addFood,
     addGlobalPromotion, addRestaurantPromotion, addAddress,
     addFrequents, addCollates, addOrders, deleteTables, addShifts,
     addFTSchedule, addConsist, addFullTimer, addReview, addRating, addPartTimer } = require('../db/fillTableMethods');
+const { generate_payouts_receives_rates } = require('./payout_generator')
 const db = require('./index');
 
 //(uid, name, username, salt, passwordHash)
@@ -39,6 +40,8 @@ const PartTimers = [
     [7],
     [8],
 ]
+
+const [Rates, Payouts, Receives] = generate_payouts_receives_rates(FullTimers, PartTimers, 2019, 1, 16, 12, 10)
 
 //(uid, name, username, salt, passwordHash)
 const Managers = [
@@ -488,6 +491,18 @@ async function fill() {
 
     for (const partTimer of PartTimers) {
         await addPartTimer(partTimer);
+    }
+
+    for (const rate of Rates) {
+        await addRate(rate)
+    }
+
+    for (const payout of Payouts) {
+        await addPayout(payout)
+    }
+
+    for (const receive of Receives) {
+        await addReceive(receive)
     }
 
     let promos = [...GlobalPromotions, ...RestaurantPromotions];

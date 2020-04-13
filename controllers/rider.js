@@ -174,6 +174,47 @@ const psUpdateToDelivered = new PS({
     `
 })
 
+const psGetFTSalaryInfo = new PS({
+    name: 'get-ft-salary-info', text: `
+    select
+        json_agg(
+            json_build_object(
+                'monthNumber', R.month,
+                'month', to_char(to_timestamp (R.month::text, 'MM'), 'TMmon'),
+                'baseSalary', P.basesalary,
+                'commission', P.commission,
+                'totalSalary', P.basesalary + P.commission,
+                'startDate', P.startdate,
+                'endDate', P.enddate,
+                'payOutDate', P.payoutdate
+            )
+        ) months
+    from receives R natural join Payout P
+    where R.uid = $1 and R.year = $2
+    group by R.year
+    `
+})
+
+const psGetPTSalaryInfo = new PS({
+    name: 'get-pt-salary-info', text: `
+    select
+        json_agg(
+            json_build_object(
+                'weekNumber', EXTRACT(WEEK FROM P.startdate),
+                'baseSalary', P.basesalary,
+                'commission', P.commission,
+                'totalSalary', P.basesalary + P.commission,
+                'startDate', P.startdate,
+                'endDate', P.enddate,
+                'payOutDate', P.payoutdate
+            )
+        ) weeks
+    from receives R natural join Payout P
+    where R.uid = $1 and R.year = $2
+    group by R.year
+    `
+})
+
 async function getRiderType(uid) {
     const { ridertype } = await db.one(psGetRiderType, [uid])
     return ridertype
@@ -350,7 +391,16 @@ async function updateOrderStatus(uid, oid, currStatus) {
     return
 }
 
+async function getGetFTSalaryInfo(uid, year) {
+    return await db.oneOrNone(psGetFTSalaryInfo, [uid, year]) || { months: [] }
+}
+
+async function getPTSalaryInfo(uid, year) {
+    return await db.oneOrNone(psGetPTSalaryInfo, [uid, year]) || { weeks: [] }
+}
+
 module.exports = {
     getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule,
-    RiderTypes, getPartTimeSchedule, getAvailableOrders, getCurrentOrder, selectOrder, updateOrderStatus, orderStatuses
+    RiderTypes, getPartTimeSchedule, getAvailableOrders, getCurrentOrder, selectOrder, updateOrderStatus, orderStatuses,
+    getGetFTSalaryInfo, getPTSalaryInfo
 }
