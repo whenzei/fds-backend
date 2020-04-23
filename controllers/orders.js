@@ -239,7 +239,7 @@ const getSalesSummary = async (queryParams) => {
 const getCustomerOrderSummary = async (queryParams) => {
     month = queryParams.month;
     year = queryParams.year;
-    if(month == 'true' || (month == 'true' && year == 'true') ||
+    if(month == 'true' ||
         (month == null && year == null))
         return await db.any(psGetMonthlyCustomerOrderSummary);
     else if (year == 'true')
