@@ -61,39 +61,39 @@ const psUpdateFoodCount = new PS({
 });
 
 const psGetMonthlyOrderSummary = new PS({ name: 'monthly-order-summary',
-    text: 'SELECT date_part(\'month\', ordertime) as month, date_part(\'year\', ordertime) as year, count(*) as order_count' +
-    ' FROM orders ' +
-    'GROUP BY month, year ' +
-    'ORDER BY year, month;'});
+    text: "SELECT date_part('month', ordertime) as month, date_part('year', ordertime) as year, count(*) as order_count" +
+    " FROM orders " +
+    "GROUP BY month, year " +
+    "ORDER BY year, month;"});
 
 const psGetYearlyOrderSummary = new PS({ name: 'yearly-order-summary',
-    text: 'SELECT date_part(\'year\', ordertime) as year, count(*) as order_count' +
-    ' FROM orders ' +
-    'GROUP BY year ' +
-    'ORDER BY year;'});
+    text: "SELECT date_part('year', ordertime) as year, count(*) as order_count" +
+    " FROM orders " +
+    "GROUP BY year " +
+    "ORDER BY year;"});
 
 const psGetYearlySalesSummary = new PS({ name: 'yearly-sales-summary',
-    text: 'SELECT date_part(\'year\', ordertime) as year, sum(finalprice) as yearly_sales' +
-    ' FROM orders ' +
-    'GROUP BY year ' +
-    'ORDER BY year;'});
+    text: "SELECT date_part('year', ordertime) as year, sum(finalprice) as yearly_sales" +
+    " FROM orders " +
+    "GROUP BY year " +
+    "ORDER BY year;"});
 
 const psGetMonthlySalesSummary = new PS({ name: 'monthly-sales-summary',
-    text: 'SELECT date_part(\'month\', ordertime) as month, date_part(\'year\', ordertime) as year, sum(finalprice) as monthly_sales' +
-    ' FROM orders ' +
-    'GROUP BY month, year ' +
-    'ORDER BY year, month;'});
+    text: "SELECT date_part('month', ordertime) as month, date_part('year', ordertime) as year, sum(finalprice) as monthly_sales" +
+    " FROM orders " +
+    "GROUP BY month, year " +
+    "ORDER BY year, month;"});
 
-const psGetMonthlyCustomerOrderSummary = new PS({name: 'customer-monthly-order-summary', text: 'SELECT customerid, date_part(\'month\', ordertime) as month, date_part(\'year\', ordertime) as year, \n' +
-    'count(*) as order_count, sum(finalprice) as totalPrice\n' +
-    'FROM ORDERS \n' +
-    'GROUP BY month, year, customerid\n' +
-    'ORDER BY year, month;'});
+const psGetMonthlyCustomerOrderSummary = new PS({name: 'customer-monthly-order-summary', text: "SELECT customerid, date_part('month', ordertime) as month, date_part('year', ordertime) as year, \n" +
+    "count(*) as order_count, sum(finalprice) as totalPrice\n" +
+    "FROM ORDERS \n" +
+    "GROUP BY month, year, customerid\n" +
+    "ORDER BY year, month;"});
 
-const psGetYearlyCustomerOrderSummary = new PS({name: 'customer-yearly-order-summary', text: 'SELECT customerid, date_part(\'year\', ordertime) as year,count(*) as order_count, sum(finalprice) as totalPrice \n' +
-    'FROM ORDERS \n' +
-    'GROUP BY year, customerid \n' +
-    'ORDER BY year;'});
+const psGetYearlyCustomerOrderSummary = new PS({name: 'customer-yearly-order-summary', text: "SELECT customerid, date_part('year', ordertime) as year,count(*) as order_count, sum(finalprice) as totalPrice \n" +
+    "FROM ORDERS \n" +
+    "GROUP BY year, customerid \n" +
+    "ORDER BY year;"});
 
 
 const DELIVERY_FEE = 300;

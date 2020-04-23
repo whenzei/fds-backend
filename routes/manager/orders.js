@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const {getOrderSummary, getSalesSummary, getCustomerOrderSummary} = require('../controllers/orders');
+const {getOrderSummary, getSalesSummary, getCustomerOrderSummary} = require('../../controllers/orders');
 
 router.get('/orders-summary', async (req, res, next) => {
     let result;
