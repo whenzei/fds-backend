@@ -11,7 +11,7 @@ const addUser = async (user) => {
         uid = await getNextUid();
         
         if (user.role == Roles.staff) {
-            riderData = [null, 'S', user.name, user.username, 'salt', user.password, user.rid];
+            staffData = [null, 'S', user.name, user.username, 'salt', user.password, user.rid];
             await addStaff(riderData);
         } else if (user.role == Roles.rider){
             riderData = [null, 'R', user.name, user.username, 'salt', user.password];
