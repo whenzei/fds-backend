@@ -1,5 +1,6 @@
 const LocalStrategy = require('passport-local');
 const { getUserByUid, getUserByUsername } = require('../controllers/user')
+const {getRiderType} = require('../controllers/rider')
 const _ = require('lodash')
 const passportJWT = require("passport-jwt");
 const { ExtractJwt } = passportJWT;
@@ -40,6 +41,7 @@ const jwtStrategyRider = new passportJWT.Strategy({
         if (!user || user.role != Roles.rider) {
             return done(null, false)
         } else {
+            user.riderType = await getRiderType(user.uid);
             return done(null, user);
         }
     }
@@ -56,7 +58,6 @@ const jwtStrategyCustomer = new passportJWT.Strategy({
         } catch (err) {
             return done(null, false)
         }
-        console.log(user)
         if (!user || user.role != Roles.customer) {
             return done(null, false)
         } else {

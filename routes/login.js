@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken');
 const { JWT_SECRET_KEY } = require("../auth/strategies")
 const { check } = require('express-validator')
 const { validate } = require('../validate')
+const {Roles} = require('../auth')
+const {getRiderType} = require("../controllers/rider")
 
 router.post('/',
     [

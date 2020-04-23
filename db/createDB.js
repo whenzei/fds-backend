@@ -1,19 +1,14 @@
-const initOptions = {}
-const pgp = require('pg-promise')(initOptions);
+const postgresDB = require('./posgresDB')
 
-const cn = {
-    host: 'localhost',
-    port: 5432,
-    database: 'postgres',
-    user: 'postgres',
-    password: 'postgres'
-};
-const db = pgp(cn);
-const dbName = 'fds';
-db.none("CREATE DATABASE " + dbName)
-    .then(data => {
-        console.log("CREATE DB " + dbName);
-    })
-    .catch(error => {
-        console.log(error);
-    });
+async function createDB(dbName) {
+    await postgresDB.none("CREATE DATABASE " + dbName)
+    console.log(dbName + " created")
+}
+
+if (require.main === module) {
+    createDB('fds')
+}
+
+module.exports = {
+    createDB
+}

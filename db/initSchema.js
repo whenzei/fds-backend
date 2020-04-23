@@ -8,8 +8,8 @@ DROP_TABLES = `
         DROP TABLE IF EXISTS Customers CASCADE;
         DROP TABLE IF EXISTS PartTimers CASCADE;
         DROP TABLE IF EXISTS FullTimers CASCADE;
-        DROP TABLE IF EXISTS PTSchedule CASCADE;
-        DROP TABLE IF EXISTS FTSchedule CASCADE;
+        DROP TABLE IF EXISTS PTSchedules CASCADE;
+        DROP TABLE IF EXISTS FTSchedules CASCADE;
         DROP TABLE IF EXISTS Shifts CASCADE;
         DROP TABLE IF EXISTS Consists CASCADE;
         DROP TABLE IF EXISTS Payout CASCADE;
@@ -27,12 +27,11 @@ DROP_TABLES = `
         DROP TABLE IF EXISTS Staff CASCADE;
         DROP TABLE IF EXISTS Food CASCADE;
         DROP TABLE IF EXISTS Collates CASCADE;
-        DROP TYPE IF EXISTS MONTH_ENUM CASCADE;
         DROP TYPE IF EXISTS CUISINE_ENUM CASCADE;
     `;
 
 TRIGGERS = {
-        user_subclass_overlap_check: 
+    user_subclass_overlap_check:
         `CREATE OR REPLACE FUNCTION check_subuser_constraint() RETURNS TRIGGER AS $$
         DECLARE 
         user 		INTEGER;
@@ -58,7 +57,7 @@ TRIGGERS = {
         
         DROP TRIGGER IF EXISTS customer_trigger ON Customers CASCADE;
         CREATE TRIGGER customer_trigger
-        BEFORE INSERT OR UPDATE ON Customers
+        BEFORE INSERT ON Customers
         FOR EACH ROW
         EXECUTE FUNCTION check_subuser_constraint();
 
@@ -80,7 +79,7 @@ TRIGGERS = {
         FOR EACH ROW
         EXECUTE FUNCTION check_subuser_constraint();
         `,
-    riders_subclass_overlap_check: 
+    riders_subclass_overlap_check:
         `
         CREATE OR REPLACE FUNCTION check_subrider_constraint() RETURNS TRIGGER AS $$
         DECLARE
@@ -158,7 +157,7 @@ TRIGGERS = {
         BEGIN
         WITH SortPT AS (
             SELECT P1.uid, P1.date, P2.startTime - P1.endTime as break
-            FROM PTSchedule P1, PTSchedule P2
+            FROM PTSchedules P1, PTSchedules P2
             WHERE P1.uid = P2.uid AND P1.date = P2.date AND P1.startTime < P2.startTime
         )
         /*check breaks for each day, returns 1 if any of the days have a break that is < 1 hour*/
@@ -174,10 +173,10 @@ TRIGGERS = {
         END;
         $$ LANGUAGE plpgsql;
 
-        DROP TRIGGER IF EXISTS check_pt_schedule_trigger ON PTSchedule;
+        DROP TRIGGER IF EXISTS check_pt_schedule_trigger ON PTSchedules;
         CREATE CONSTRAINT TRIGGER check_pt_schedule_trigger
         AFTER INSERT OR UPDATE
-        ON PTSchedule
+        ON PTSchedules
         DEFERRABLE INITIALLY DEFERRED
         FOR EACH ROW
         EXECUTE FUNCTION check_pt_schedule();
@@ -191,7 +190,7 @@ TRIGGERS = {
         BEGIN
         /*check if total number of hours in each WWS is at least 10 and at most 48*/
         SELECT sum(endTime - startTime) INTO totalHours
-            FROM PTSchedule
+            FROM PTSchedules
             WHERE NEW.uid = uid AND date_part('year', date::date) = date_part('year', NEW.date::date) AND date_part('week', date::date) = date_part('week', NEW.date::date);
         
             IF totalHours < 10 OR  totalHours > 48 THEN
@@ -201,10 +200,10 @@ TRIGGERS = {
         END;
         $$ LANGUAGE plpgsql;
 
-        DROP TRIGGER IF EXISTS check_pt_total_hours_trigger ON PTSchedule;
+        DROP TRIGGER IF EXISTS check_pt_total_hours_trigger ON PTSchedules;
         CREATE CONSTRAINT TRIGGER check_pt_total_hours_trigger
         AFTER INSERT OR UPDATE OR DELETE
-        ON PTSchedule
+        ON PTSchedules
         DEFERRABLE INITIALLY DEFERRED
         FOR EACH ROW
         EXECUTE FUNCTION check_pt_total_hours ();
@@ -252,13 +251,13 @@ TRIGGERS = {
 
         SELECT count(*) INTO addressCt
         FROM Frequents
-        GROUP BY NEW.uid;
+        WHERE NEW.uid = uid;
 
         IF addressCt >= 5 THEN
             DELETE FROM Frequents WHERE uid = NEW.uid AND lastUsed = (SELECT min(lastUsed) FROM Frequents WHERE NEW.uid = uid);
             RETURN NEW;
         END IF;
-        RETURN NULL;
+        RETURN NEW;
         END;
         $$ LANGUAGE plpgsql;
 
@@ -269,26 +268,12 @@ TRIGGERS = {
         FOR EACH ROW
         EXECUTE FUNCTION  is_address_count_in_limit();
         `,
-        // rider_schedule_check:
+    // rider_schedule_check:
 };
 
 SQL_STATEMENTS = {
     Enums:
-        `CREATE TYPE MONTH_ENUM AS ENUM
-    ('Jan', 
-     'Feb',
-     'Mar', 
-     'Apr',
-     'May',
-     'Jun',
-     'Jul',
-     'Aug',
-     'Sep',
-     'Oct',
-     'Nov',
-     'Dec'
-    );
-    CREATE TYPE CUISINE_ENUM AS ENUM
+        `CREATE TYPE CUISINE_ENUM AS ENUM
     ('Western', 
      'Chinese',
      'Japanese', 
@@ -332,8 +317,8 @@ SQL_STATEMENTS = {
             primary key (uid)
         );
         `,
-    PTSchedule:
-        `CREATE TABLE PTSchedule (
+    PTSchedules:
+        `CREATE TABLE PTSchedules (
             uid            INTEGER,
             date            DATE,
             startTime        INTEGER check (startTime >= 10 and endTime - startTime >= 1 and endTime - startTime <= 4),
@@ -342,13 +327,14 @@ SQL_STATEMENTS = {
             foreign key (uid) references PartTimers on delete cascade
         );
         `,
-    FTSchedule:
-        `CREATE TABLE FTSchedule (
+    FTSchedules:
+        `CREATE TABLE FTSchedules (
             scheduleId        SERIAL primary key,
             uid            INTEGER not null,
-            month            MONTH_ENUM not null,
+            month            SMALLINT not NULL check (month > 0 and month < 13),
             year            INTEGER not null,
-            startDayOfMonth    INTEGER
+            startDayOfMonth    INTEGER,
+            unique (uid, year, month),
             check (startDayOfMonth > 0 and startDayOfMonth < 7),
             foreign key (uid) references FullTimers on delete cascade
         );
@@ -364,34 +350,36 @@ SQL_STATEMENTS = {
         `,
     Consists:
         `CREATE TABLE Consists (
-            scheduleId        INTEGER references FTSchedule on delete cascade,
+            scheduleId        INTEGER references FTSchedules on delete cascade,
             relativeDay        INTEGER check (relativeDay in (0, 1, 2, 3, 4)),
             shiftId            INTEGER references Shifts on delete cascade,
-            primary key (scheduleId, shiftId)
+            primary key (scheduleId, relativeDay)
             );
             `,
     Payout:
         `CREATE TABLE Payout (
             payId            SERIAL primary key,
-            date            DATE,
-            baseSalary        INTEGER check (baseSalary >= 0),
-            commission        INTEGER check (commission >= 0),
-            hoursClocked        INTEGER check (hoursClocked >= 0)
+            startDate        DATE,
+            endDate          DATE,
+            payoutDate       DATE,
+            baseSalary       INTEGER check (baseSalary >= 0),
+            commission       INTEGER check (commission >= 0),
+            hoursClocked     INTEGER check (hoursClocked >= 0)
         );
         `,
     Rates:
         `CREATE TABLE Rates (
-            month            MONTH_ENUM not null,
+            month            SMALLINT not NULL check (month > 0 and month < 13),
             year            INTEGER check (year >= 0),
-            isWeekend        BOOLEAN not NULL,
-            hourlyPay        INTEGER check (hourlyPay >= 0),
+            weekendhourlyPay        INTEGER check (weekendhourlyPay >= 0),
+            weekdayhourlyPay        INTEGER check (weekdayhourlyPay >= 0),
             primary key (month, year)
         );
         `,
     Receives:
         `CREATE TABLE Receives (
             payId            INTEGER references Payout,
-            month            MONTH_ENUM,
+            month            SMALLINT not NULL check (month > 0 and month < 13),
             year            INTEGER,
             uid            INTEGER references Riders on delete set null,
             foreign key (month, year)
@@ -403,7 +391,7 @@ SQL_STATEMENTS = {
         `CREATE TABLE Customers (
             uid            SERIAL,
             creditCard        CHAR(16),
-            points            INTEGER,
+            points            INTEGER DEFAULT 0,
             primary key (uid),
             foreign key(uid) references Users on delete cascade
         );
@@ -411,9 +399,10 @@ SQL_STATEMENTS = {
     Address:
         `CREATE TABLE Address (
             addrId          SERIAL primary key,
-            unit            VARCHAR(10),
-            streetName        VARCHAR(100),
-            postalCode         INTEGER check (postalCode > 99999 and postalCode < 10000000)
+            unit            VARCHAR(10) not NULL,
+            streetName        VARCHAR(100) not NULL,
+            postalCode         INTEGER check (postalCode > 9999 and postalCode < 10000000) not NULL,
+            unique(unit, streetName, postalCode)
         );
         `,
     Frequents:
@@ -426,21 +415,21 @@ SQL_STATEMENTS = {
         `,
     Restaurants:
         `CREATE TABLE Restaurants (
-            rid             INTEGER primary key,
-            minSpending        INTEGER not NULL,
-            rname            VARCHAR(100) not NULL
+            rid             SERIAL primary key,
+            minSpending        INTEGER not NULL check (minSpending >= 0),
+            rname            VARCHAR(100) not NULL unique,
+            addrId       Integer references Address on delete cascade
         );
         `,
     Promotions:
         `CREATE TABLE Promotions (
-            pid                INTEGER primary key,
-            points                INTEGER,
+            pid                SERIAL primary key,
+            points                INTEGER not NULL DEFAULT 0,
             startDate            DATE not NULL,
-            endDate             DATE,
-            percentOff             INTEGER check ((percentOff > 0 and percentOff <= 100) 
-            or NULL),
-            minSpending            INTEGER,
-            monthsWithNoOrders     INTEGER
+            endDate             DATE not NULL,
+            percentOff             INTEGER check (percentOff >= 0 and percentOff <= 100) not NULL DEFAULT 0,
+            minSpending            INTEGER not NULL DEFAULT 0,
+            monthsWithNoOrders     INTEGER not NULL DEFAULT 0
             /*monthsWithNoOrders is the number of months with no order to be eligible for this promo. E.g. if monthsWithNoOrders = 3 then to be eligible for this promo, customer must not have ordered in the last 3 months*/
         );
         `,
@@ -472,7 +461,8 @@ SQL_STATEMENTS = {
             finalPrice        INTEGER not NULL,
             addrId          INTEGER not null,
             pid            INTEGER references Promotions,
-            foreign key (addrId) references Address
+            foreign key (addrId) references Address,
+            isCod           BOOLEAN not NULL DEFAULT TRUE
         );
         `,
     Reviews:
@@ -544,5 +534,13 @@ async function init() {
             break;
         }
     }
+    console.log("Schema Init Done!")
 };
-init().then(() => console.log("DONE"))
+
+if (require.main === module) {
+    init()
+}
+
+module.exports = {
+    init
+}
