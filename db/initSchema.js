@@ -293,7 +293,8 @@ SQL_STATEMENTS = {
         name            VARCHAR(100) not null,
         userName        VARCHAR(100) not null unique,
         salt            VARCHAR(100) not null,
-        passwordHash    VARCHAR(100) not null
+        passwordHash    VARCHAR(100) not null,
+        creationTime    TIMESTAMP not null DEFAULT NOW()
     );`,
     Managers:
         `CREATE TABLE Managers (
