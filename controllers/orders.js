@@ -58,7 +58,49 @@ const psMinusWaivePoints = new PS({
 const psUpdateFoodCount = new PS({
     name: 'update-food-count',
     text: `UPDATE Food set numOrders = (numOrders + $3) WHERE fname = $1 and rid = $2`
-})
+});
+
+const psGetMonthlyOrderSummary = new PS({ name: 'monthly-order-summary',
+    text: "SELECT date_part('month', deliveredtime) as month, date_part('year', deliveredtime) as year, count(*) as order_count" +
+    " FROM orders " +
+    "GROUP BY month, year " +
+    "HAVING date_part('month', deliveredtime) IS NOT NULL and date_part('year', deliveredtime) IS NOT NULL " +
+    "ORDER BY year, month;"});
+
+const psGetYearlyOrderSummary = new PS({ name: 'yearly-order-summary',
+    text: "SELECT date_part('year', deliveredtime) as year, count(*) as order_count" +
+    " FROM orders " +
+    "GROUP BY year " +
+    "HAVING date_part('year', deliveredtime) IS NOT NULL " +
+    "ORDER BY year;"});
+
+const psGetYearlySalesSummary = new PS({ name: 'yearly-sales-summary',
+    text: "SELECT date_part('year', deliveredtime) as year, sum(finalprice) as yearly_sales" +
+    " FROM orders " +
+    "GROUP BY year " +
+    "HAVING date_part('year', deliveredtime) IS NOT NULL " +
+    "ORDER BY year;"});
+
+const psGetMonthlySalesSummary = new PS({ name: 'monthly-sales-summary',
+    text: "SELECT date_part('month', deliveredtime) as month, date_part('year', deliveredtime) as year, sum(finalprice) as monthly_sales" +
+    " FROM orders " +
+    "GROUP BY month, year " +
+    "HAVING date_part('month', deliveredtime) IS NOT NULL and date_part('year', deliveredtime) IS NOT NULL " +
+    "ORDER BY year, month;"});
+
+const psGetMonthlyCustomerOrderSummary = new PS({name: 'customer-monthly-order-summary', text: "SELECT customerid, date_part('month', deliveredtime) as month, date_part('year', deliveredtime) as year, \n" +
+    "count(*) as order_count, sum(finalprice) as totalPrice\n" +
+    "FROM ORDERS \n" +
+    "GROUP BY month, year, customerid\n" +
+    "HAVING date_part('month', deliveredtime) IS NOT NULL and date_part('year', deliveredtime) IS NOT NULL " +
+    "ORDER BY year, month;"});
+
+const psGetYearlyCustomerOrderSummary = new PS({name: 'customer-yearly-order-summary', text: "SELECT customerid, date_part('year', deliveredtime) as year,count(*) as order_count, sum(finalprice) as totalPrice \n" +
+    "FROM ORDERS \n" +
+    "GROUP BY year, customerid \n" +
+    "HAVING date_part('year', deliveredtime) IS NOT NULL " +
+    "ORDER BY year;"});
+
 
 const DELIVERY_FEE = 300;
 
@@ -180,10 +222,42 @@ async function getDiscountedPriceAndPoints(price, pid) {
     };
 }
 
+const getOrderSummary = async (queryParams) => {
+    interval = queryParams.interval;
+    if(interval == 'yearly')
+        return await db.any(psGetYearlyOrderSummary);
+    else if(interval == 'monthly' || interval == null)
+        return await db.any(psGetMonthlyOrderSummary);
+    else
+        return "Interval value can only be yearly or monthly";
+}
+
+const getSalesSummary = async (queryParams) => {
+    interval = queryParams.interval;
+    if(interval == 'yearly')
+        return await db.any(psGetYearlySalesSummary);
+    else if(interval == 'monthly' || interval == null)
+        return await db.any(psGetMonthlySalesSummary);
+    else
+        return "Interval value can only be yearly or monthly";
+}
+
+const getCustomerOrderSummary = async (queryParams) => {
+    month = queryParams.month;
+    year = queryParams.year;
+    if(month == 'true' ||
+        (month == null && year == null))
+        return await db.any(psGetMonthlyCustomerOrderSummary);
+    else if (year == 'true')
+        return await db.any(psGetYearlyCustomerOrderSummary);
+    else
+        return "Please enter only true or false for month and year fields";
+}
+
 const getOrders = async function(uid) {
     return await db.any(psGetOrders, [uid])
 }
 
 module.exports = {
-    addOrder, getOrders
+    addOrder, getOrders,getOrderSummary, getSalesSummary, getCustomerOrderSummary
 }

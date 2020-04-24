@@ -11,10 +11,10 @@ const addUser = async (user) => {
         uid = await getNextUid();
         
         if (user.role == Roles.staff) {
-            riderData = [uid, user.name, user.username, 'salt', user.password, user.rid];
+            staffData = [null, 'S', user.name, user.username, 'salt', user.password, user.rid];
             await addStaff(riderData);
         } else if (user.role == Roles.rider){
-            riderData = [uid, user.name, user.username, 'salt', user.password];
+            riderData = [null, 'R', user.name, user.username, 'salt', user.password];
             await addRider(riderData);
         } else {
             throw "Not authorised to add the user";

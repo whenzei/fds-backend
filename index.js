@@ -13,7 +13,7 @@ const logoutRouter = require('./routes/logout');
 const riderRouter = require('./routes/rider');
 const staffRouter = require('./routes/staff');
 const managerRouter = require('./routes/manager');
-const signupBusinessRouter = require('./routes/signupBusiness')
+const signupBusinessRouter = require('./routes/signupBusiness');
 
 const port = process.env.PORT || "8000";
 
