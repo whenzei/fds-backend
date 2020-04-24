@@ -64,35 +64,41 @@ const psGetMonthlyOrderSummary = new PS({ name: 'monthly-order-summary',
     text: "SELECT date_part('month', deliveredtime) as month, date_part('year', deliveredtime) as year, count(*) as order_count" +
     " FROM orders " +
     "GROUP BY month, year " +
+    "HAVING date_part('month', deliveredtime) IS NOT NULL and date_part('year', deliveredtime) IS NOT NULL " +
     "ORDER BY year, month;"});
 
 const psGetYearlyOrderSummary = new PS({ name: 'yearly-order-summary',
     text: "SELECT date_part('year', deliveredtime) as year, count(*) as order_count" +
     " FROM orders " +
     "GROUP BY year " +
+    "HAVING date_part('year', deliveredtime) IS NOT NULL " +
     "ORDER BY year;"});
 
 const psGetYearlySalesSummary = new PS({ name: 'yearly-sales-summary',
     text: "SELECT date_part('year', deliveredtime) as year, sum(finalprice) as yearly_sales" +
     " FROM orders " +
     "GROUP BY year " +
+    "HAVING date_part('year', deliveredtime) IS NOT NULL " +
     "ORDER BY year;"});
 
 const psGetMonthlySalesSummary = new PS({ name: 'monthly-sales-summary',
     text: "SELECT date_part('month', deliveredtime) as month, date_part('year', deliveredtime) as year, sum(finalprice) as monthly_sales" +
     " FROM orders " +
     "GROUP BY month, year " +
+    "HAVING date_part('month', deliveredtime) IS NOT NULL and date_part('year', deliveredtime) IS NOT NULL " +
     "ORDER BY year, month;"});
 
 const psGetMonthlyCustomerOrderSummary = new PS({name: 'customer-monthly-order-summary', text: "SELECT customerid, date_part('month', deliveredtime) as month, date_part('year', deliveredtime) as year, \n" +
     "count(*) as order_count, sum(finalprice) as totalPrice\n" +
     "FROM ORDERS \n" +
     "GROUP BY month, year, customerid\n" +
+    "HAVING date_part('month', deliveredtime) IS NOT NULL and date_part('year', deliveredtime) IS NOT NULL " +
     "ORDER BY year, month;"});
 
 const psGetYearlyCustomerOrderSummary = new PS({name: 'customer-yearly-order-summary', text: "SELECT customerid, date_part('year', deliveredtime) as year,count(*) as order_count, sum(finalprice) as totalPrice \n" +
     "FROM ORDERS \n" +
     "GROUP BY year, customerid \n" +
+    "HAVING date_part('year', deliveredtime) IS NOT NULL " +
     "ORDER BY year;"});
 
 
