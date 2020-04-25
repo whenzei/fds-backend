@@ -418,7 +418,7 @@ SQL_STATEMENTS = {
             rid             SERIAL primary key,
             minSpending        INTEGER not NULL check (minSpending >= 0),
             rname            VARCHAR(100) not NULL unique,
-            addrId       Integer references Address on delete cascade
+            addrId       Integer unique not NULL references Address on delete cascade
         );
         `,
     Promotions:
