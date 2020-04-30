@@ -1,10 +1,14 @@
 const moment = require('moment')
 const _ = require('lodash')
 
-function generate_orders_collates(Customers, Restaurants, Addresses, Riders, Food, startDate, endDate, dailyOrdersPerCustomer = 2, Promotions, deliveryFee = 300, isDeliveryFeeWaived = false) {
+function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addresses, Riders, Food, startDate, endDate, dailyOrdersPerCustomer = 2, Promotions, deliveryFee = 300, isDeliveryFeeWaived = false) {
+    const ODDS_RATING = 0.5;
+    const ODDS_REVIEW = 0.5;
     const MAX_NUM_FOOD_ITEM_IN_ORDER = 5;
     const Orders = []
     const Collates = []
+    const Ratings = []
+    const Reviews = []
     let oid = 1
     const currDate = moment(startDate)
     endDate = moment(endDate)
@@ -44,6 +48,25 @@ function generate_orders_collates(Customers, Restaurants, Addresses, Riders, Foo
                 const order = [oid++, _.sample(Riders)[0], customer[0], orderTime.format("YYYY-MM-DD"), deliveredTime.format("YYYY-MM-DD"), deliveryFee, isDeliveryFeeWaived,
                 departForR.format("YYYY-MM-DD"), arriveAtR.format("YYYY-MM-DD"), departFromR.format("YYYY-MM-DD"), totalPrice, _.sample(Addresses)[0], null]
                 Orders.push(order)
+
+                // Dont write rating
+                if (_.random(1, true) < ODDS_RATING) {
+                    continue
+                }
+                else {
+                    // Ratings (oid, value, date)
+                    const rating = [oid - 1, _.random(0, 5), deliveredTime.clone().add(1, 'hour').format("YYYY-MM-DD")]
+                    Ratings.push(rating)
+                }
+
+                // Dont write Review
+                if (_.random(1, true) < ODDS_REVIEW) {
+                    continue
+                } else {
+                    // Reviews (oid, comment, stars, date)
+                    const review = [oid - 1, random_comment() ,_.random(0, 5), deliveredTime.clone().add(2, 'hour').format("YYYY-MM-DD")]
+                    Reviews.push(review)
+                }
             }
 
         }
@@ -53,10 +76,27 @@ function generate_orders_collates(Customers, Restaurants, Addresses, Riders, Foo
     }
     return {
         Orders,
-        Collates
+        Collates,
+        Ratings,
+        Reviews
     }
 }
 
+// Add more comments here
+function random_comment() {
+    return _.sample(
+        [
+            'Food is decent, would buy again',
+            'Wished that the Chow Mein is spicier, otherwise all is good!',
+            'Food is below average',
+            'One of the best places for Chicken Chop',
+            '',
+            'Average food',
+            'Pretty good for the price'
+        ]
+    )
+}
+
 module.exports = {
-    generate_orders_collates
+    generate_orders_collates_ratings_reviews
 }

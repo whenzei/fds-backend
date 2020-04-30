@@ -3,7 +3,7 @@ const { addRate, addPayout, addReceive, addCustomer, addRider, addStaff, addMana
     addFrequents, addCollates, addOrders, deleteTables, addShifts,
     addFTSchedule, addConsist, addFullTimer, addReview, addRating, addPartTimer } = require('../db/fillTableMethods');
 const { generate_payouts_receives_rates } = require('./payout_generator')
-const { generate_orders_collates } = require('./orders_generator')
+const { generate_orders_collates_ratings_reviews } = require('./orders_generator')
 const db = require('./index');
 
 //(uid, name, username, salt, passwordHash)
@@ -332,7 +332,7 @@ const Frequents = [
     [4, 4, '2020-03-01 19:10:25-07']
 ];
 
-const {Collates, Orders} = generate_orders_collates(Customers, Restaurants, Addresses, Riders, Food, '2019-01-01', '2020-04-30', 2, null)
+const {Collates, Orders, Reviews, Ratings} = generate_orders_collates_ratings_reviews(Customers, Restaurants, Addresses, Riders, Food, '2019-01-01', '2019-04-30', 2, null)
 
 // (shiftid, starttime1, endtime1, starttime2, endtime2)
 const Shifts = [
@@ -372,27 +372,6 @@ const Consists = [
     [3, 2, 3],
     [3, 3, 4],
     [3, 4, 1],
-]
-
-// (oid, comment, stars, date)
-const Reviews = [
-    [1, 'Food is decent, would buy again', 4, '2018-10-19 13:50:54'],
-    [2, 'Wished that the Chow Mein is spicier, otherwise all is good!', 5, '2018-10-19 13:20:22'],
-    [3, 'Food is below average', 2, '2018-11-19 14:10:22'],
-    [4, 'One of the best places for Chicken Chop', 5, '2019-10-01 16:10:54'],
-    [5, '', 5, '2019-10-19 14:44:54'],
-    [6, 'Average food', 3, '2019-10-20 16:23:22'],
-    [7, 'Pretty good for the price', 5, '2020-02-24 18:21:11'],
-]
-
-// (oid, value, date)
-const Ratings = [
-    [1, 5, '2018-10-19 13:51:54'],
-    [2, 4, '2018-10-19 13:25:22'],
-    [3, 4, '2018-11-19 14:11:22'],
-    [4, 3, '2019-10-01 16:09:54'],
-    [5, 5, '2019-10-19 14:40:54'],
-    [6, 4, '2019-10-20 16:24:22'],
 ]
 
 function Comparator(a, b) {
