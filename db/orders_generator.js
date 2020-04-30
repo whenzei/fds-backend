@@ -1,13 +1,14 @@
 const moment = require('moment')
 const _ = require('lodash')
 
-function generate_orders_collates(Customers, Restaurants, Addresses, Riders, Food, startYear, startMonth, durationInMonths, dailyOrdersPerCustomer = 2, Promotions, deliveryFee = 300, isDeliveryFeeWaived = false) {
+function generate_orders_collates(Customers, Restaurants, Addresses, Riders, Food, startDate, endDate, dailyOrdersPerCustomer = 2, Promotions, deliveryFee = 300, isDeliveryFeeWaived = false) {
     const MAX_NUM_FOOD_ITEM_IN_ORDER = 5;
     const Orders = []
     const Collates = []
     let oid = 1
-    const currDate = moment(startYear + "-" + (startMonth < 10 ? "0" + startMonth : startMonth) + "-0" + 1)
-    for (let day = 0; day < durationInMonths * 30; day++) {
+    const currDate = moment(startDate)
+    endDate = moment(endDate)
+    while (currDate < endDate) {
 
         for (const customer of Customers) {
             // Customer: (uid, name, username, salt, passwordHash)
@@ -40,8 +41,8 @@ function generate_orders_collates(Customers, Restaurants, Addresses, Riders, Foo
                 const arriveAtR = departForR.clone().add(_.random(10, false), 'hour')
                 const departFromR = arriveAtR.clone().add(_.random(10, false), 'hour')
                 const deliveredTime = departFromR.clone().add(_.random(10, false), 'hour')
-                const order = [oid++, _.sample(Riders)[0], customer[0], orderTime.format("YY-MM-DD"), deliveredTime.format("YY-MM-DD"), deliveryFee, isDeliveryFeeWaived,
-                departForR.format("YY-MM-DD"), arriveAtR.format("YY-MM-DD"), departFromR.format("YY-MM-DD"), totalPrice, _.sample(Addresses)[0], null]
+                const order = [oid++, _.sample(Riders)[0], customer[0], orderTime.format("YYYY-MM-DD"), deliveredTime.format("YYYY-MM-DD"), deliveryFee, isDeliveryFeeWaived,
+                departForR.format("YYYY-MM-DD"), arriveAtR.format("YYYY-MM-DD"), departFromR.format("YYYY-MM-DD"), totalPrice, _.sample(Addresses)[0], null]
                 Orders.push(order)
             }
 
