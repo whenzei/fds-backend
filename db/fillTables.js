@@ -3,6 +3,7 @@ const { addRate, addPayout, addReceive, addCustomer, addRider, addStaff, addMana
     addFrequents, addCollates, addOrders, deleteTables, addShifts,
     addFTSchedule, addConsist, addFullTimer, addReview, addRating, addPartTimer } = require('../db/fillTableMethods');
 const { generate_payouts_receives_rates } = require('./payout_generator')
+const { generate_orders_collates } = require('./orders_generator')
 const db = require('./index');
 
 //(uid, name, username, salt, passwordHash)
@@ -58,39 +59,39 @@ const Staffs = [
 // (minSpending (in cents), rname)
 const Restaurants = [
     // rid 1 
-    [500, 'Fukuroku', 6],
+    [1, 500, 'Fukuroku', 6],
     // rid 2
-    [1000, 'MaMas Specials', 7],
+    [2, 1000, 'MaMas Specials', 7],
     // rid 3
-    [1100, 'WacDonalds', 8],
+    [3, 1100, 'WacDonalds', 8],
     // rid 4
-    [1500, 'KFC', 5],
+    [4, 1500, 'KFC', 5],
     // rid 5
-    [1000, 'Asian Kitchen', 9],
+    [5, 1000, 'Asian Kitchen', 9],
     // rid 6
-    [500, 'La Fela', 10],
+    [6, 500, 'La Fela', 10],
     // rid 7
-    [500, 'Bobby BBQ', 11],
+    [7, 500, 'Bobby BBQ', 11],
     // rid 8
-    [1000, 'Asian Fusion', 12],
+    [8, 1000, 'Asian Fusion', 12],
     // rid 9
-    [1500, 'Tempura Don', 13],
+    [9, 1500, 'Tempura Don', 13],
     // rid 10
-    [1500, 'Ramen House', 14],
+    [10, 1500, 'Ramen House', 14],
     // rid 11
-    [1000, 'Sushi Craze', 15],
+    [11, 1000, 'Sushi Craze', 15],
     // rid 12
-    [1000, 'Vietnam Hut', 16],
+    [12, 1000, 'Vietnam Hut', 16],
     // rid 13
-    [800, 'Fu Zhou Eatery', 17],
+    [13, 800, 'Fu Zhou Eatery', 17],
     // rid 14
-    [600, 'North Indian Delights', 18],
+    [14, 600, 'North Indian Delights', 18],
     // rid 15
-    [500, 'Kimchi Love', 19],
+    [15, 500, 'Kimchi Love', 19],
     // rid 16
-    [1000, 'Nakon House', 20],
+    [16, 1000, 'Nakon House', 20],
     // rid 17
-    [1000, 'Grill N Meal', 21],
+    [17, 1000, 'Grill N Meal', 21],
 ];
 
 `
@@ -105,7 +106,7 @@ const Restaurants = [
 8)Vietnamese
 9)Lebanese
 `
-// (rid, fname, price, category, dailyLimit)
+// (rid, fname, category, price, dailyLimit)
 const Food = [
     [1, 'Fried Rice', 'Chinese', '500', '200'],
     [1, 'Chow Mein', 'Chinese', '500', '200'],
@@ -254,67 +255,67 @@ const RestaurantPromotions = [
 
 const Addresses = [
     //1 
-    ['12-34', '77 TREVOSE CRESCENT', 298091],
+    [1, '12-34', '77 TREVOSE CRESCENT', 298091],
     //2
-    ['13-35', '512A THOMSON ROAD', 298137],
+    [2, '13-35', '512A THOMSON ROAD', 298137],
     //3
-    ['05-12', '11A NAROOMA ROAD DUNEARN ESTATE', 298306],
+    [3, '05-12', '11A NAROOMA ROAD DUNEARN ESTATE', 298306],
     //4
-    ['14-36', '37 BEECHWOOD GROVE', 738236],
+    [4, '14-36', '37 BEECHWOOD GROVE', 738236],
     //5
-    ['09-11', '56 WOODGROVE WALK CENTURY WOODS', 738199],
+    [5, '09-11', '56 WOODGROVE WALK CENTURY WOODS', 738199],
     //6
-    ['03-22', '47 YUK TONG AVENUE', 596348],
+    [6, '03-22', '47 YUK TONG AVENUE', 596348],
     //7
-    ['05-55', '93B DUNBAR WALK', 459446],
+    [7, '05-55', '93B DUNBAR WALK', 459446],
     //8
-    ['05-11', '35 EAST COAST AVENUE', 459240],
+    [8, '05-11', '35 EAST COAST AVENUE', 459240],
     //9
-    ['20-10', '361A TAMPINES STREET 34', 521361],
+    [9, '20-10', '361A TAMPINES STREET 34', 521361],
     //10
-    ['03-17', '37F LORONG STANGEE', 425018],
+    [10, '03-17', '37F LORONG STANGEE', 425018],
     //11
-    ['07-02', '8 HAPPY AVENUE NORTH', 369756],
+    [11, '07-02', '8 HAPPY AVENUE NORTH', 369756],
     //12
-    ['11-23', '6 JALAN SOO BEE', 488129],
+    [12, '11-23', '6 JALAN SOO BEE', 488129],
     //13
-    ['04-31', '5 WILKINSON ROAD', 436658],
+    [13, '04-31', '5 WILKINSON ROAD', 436658],
     //14
-    ['16-12', '29D POH HUAT ROAD', 546753],
+    [14, '16-12', '29D POH HUAT ROAD', 546753],
     //15
-    ['04-33', '477 SEGAR ROAD SEGAR GARDENS', 670477],
+    [15, '04-33', '477 SEGAR ROAD SEGAR GARDENS', 670477],
     //16
-    ['18-01', '222 SUMANG LANE MATILDA EDGE', 820222],
+    [16, '18-01', '222 SUMANG LANE MATILDA EDGE', 820222],
     //17
-    ['09-09', '4 SEA AVENUE', 424221],
+    [17, '09-09', '4 SEA AVENUE', 424221],
     //18
-    ['02-21', '36A SIAK KEW AVENUE SENNETT ESTATE', 348075],
+    [18, '02-21', '36A SIAK KEW AVENUE SENNETT ESTATE', 348075],
     //19
-    ['11-21', '260 JALAN BESAR', 208935],
+    [19, '11-21', '260 JALAN BESAR', 208935],
     //20
-    ['07-15', '46 TANGLIN HALT ROAD', 142046],
+    [20, '07-15', '46 TANGLIN HALT ROAD', 142046],
     //21
-    ['09-19', '192A SERANGOON ROAD', 218066],
+    [21, '09-19', '192A SERANGOON ROAD', 218066],
     //22
-    ['15-04', '64 TAMAN NAKHODA VILLA DELLE ROSE', 257775],
+    [22, '15-04', '64 TAMAN NAKHODA VILLA DELLE ROSE', 257775],
     //23
-    ['04-04', '304 ORCHARD ROAD UOB LUCKY PLAZA', 238863],
+    [23, '04-04', '304 ORCHARD ROAD UOB LUCKY PLAZA', 238863],
     //24
-    ['07-07', '18 JALAN NOVENA RESIDENCES @ NOVENA', 308679],
+    [24, '07-07', '18 JALAN NOVENA RESIDENCES @ NOVENA', 308679],
     //25
-    ['02-22', '38A LENGKONG TIGA', 417460],
+    [25, '02-22', '38A LENGKONG TIGA', 417460],
     //26
-    ['03-03', '7 JALAN SEAVIEW SEA VIEW PARK', 438321],
+    [26, '03-03', '7 JALAN SEAVIEW SEA VIEW PARK', 438321],
     //27
-    ['10-11', '6 MARIA AVENUE OPERA ESTATE', 456738],
+    [27, '10-11', '6 MARIA AVENUE OPERA ESTATE', 456738],
     //28
-    ['09-08', '5 PARRY ROAD', 547190],
+    [28, '09-08', '5 PARRY ROAD', 547190],
     //29
-    ['08-15', '7 JALAN LAYANG LAYANG', 598474],
+    [29, '08-15', '7 JALAN LAYANG LAYANG', 598474],
     //30
-    ['05-55', '66 JALAN MALU-MALU SEMBAWANG SPRINGS ESTATE', 769681],
+    [30, '05-55', '66 JALAN MALU-MALU SEMBAWANG SPRINGS ESTATE', 769681],
     //31
-    ['02-02', '104 BUTTERFLY AVENUE SENNETT ESTATE', 349841]
+    [31, '02-02', '104 BUTTERFLY AVENUE SENNETT ESTATE', 349841]
 
 ];
 
@@ -331,108 +332,9 @@ const Frequents = [
     [4, 4, '2020-03-01 19:10:25-07']
 ];
 
-// (fname, rid, oid, totalPrice, qty)
-const Collates = [
-    // oid = 1
-    ['Fried Rice', 1, 1, '1000', 2],
-    ['Chow Mein', 1, 1, '500', 1],
-
-    // oid = 2
-    ['Chow Mein', 1, 2, '500', 1],
-    ['Chicken Congee', 1, 2, '400', 1],
-
-    // oid = 3
-    ['Hor Fun', 1, 3, '1200', 2],
-
-    // oid = 4
-    ['Chicken Chop', 2, 4, '1800', 3],
-    ['Pork Chop', 2, 4, '700', 1],
-
-    // oid = 5
-    ['Fish n Chips', 2, 5, '700', 1],
-    ['Mediterranean Burrito', 2, 5, '500', 1],
-    ['Pork Chop', 2, 5, '700', 1],
-
-    // oid = 6
-    ['Baked Cod', 2, 6, '1800', 2],
-    ['Chicken Shawarma', 2, 6, '900', 1],
-    ['Seafood Paella', 2, 6, '800', 1],
-
-    // oid = 7
-    ['Chow Mein', 1, 7, '1500', 3],
-
-    // oid = 8
-    ['Tom Yum Soup', 1, 8, '600', 1],
-    ['Pad Thai', 1, 8, '300', 1],
-    ['Basil Chicken Rice', 1, 8, '650', 1],
-
-    // oid = 9
-    ['Kimchi Ramen', 15, 9, '550', 1],
-    ['Spicy Chicken Hotplate', 15, 9, '1100', 2],
-
-    // oid = 10
-    ['Salmon Sashimi', 11, 10, '600', 1],
-    ['Salmon Mentaiko', 11, 10, '700', 1],
-    ['Tuna Sashimi', 11, 10, '600', 1],
-
-    // oid = 11
-    ['Salmon Sashimi', 11, 11, '600', 1],
-    ['Tuna Sashimi', 11, 11, '600', 1],
-
-    // oid = 12
-    ['Sticks N Bones', 17, 12, '1000', 1],
-    ['Finger Licking Wings', 17, 12, '800', 1],
-
-    // oid = 13
-    ['Hujiao Bing', 13, 13, '300', 1],
-    ['Fish Ball Noodle', 13, 13, '700', 1],
-
-    // oid = 14
-    ['Butter Chicken', 14, 14, '600', 2],
-    ['Rogan Josh Recipe', 14, 14, '700', 1],
-    ['Fish Amritsari', 14, 14, '800', 1],
-
-    // oid = 15
-    ['Bibimbap', 15, 15, '700', 2],
-    ['Beef Hotplate', 15, 15, '800', 3],
-
-];
-
-// (riderId, customerId, orderTime, deliveredTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, departFromR, finalPrice, addrId, pid)
-const Orders = [
-    //oid 1
-    [8, 2, '2018-10-19 10:23:54', '2018-10-19 12:23:54', 200, false, '2018-10-19 12:00:54', '2018-10-19 12:05:54', '2018-10-19 12:15:54', 1500, 1, 1],
-    //oid 2
-    [7, 2, '2018-10-19 10:23:54', '2018-10-19 12:23:54', 200, false, '2018-10-19 12:00:54', '2018-10-19 12:05:54', '2018-10-19 12:15:54', 900, 1, null],
-    //oid 3
-    [6, 2, '2018-11-19 10:23:54', '2018-11-19 12:23:54', 200, false, '2018-11-19 12:00:54', '2018-11-19 12:05:54', '2018-11-19 12:15:54', 1200, 1, null],
-    //oid 4
-    [6, 2, '2019-10-01 10:23:54', '2019-10-01 12:23:54', 300, false, '2019-10-01 12:00:54', '2019-10-01 12:05:54', '2019-10-01 12:15:54', 2500, 2, 11],
-    //oid 5
-    [7, 2, '2019-10-19 10:23:54', '2019-10-19 12:23:54', 300, false, '2019-10-19 12:00:54', '2019-10-19 12:05:54', '2019-10-19 12:15:54', 1900, 2, 11],
-    //oid 6
-    [8, 3, '2019-10-20 10:23:54', '2019-10-20 12:23:54', 300, false, '2019-10-20 12:00:54', '2019-10-20 12:05:54', '2019-10-20 12:15:54', 3500, 4, 10],
-    //oid 7
-    [7, 2, '2020-02-24 10:23:54', '2020-02-24 11:00:54', 300, false, '2020-02-24 10:24:54', '2020-02-24 10:40:54', '2020-02-24 10:45:54', 1500, 1, 15],
-    //oid 8
-    [6, 2, '2020-02-25 11:23:54', '2020-02-25 12:30:54', 300, false, '2020-02-25 11:40:54', '2020-02-25 12:00:54', '2020-02-25 12:15:54', 1550, 1, null],
-    //oid 9
-    [5, 13, '2020-01-10 14:23:54', '2020-01-10 14:30:54', 300, false, '2020-01-10 14:40:54', '2020-01-10 15:00:54', '2020-01-10 15:15:54', 1650, 22, null],
-    //oid 10
-    [6, 13, '2020-01-02 14:23:54', '2020-01-02 14:30:54', 300, false, '2020-01-02 14:40:54', '2020-01-02 15:00:54', '2020-01-02 15:15:54', 1900, 23, null],
-    //oid 11
-    [7, 14, '2020-01-22 14:23:54', '2020-01-22 14:30:54', 300, true, '2020-01-22 14:40:54', '2020-01-22 15:00:54', '2020-01-22 15:15:54', 900, 24, 19],
-    //oid 12
-    [6, 14, '2020-03-22 14:23:54', '2020-03-22 14:30:54', 300, true, '2020-03-22 14:40:54', '2020-03-22 15:00:54', '2020-03-22 15:15:54', 1440, 24, 18],
-    //oid 13
-    [5, 15, '2020-03-10 14:23:54', '2020-03-10 14:30:54', 300, false, '2020-03-10 14:40:54', '2020-03-10 15:00:54', '2020-03-10 15:15:54', 1000, 25, null],
-    //oid 14
-    [5, 15, '2020-01-02 14:23:54', '2020-01-02 14:30:54', 300, false, '2020-01-02 14:40:54', '2020-01-02 15:00:54', '2020-01-02 15:15:54', 2700, 25, 20],
-    //oid 15
-    [7, 16, '2020-02-02 14:23:54', '2020-02-02 14:30:54', 300, false, '2020-02-02 14:40:54', '2020-02-02 15:00:54', '2020-02-02 15:15:54', 3800, 26, null],
-    // deliveredTime = null signifies an incomplete order. unable to represent it here because statement will be prepared as 'null' string causing DateTimeParse error
-];
-
+const {Collates, Orders} = generate_orders_collates(Customers, Restaurants, Addresses, Riders, Food, 2019, 1, 15, 2, null)
+console.log(Collates[0])
+console.log(Orders[0])
 // (shiftid, starttime1, endtime1, starttime2, endtime2)
 const Shifts = [
     //1
