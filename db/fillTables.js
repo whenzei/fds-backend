@@ -333,8 +333,7 @@ const Frequents = [
 ];
 
 const {Collates, Orders} = generate_orders_collates(Customers, Restaurants, Addresses, Riders, Food, 2019, 1, 15, 2, null)
-console.log(Collates[0])
-console.log(Orders[0])
+
 // (shiftid, starttime1, endtime1, starttime2, endtime2)
 const Shifts = [
     //1
