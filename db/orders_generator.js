@@ -11,8 +11,9 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
     const Ratings = []
     const Reviews = []
     let oid = 1
-    const currDate = moment(startDate)
+    const currDate = moment(startDate + " 10")
     endDate = moment(endDate)
+    const timestampFormat = "YYYY-MM-DD HH:mm"
     while (currDate < endDate) {
 
         for (const customer of Customers) {
@@ -49,8 +50,9 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
                     departFromR = arriveAtR.clone().add(_.random(10, false), 'hour')
                     deliveredTime = departFromR.clone().add(_.random(10, false), 'hour')
                 }
-                const order = [oid++, departForR ? _.sample(Riders)[0] : null, customer[0], orderTime.format("YYYY-MM-DD"), deliveredTime ? deliveredTime.format("YYYY-MM-DD") : null, deliveryFee, isDeliveryFeeWaived,
-                departForR ? departForR.format("YYYY-MM-DD") : null, arriveAtR ? arriveAtR.format("YYYY-MM-DD") : null, departFromR ? departFromR.format("YYYY-MM-DD") : null, totalPrice, _.sample(Addresses)[0], null]
+
+                const order = [oid++, departForR ? _.sample(Riders)[0] : null, customer[0], orderTime.format(timestampFormat), deliveredTime ? deliveredTime.format(timestampFormat) : null, deliveryFee, isDeliveryFeeWaived,
+                departForR ? departForR.format(timestampFormat) : null, arriveAtR ? arriveAtR.format(timestampFormat) : null, departFromR ? departFromR.format(timestampFormat) : null, totalPrice, _.sample(Addresses)[0], null]
                 Orders.push(order)
 
                 // Dont write rating
@@ -59,7 +61,7 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
                 }
                 else {
                     // Ratings (oid, value, date)
-                    const rating = [oid - 1, _.random(0, 5), deliveredTime.clone().add(1, 'hour').format("YYYY-MM-DD")]
+                    const rating = [oid - 1, _.random(0, 5), deliveredTime.clone().add(1, 'hour').format(timestampFormat)]
                     Ratings.push(rating)
                 }
 
@@ -68,7 +70,7 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
                     continue
                 } else {
                     // Reviews (oid, comment, stars, date)
-                    const review = [oid - 1, random_comment(), _.random(0, 5), deliveredTime.clone().add(2, 'hour').format("YYYY-MM-DD")]
+                    const review = [oid - 1, random_comment(), _.random(0, 5), deliveredTime.clone().add(2, 'hour').format(timestampFormat)]
                     Reviews.push(review)
                 }
             }
