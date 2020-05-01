@@ -77,7 +77,13 @@ CidToName AS (
     SELECT uid as customerId, name as cname
     FROM Customers natural join Users
 )
-SELECT oid, rname, cname, orderTime, deliveredTime, finalPrice, (SELECT array_agg(fname) FROM COLLATES C WHERE C.oid = X.oid) as itemsOrdered
+SELECT oid, rname, cname, orderTime, deliveredTime, finalPrice, (SELECT array_agg(fname) FROM COLLATES C WHERE C.oid = X.oid) as itemsOrdered,
+case
+    when deliveredTime IS NOT NULL then 'Delivered'
+    when departFromR IS NOT NULL then 'Delivery in Progress'
+    when riderId IS NOT NULL AND arriveAtR IS NULL then 'Awaiting Pick Up'
+    else 'Not Assigned'
+end as status
 FROM (Orders natural join OrderRestaurantPair join RidToName using (riderId) join CidToName using (customerId)) as X
 WHERE rid = $1
 ORDER BY orderTime DESC, deliveredTime DESC;`});
