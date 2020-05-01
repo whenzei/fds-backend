@@ -145,7 +145,6 @@ router.get("/food/:rid",
     ],
     validate
     , async (req, res, next) => {
-        console.log(req.params.rid)
         let foodList = [];
         try {
             foodList = await getMenu(req.params.rid);
