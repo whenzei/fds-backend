@@ -88,10 +88,10 @@ const psGetMonthlySalesSummary = new PS({ name: 'monthly-sales-summary',
     "HAVING date_part('month', deliveredtime) IS NOT NULL and date_part('year', deliveredtime) IS NOT NULL " +
     "ORDER BY year, month;"});
 
-const psGetMonthlyCustomerOrderSummary = new PS({name: 'customer-monthly-order-summary', text: "SELECT customerid, date_part('month', deliveredtime) as month, date_part('year', deliveredtime) as year, \n" +
+const psGetMonthlyCustomerOrderSummary = new PS({name: 'customer-monthly-order-summary', text: "SELECT customerid, name, date_part('month', deliveredtime) as month, date_part('year', deliveredtime) as year, \n" +
     "count(*) as order_count, sum(finalprice) as totalPrice\n" +
-    "FROM ORDERS \n" +
-    "GROUP BY month, year, customerid\n" +
+    "FROM ORDERS join Users on (customerid = uid)\n" +
+    "GROUP BY month, year, customerid, name\n" +
     "HAVING date_part('month', deliveredtime) IS NOT NULL and date_part('year', deliveredtime) IS NOT NULL " +
     "ORDER BY year, month;"});
 
