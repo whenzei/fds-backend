@@ -4,7 +4,7 @@ const PS = require('pg-promise').PreparedStatement;
 
 const psGetStaff = new PS({ name: 'get-staff', text: 'SELECT * FROM Staff WHERE uid = $1;' });
 
-const psGetRestaurantId = new PS({ name: 'get-restaurant-id', text: 'SELECT rid FROM Staff WHERE uid = $1;' });
+const psGetRestaurantInfo = new PS({ name: 'get-restaurant-info', text: 'SELECT S.rid, (SELECT rname FROM Restaurants R WHERE R.rid = S.rid) as rname FROM Staff S WHERE S.uid = $1;' });
 
 const psGetTotalOrdersAndCost = new PS({ name: 'get-total-orders-and-cost', text:
 `
@@ -112,8 +112,8 @@ const getStaff = async () => {
     return await db.any(psGetStaff, [uid]);
 };
 
-const getRestaurantId = async (uid) => {
-    return await db.one(psGetRestaurantId, [uid]);
+const getRestaurantInfo = async (uid) => {
+    return await db.one(psGetRestaurantInfo, [uid]);
 };
 
 const getTotalOrdersAndCost = async (rid) => {
@@ -166,6 +166,6 @@ const deleteRestaurantPromos = async (pid, uid) => {
 };
 
 module.exports = {
-    getStaff, getRestaurantId, getTotalOrdersAndCost, getFoodCount, getMinMaxDate, getPromoStats, getAllOrders, getRestaurantPromos,
+    getStaff, getRestaurantInfo, getTotalOrdersAndCost, getFoodCount, getMinMaxDate, getPromoStats, getAllOrders, getRestaurantPromos,
     updateRestaurantPromos, deleteRestaurantPromos, insertRestaurantPromos
 }
