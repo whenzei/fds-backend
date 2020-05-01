@@ -366,7 +366,7 @@ async function selectOrder(uid, oid) {
     let count;
     try {
         count = await db.tx(async t => {
-            const currOrder = await db.any(psGetCurrentOrder)
+            const currOrder = await db.any(psGetCurrentOrder, [uid])
             if (currOrder.length > 0) {
                 return 0
             }
