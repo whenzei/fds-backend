@@ -91,8 +91,8 @@ async function addStaff(arr) {
 async function addRestaurant(arr) {
     try {
         await db.none(
-            `Insert into Restaurants (minSpending, rname, addrId) Values
-            ('${arr[0]}', '${arr[1]}', ${arr[2]})`
+            `Insert into Restaurants (rid, minSpending, rname, addrId) Values
+            (${arr[0]}, '${arr[1]}', '${arr[2]}', ${arr[3]})`
         );
     } catch (error) {
         console.log(error, 'Failed to add restaurant');
@@ -145,8 +145,8 @@ async function addRestaurantPromotion(arr) {
 async function addAddress(arr) {
     try {
         await db.none(
-            `Insert into Address (unit, streetname, postalCode) Values
-            ('${arr[0]}', '${arr[1]}', ${arr[2]})`
+            `Insert into Address (addrId, unit, streetname, postalCode) Values
+            (${arr[0]}, '${arr[1]}', '${arr[2]}', ${arr[3]})`
         );
     } catch (error) {
         console.log(error, 'Failed to add address')
@@ -178,8 +178,8 @@ async function addCollates(arr) {
 async function addOrders(arr) {
     try {
         await db.none(
-            `Insert into Orders (riderId, customerId, orderTime, deliveredTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, departFromR, finalPrice, addrId, pid) Values
-            (${arr[0]}, ${arr[1]}, '${arr[2]}', '${arr[3]}', ${arr[4]}, ${arr[5]}, '${arr[6]}', '${arr[7]}', '${arr[8]}', ${arr[9]}, ${arr[10]}, ${arr[11]})`
+            `Insert into Orders (oid, riderId, customerId, orderTime, deliveredTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, departFromR, finalPrice, addrId, pid) Values
+            (${arr[0]}, ${arr[1]}, ${arr[2]}, '${arr[3]}', '${arr[4]}', ${arr[5]}, ${arr[6]}, '${arr[7]}', '${arr[8]}', '${arr[9]}', ${arr[10]}, ${arr[11]}, ${arr[12]})`
         );
     } catch (error) {
         console.log(error, 'Failed to add orders');
