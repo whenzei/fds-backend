@@ -45,10 +45,10 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
                 const orderTime = currDate.clone().add(_.random(11, false), 'hour')
                 let departForR = null, arriveAtR = null, departFromR = null, deliveredTime = null;
                 if (!lastDayIncompleteOrders | currDate.clone().add(1, 'day') < endDate) {
-                    departForR = orderTime.clone().add(_.random(10, false), 'hour')
-                    arriveAtR = departForR.clone().add(_.random(10, false), 'hour')
-                    departFromR = arriveAtR.clone().add(_.random(10, false), 'hour')
-                    deliveredTime = departFromR.clone().add(_.random(10, false), 'hour')
+                    departForR = orderTime.clone().add(_.random(10, false), 'minute')
+                    arriveAtR = departForR.clone().add(_.random(10, false), 'minute')
+                    departFromR = arriveAtR.clone().add(_.random(10, false), 'minute')
+                    deliveredTime = departFromR.clone().add(_.random(10, false), 'minute')
                 }
 
                 const order = [oid++, departForR ? _.sample(Riders)[0] : null, customer[0], orderTime.format(timestampFormat), deliveredTime ? deliveredTime.format(timestampFormat) : null, deliveryFee, isDeliveryFeeWaived,
