@@ -240,6 +240,7 @@ const psGetRiderTotalOrdersAndAverageDeliveryTime = new PS({
     "SELECT riderid, name, month, year, avg(deliverytime) as average_mins, count(*) as total_orders_delivered " +
     "FROM Rider_Delivery_Time join Users on (riderid = uid) " +
     "GROUP BY riderid, name, year, month " +
+    "HAVING year IS NOT NULL and month IS NOT NULL " +
     "ORDER BY riderid, year, month;"
 });
 
