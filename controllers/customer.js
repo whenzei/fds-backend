@@ -50,7 +50,16 @@ const psGetElgiblePromos = new PS({
             SELECT pid, coalesce(percentOff, 0) as percentOff, coalesce(minSpending, 0) as minSpending
             FROM EligibilePromos;
             `
-}) 
+})
+
+const psGetCustomerMonthlySignUpSummary = new PS ({name:"monthly-customer-signups", text:"SELECT date_part('month', creationtime) as month, " +
+        "date_part('year', creationtime) as year, count(*) as signups " +
+    "FROM customers natural join users " +
+    "GROUP BY year, month;"});
+
+const psGetCustomerYearlySignUpSummary = new PS ({name:"yearly-customer-signups", text:"SELECT date_part('year', creationtime) as year, count(*) as signups " +
+    "FROM customers natural join users " +
+    "GROUP BY year;"});
 
 const getCustomers = async function () {
     return await db.any(psGetCustomers);
@@ -81,6 +90,17 @@ const getEligiblePromos = async function (uid, rid) {
     const today = moment().format('YYYY-MM-DD');
     return await db.any(psGetElgiblePromos, [today, uid, rid]);
 }
+
+const getCustomerSignups = async (queryParams) => {
+    month = queryParams.month;
+    year = queryParams.year;
+    
+    if(year == 'true') {
+        return await db.any(psGetCustomerYearlySignUpSummary)
+    } else {
+        return await db.any(psGetCustomerMonthlySignUpSummary)
+    }
+}
 module.exports = {
-    getCustomers, getFrequents, getAccountInfo, addCreditCard, removeCreditCard, getEligiblePromos
+    getCustomers, getFrequents, getAccountInfo, addCreditCard, removeCreditCard, getEligiblePromos, getCustomerSignups,
 }
