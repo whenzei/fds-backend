@@ -5,6 +5,7 @@ const { addRate, addPayout, addReceive, addCustomer, addRider, addStaff, addMana
 const { generate_payouts_receives_rates } = require('./payout_generator')
 const { generate_orders_collates_ratings_reviews } = require('./orders_generator')
 const db = require('./index');
+const moment = require('moment')
 
 //(uid, name, username, salt, passwordHash)
 const Customers = [
@@ -332,7 +333,7 @@ const Frequents = [
     [4, 4, '2020-03-01 19:10:25-07']
 ];
 
-const {Collates, Orders, Reviews, Ratings} = generate_orders_collates_ratings_reviews(Customers, Restaurants, Addresses, Riders, Food, '2019-01-01', '2020-04-30', 2, null)
+const {Collates, Orders, Reviews, Ratings} = generate_orders_collates_ratings_reviews(Customers, Restaurants, Addresses, Riders, Food, '2019-01-01', moment().format("YYYY-MM-DD"), 2, null)
 
 // (shiftid, starttime1, endtime1, starttime2, endtime2)
 const Shifts = [
