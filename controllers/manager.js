@@ -12,7 +12,7 @@ const addUser = async (user) => {
         
         if (user.role == Roles.staff) {
             staffData = [null, 'S', user.name, user.username, 'salt', user.password, user.rid];
-            await addStaff(riderData);
+            await addStaff(staffData);
         } else if (user.role == Roles.rider){
             riderData = [null, 'R', user.name, user.username, 'salt', user.password];
             await addRider(riderData);
