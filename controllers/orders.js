@@ -101,7 +101,9 @@ const psGetYearlyCustomerOrderSummary = new PS({name: 'customer-yearly-order-sum
     "HAVING date_part('year', deliveredtime) IS NOT NULL " +
     "ORDER BY year;"});
 
-
+const psGetHourlyAreaOrdersSummary = new PS({name: 'orders-hourly-area-summary', text: "SELECT postalcode, count(*),date_part('hour', ordertime) as hour from ORDERS NATURAL JOIN ADDRESS " +
+    "GROUP BY postalcode, hour " +
+    "ORDER BY hour;"});
 const DELIVERY_FEE = 300;
 
 const addOrder = async function (user, order) {
@@ -254,10 +256,14 @@ const getCustomerOrderSummary = async (queryParams) => {
         return "Please enter only true or false for month and year fields";
 }
 
+const getAreaOrderSummary = async () => {
+    return await db.any(psGetHourlyAreaOrdersSummary);
+}
+
 const getOrders = async function(uid) {
     return await db.any(psGetOrders, [uid])
 }
 
 module.exports = {
-    addOrder, getOrders,getOrderSummary, getSalesSummary, getCustomerOrderSummary
+    addOrder, getOrders,getOrderSummary, getSalesSummary, getCustomerOrderSummary, getAreaOrderSummary
 }
