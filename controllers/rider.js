@@ -215,6 +215,14 @@ const psGetPTSalaryInfo = new PS({
     `
 })
 
+const psGetRating = new PS({
+    name: 'get-rating', text: `
+    select coalesce(avg(value), 0) as value, count(value) as count
+    from Ratings R join Orders O on O.riderId = $1 and R.oid = O.oid
+    group by O.riderId
+    `
+})
+
 async function getRiderType(uid) {
     const { ridertype } = await db.one(psGetRiderType, [uid])
     return ridertype
@@ -399,8 +407,12 @@ async function getPTSalaryInfo(uid, year) {
     return await db.oneOrNone(psGetPTSalaryInfo, [uid, year]) || { weeks: [] }
 }
 
+async function getRating(uid) {
+    return await db.one(psGetRating, uid)
+}
+
 module.exports = {
     getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule,
     RiderTypes, getPartTimeSchedule, getAvailableOrders, getCurrentOrder, selectOrder, updateOrderStatus, orderStatuses,
-    getGetFTSalaryInfo, getPTSalaryInfo
+    getGetFTSalaryInfo, getPTSalaryInfo, getRating
 }

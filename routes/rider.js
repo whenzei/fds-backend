@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { getGetFTSalaryInfo, getPTSalaryInfo, orderStatuses, updateOrderStatus, selectOrder, getCurrentOrder, getAvailableOrders, getFullTimeSchedule, getPartTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule } = require('../controllers/rider')
+const { getGetFTSalaryInfo, getPTSalaryInfo, orderStatuses, updateOrderStatus, selectOrder, getCurrentOrder, getAvailableOrders, getFullTimeSchedule, getPartTimeSchedule,
+     getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule, getRating } = require('../controllers/rider')
 const { check } = require('express-validator');
 const { validate } = require('../validate')
 const { RiderTypes } = require('../controllers/rider')
@@ -229,6 +230,17 @@ router.get('/startDaysOfMonths/:year/:month',
         try {
             let startDaysOfMonth = await getStartDaysOfMonth(req.params.year, req.params.month)
             return res.send(startDaysOfMonth)
+        } catch (e) {
+            return next(e)
+        }
+    }
+)
+
+router.get('/rating',
+    async (req, res, next) => {
+        try {
+            let rating = await getRating(req.user.uid)
+            return res.send(rating)
         } catch (e) {
             return next(e)
         }
