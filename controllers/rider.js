@@ -223,6 +223,16 @@ const psGetRating = new PS({
     `
 })
 
+const psGetSummary = new PS({
+    name: 'get-summary', text: `
+    select EXTRACT(MONTH FROM O.ordertime) as month, coalesce(avg(R.value), 0) as avgRating, coalesce(max(R.value), 0) as maxRating, coalesce(min(R.value), 0) as minRating, coalesce(count(R.oid), 0) as ratingCount,
+    count(O.oid) as orderCount
+    from Orders O left join Ratings R on O.oid = R.oid
+    where O.riderid = $1 and EXTRACT(YEAR FROM O.ordertime) = $2
+    group by EXTRACT(MONTH FROM O.ordertime)
+    `
+})
+
 async function getRiderType(uid) {
     const { ridertype } = await db.one(psGetRiderType, [uid])
     return ridertype
@@ -411,8 +421,12 @@ async function getRating(uid) {
     return await db.one(psGetRating, uid)
 }
 
+async function getSummaryInfo(uid, year) {
+    return await db.any(psGetSummary, [uid, year])
+}
+
 module.exports = {
     getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule,
     RiderTypes, getPartTimeSchedule, getAvailableOrders, getCurrentOrder, selectOrder, updateOrderStatus, orderStatuses,
-    getGetFTSalaryInfo, getPTSalaryInfo, getRating
+    getGetFTSalaryInfo, getPTSalaryInfo, getRating, getSummaryInfo
 }
