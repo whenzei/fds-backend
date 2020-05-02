@@ -15,13 +15,15 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
     endDate = moment(endDate)
     const timestampFormat = "YYYY-MM-DD HH:mm"
     while (currDate < endDate || currDate.isSame(endDate, 'day')) {
-
+        let unavailRider = new Set()
+        
         for (const customer of Customers) {
             // Customer: (uid, name, username, salt, passwordHash)
             
             for (let restIdx = 0; restIdx < Restaurants.length; restIdx++) {
                 const rid = Restaurants[restIdx][0]
                 const dailyOrdersPerCustomer = _.random(1, false)
+                
                 for (let orderIdx = 0; orderIdx < dailyOrdersPerCustomer; orderIdx++) {
                     const restFood = Food.filter(food => food[0] == rid)
                     const numOfDistinctFood = _.random(1, restFood.length)
@@ -61,6 +63,13 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
 
                             randInt = _.random(11, false)
                             deliveredTime = departFromR && randInt <= 10 ? departFromR.clone().add(randInt, 'minute') : null
+
+                            while (unavailRider.size != Riders.length && unavailRider.has(rider)) {
+                                rider = _.sample(Riders)[0]
+                            }
+                            if (unavailRider.length == Riders.length) {
+                                continue
+                            }
                         }
                     }
 
@@ -68,7 +77,10 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
                     const order = [oid++, rider, customer[0], orderTime.format(timestampFormat), deliveredTime ? deliveredTime.format(timestampFormat) : null, deliveryFee, isDeliveryFeeWaived,
                     departForR ? departForR.format(timestampFormat) : null, arriveAtR ? arriveAtR.format(timestampFormat) : null, departFromR ? departFromR.format(timestampFormat) : null, totalPrice, _.sample(Addresses)[0], null]
                     Orders.push(order)
-
+                    if (rider != null) {
+                        unavailRider.add(rider)
+                    }
+                    
                     // Dont write rating
                     if (_.random(1, true) < ODDS_RATING || (lastDayIncompleteOrders && currDate.clone().add(1, 'day') >= endDate)) {
                         continue
