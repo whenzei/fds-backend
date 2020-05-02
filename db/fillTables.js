@@ -333,7 +333,7 @@ const Frequents = [
     [4, 4, '2020-03-01 19:10:25-07']
 ];
 
-const {Collates, Orders, Reviews, Ratings} = generate_orders_collates_ratings_reviews(Customers, Restaurants, Addresses, Riders, Food, '2019-01-01', moment().format("YYYY-MM-DD"), 2, null)
+const {Collates, Orders, Reviews, Ratings} = generate_orders_collates_ratings_reviews(Customers, Restaurants, Addresses, Riders, Food, '2019-06-01', moment().format("YYYY-MM-DD"), 2, null)
 
 // (shiftid, starttime1, endtime1, starttime2, endtime2)
 const Shifts = [
