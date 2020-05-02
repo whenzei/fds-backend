@@ -1,7 +1,7 @@
 const moment = require('moment')
 const _ = require('lodash')
 
-function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addresses, Riders, Food, startDate, endDate, maxDailyOrdersPerCustomer = 2, Promotions, deliveryFee = 300,
+function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addresses, Riders, Food, startDate, endDate, Promotions, deliveryFee = 300,
     isDeliveryFeeWaived = false, lastDayIncompleteOrders = true) {
     const ODDS_RATING = 0.5;
     const ODDS_REVIEW = 0.5;
@@ -14,7 +14,7 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
     const currDate = moment(startDate + " 10")
     endDate = moment(endDate)
     const timestampFormat = "YYYY-MM-DD HH:mm"
-    while (currDate < endDate) {
+    while (currDate < endDate || currDate.isSame(endDate, 'day')) {
 
         for (const customer of Customers) {
             // Customer: (uid, name, username, salt, passwordHash)
@@ -24,11 +24,7 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
                 const dailyOrdersPerCustomer = _.random(1, false)
                 for (let orderIdx = 0; orderIdx < dailyOrdersPerCustomer; orderIdx++) {
                     const restFood = Food.filter(food => food[0] == rid)
-                    const numOfDistinctFood = _.random(restFood.length)
-                    // Dont buy
-                    if (numOfDistinctFood < 1) {
-                        continue;
-                    }
+                    const numOfDistinctFood = _.random(1, restFood.length)
 
                     let totalPrice = 0
                     for (const food of _.sampleSize(restFood, numOfDistinctFood)) {
@@ -44,14 +40,14 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
                     // Orders: (oid, riderId, customerId, orderTime, deliveredTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, departFromR, finalPrice, addrId, pid)
                     const orderTime = currDate.clone().add(_.random(11, false), 'hour')
                     let departForR = null, arriveAtR = null, departFromR = null, deliveredTime = null, rider = _.sample(Riders)[0];
-                    const nextDate = currDate.clone().add(1, 'day')
-                    if (!lastDayIncompleteOrders || nextDate < endDate) {
+                    
+                    if (!lastDayIncompleteOrders || currDate.clone().add(1, 'day') < endDate) {
                         departForR = orderTime.clone().add(_.random(10, false), 'hour')
                         arriveAtR = departForR.clone().add(_.random(10, false), 'hour')
                         departFromR = arriveAtR.clone().add(_.random(10, false), 'hour')
                         deliveredTime = departFromR.clone().add(_.random(10, false), 'hour')
-                    } else if (lastDayIncompleteOrders && nextDate.isSame(endDate)) {
-                        if (_.random(2, false) == 0) {
+                    } else if (lastDayIncompleteOrders && currDate.isSame(endDate, 'day')) {
+                        if (_.random(1, false) == 0) {
                             rider = null
                         } else {
                             let randInt = _.random(11, false)
@@ -65,30 +61,12 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
 
                             randInt = _.random(11, false)
                             deliveredTime = departFromR && randInt <= 10 ? departFromR.clone().add(randInt, 'minute') : null
-
-                            console.log(departForR + " " + arriveAtR + " " + departFromR + " " + deliveredTime)
                         }
                     }
 
-
                     // generate different secnarios: not assigned (a rider), awaiting pick up, delivery in progress and delivered
-                    let order;
-                    // processing (no rider)
-                    if (rider == null) {
-                        order = [oid++, null, customer[0], orderTime.format(timestampFormat), null, deliveryFee, isDeliveryFeeWaived, null, null, null, totalPrice, _.sample(Addresses)[0], null]
-                    } else if (departForR == null || arriveAtR == null || departFromR == null) {
-                        // awaiting pick up
-                        order = [oid++, rider, customer[0], orderTime.format(timestampFormat), null, deliveryFee, isDeliveryFeeWaived, departForR ? departForR.format(timestampFormat) : null, arriveAtR ? arriveAtR.format(timestampFormat) : null, null, totalPrice, _.sample(Addresses)[0], null]
-                    } else if (deliveredTime == null) {
-                        // delivery in progress
-                        order = [oid++, rider, customer[0], orderTime.format(timestampFormat), null, deliveryFee, isDeliveryFeeWaived, departForR.format(timestampFormat), arriveAtR.format(timestampFormat), departFromR.format(timestampFormat), totalPrice, _.sample(Addresses)[0], null]
-                    } else {
-                        // delivered
-                        order = [oid++, rider, customer[0], orderTime.format(timestampFormat), deliveredTime.format(timestampFormat), deliveryFee, isDeliveryFeeWaived, departForR.format(timestampFormat), arriveAtR.format(timestampFormat), departFromR.format(timestampFormat), totalPrice, _.sample(Addresses)[0], null]
-
-                        // console.log(departForR + " " + arriveAtR + " " + departFromR + " " + deliveredTime)
-                    }
-
+                    const order = [oid++, rider, customer[0], orderTime.format(timestampFormat), deliveredTime ? deliveredTime.format(timestampFormat) : null, deliveryFee, isDeliveryFeeWaived,
+                    departForR ? departForR.format(timestampFormat) : null, arriveAtR ? arriveAtR.format(timestampFormat) : null, departFromR ? departFromR.format(timestampFormat) : null, totalPrice, _.sample(Addresses)[0], null]
                     Orders.push(order)
 
                     // Dont write rating
