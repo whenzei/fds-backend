@@ -317,7 +317,7 @@ async function getAvailableOrders(lng, lat) {
             cPostalcode: item.cpostalcode,
             "Distance to Customer": cDist,
             "Total Price": item.totalprice,
-            "Payment Method": item.iscod ? "Cash on Delivery" : "Cash Card"
+            "Payment Method": item.iscod ? "Cash on Delivery" : "Credit Card"
         }
     })
     )
@@ -343,7 +343,7 @@ async function getCurrentOrder(uid, lng, lat) {
         cPostalcode: order.cpostalcode,
         "Distance to Customer": cDist,
         "Total Price": order.totalprice,
-        "Payment Method": order.iscod ? "Cash on Delivery" : "Cash Card",
+        "Payment Method": order.iscod ? "Cash on Delivery" : "Credit Card",
         orderedItems,
         status: order.status
     }
