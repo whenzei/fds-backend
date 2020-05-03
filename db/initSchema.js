@@ -293,7 +293,8 @@ SQL_STATEMENTS = {
         name            VARCHAR(100) not null,
         userName        VARCHAR(100) not null unique,
         salt            VARCHAR(100) not null,
-        passwordHash    VARCHAR(100) not null
+        passwordHash    VARCHAR(100) not null,
+        creationTime    TIMESTAMP not null DEFAULT NOW()
     );`,
     Managers:
         `CREATE TABLE Managers (
@@ -418,7 +419,7 @@ SQL_STATEMENTS = {
             rid             SERIAL primary key,
             minSpending        INTEGER not NULL check (minSpending >= 0),
             rname            VARCHAR(100) not NULL unique,
-            addrId       Integer references Address on delete cascade
+            addrId       Integer unique not NULL references Address on delete cascade
         );
         `,
     Promotions:
