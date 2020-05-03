@@ -34,7 +34,7 @@ const psSelectOrder = new PS({
 const psGetAvailableOrders = new PS({
     name: 'get-available-orders', text: `
     Select distinct O.oid, R.rname, A1.streetname as rstreetname, A1.postalcode as rpostalcode,
-        A2.streetname as cstreetname, A2.postalcode as cpostalcode, O.finalprice + O.deliveryfee as totalprice
+        A2.streetname as cstreetname, A2.postalcode as cpostalcode, O.finalprice + O.deliveryfee as totalprice, O.iscod
     from Orders O natural join Collates C join Restaurants R on C.rid = R.rid join Address A1 on R.addrid = A1.addrid join Address A2 on O.addrid = A2.addrid
     where riderid IS NULL;
     `
@@ -42,15 +42,15 @@ const psGetAvailableOrders = new PS({
 
 const psGetCurrentOrder = new PS({
     name: 'get-current-order', text: `
-    Select distinct O.oid, R.rname, A1.streetname as rstreetname, A1.postalcode as rpostalcode,
-        A2.streetname as cstreetname, A2.postalcode as cpostalcode, O.finalprice + O.deliveryfee as totalprice, (
+    Select distinct O.oid, R.rname, A1.streetname || ' ' || A1.unit as raddress, A1.postalcode as rpostalcode,
+        A2.streetname || ' ' || A2.unit as caddress, A2.postalcode as cpostalcode, O.finalprice + O.deliveryfee as totalprice, (
             case
                 WHEN O.arriveatr IS NULL THEN '${orderStatuses.toRest}'
                 WHEN O.departfromr IS NULL THEN '${orderStatuses.waiting}'
                 ELSE '${orderStatuses.toCust}'
             END
         )
-        as status
+        as status, O.iscod
     from Orders O natural join Collates C join Restaurants R on C.rid = R.rid join Address A1 on R.addrid = A1.addrid join Address A2 on O.addrid = A2.addrid
     where deliveredtime IS NULL and riderid = $1
     `
@@ -317,7 +317,7 @@ async function getAvailableOrders(lng, lat) {
             cPostalcode: item.cpostalcode,
             "Distance to Customer": cDist,
             "Total Price": item.totalprice,
-            "Payment Method": "Credit Card"
+            "Payment Method": item.iscod ? "Cash on Delivery" : "Credit Card"
         }
     })
     )
@@ -336,14 +336,14 @@ async function getCurrentOrder(uid, lng, lat) {
     return {
         oid: order.oid,
         Restaurant: order.rname,
-        "Restaurant Address": order.rstreetname,
+        "Restaurant Address": order.raddress,
         rPostalCode: order.rpostalcode,
         "Distance To Restaurant": rDist,
-        "Customer Address": order.cstreetname,
+        "Customer Address": order.caddress,
         cPostalcode: order.cpostalcode,
         "Distance to Customer": cDist,
         "Total Price": order.totalprice,
-        "Payment Method": "Credit Card",
+        "Payment Method": order.iscod ? "Cash on Delivery" : "Credit Card",
         orderedItems,
         status: order.status
     }
