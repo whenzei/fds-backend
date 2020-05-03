@@ -13,14 +13,14 @@ const Customers = [
     [2, 'C', 'zhow qing tian', 'zhow', 'pepper', 'asdsad', 1000],
     [3, 'C', 'staff of wizardry', 'Knack2Babee', 'SeaSalt', '123', 500],
     [4, 'C', 'the fork on the left', 'oheehee', 'Mother', 'Father', 20000],
-    [13, 'C', 'John Doe', 'jdoe', 'please', 'password', 20000],
-    [14, 'C', 'Tan Ah Kau', 'tahkau', 'give', 'password', 20000],
-    [15, 'C', 'Lim Bee Bee', 'lbeebee', 'me', 'password', 5000],
-    [16, 'C', 'Kamal Lama', 'kamalama', 'an', 'password', 5000],
-    [17, 'C', 'Jaleney', 'jujuje', 'A', 'password', 10000],
-    [18, 'C', 'Lu Lu', 'lulu', 'for', 'password', 20000],
-    [19, 'C', 'Hebe Fu', 'youthefool', 'this', 'password', 15000],
-    [20, 'C', 'Shimmy shammy', 'shimsham', 'module', 'password', 20000]
+    [17, 'C', 'John Doe', 'jdoe', 'please', 'password', 20000],
+    [18, 'C', 'Tan Ah Kau', 'tahkau', 'give', 'password', 20000],
+    [19, 'C', 'Lim Bee Bee', 'lbeebee', 'me', 'password', 5000],
+    [20, 'C', 'Kamal Lama', 'kamalama', 'an', 'password', 5000],
+    [21, 'C', 'Jaleney', 'jujuje', 'A', 'password', 10000],
+    [22, 'C', 'Lu Lu', 'lulu', 'for', 'password', 20000],
+    [23, 'C', 'Hebe Fu', 'youthefool', 'this', 'password', 15000],
+    [24, 'C', 'Shimmy shammy', 'shimsham', 'module', 'password', 20000]
 ];
 
 //(uid, name, username, salt, passwordHash)
@@ -29,32 +29,40 @@ const Riders = [
     [6, 'R', 'Bobby', 'worm', 'qwerty', '2222'],
     [7, 'R', 'Alfred', 'batman', 'ytrewq', '33333'],
     [8, 'R', 'Penny', 'penny555', 'wiwiwi', 'pppppp'],
+    [9, 'R', 'Hal', 'jordan', 'mustard', 'lantern'],
+    [10, 'R', 'Bruce', 'wayne', 'bat', 'richboi'],
+    [11, 'R', 'Diana', 'prince', 'wonder', 'woman'],
+    [12, 'R', 'Kalel', 'kent', 'super', 'man']
 ]
 
 //(uid)
 const FullTimers = [
     [5],
     [6],
+    [9],
+    [11]
 ]
 
 //(uid)
 const PartTimers = [
     [7],
     [8],
+    [10],
+    [12]
 ]
 
 const [Rates, Payouts, Receives] = generate_payouts_receives_rates(FullTimers, PartTimers, 2019, 1, 16, 12, 10)
 
 //(uid, name, username, salt, passwordHash)
 const Managers = [
-    [9, 'M', 'Martin', 'ihaveadream', 'hehehuhu', 'huhuhehe'],
-    [10, 'M', 'Victor', 'victory', 'lel1234', 'iamsecure'],
+    [13, 'M', 'Martin', 'ihaveadream', 'hehehuhu', 'huhuhehe'],
+    [14, 'M', 'Victor', 'victory', 'lel1234', 'iamsecure'],
 ];
 
 //(uid, name, username, salt, passwordHash, rid)
 const Staffs = [
-    [11, 'S', 'Macguire', 'flash', 'password11', 'safetosay', 1],
-    [12, 'S', 'Pom', 'iamvegan', 'password22', 'iambatman', 2],
+    [15, 'S', 'Macguire', 'flash', 'password11', 'safetosay', 1],
+    [16, 'S', 'Pom', 'iamvegan', 'password22', 'iambatman', 2],
 ];
 
 // (minSpending (in cents), rname)
@@ -333,7 +341,7 @@ const Frequents = [
     [4, 4, '2020-03-01 19:10:25-07']
 ];
 
-const {Collates, Orders, Reviews, Ratings} = generate_orders_collates_ratings_reviews(Customers, Restaurants, Addresses, Riders, Food, '2019-01-01', moment().format("YYYY-MM-DD"), 2, null)
+const {Collates, Orders, Reviews, Ratings} = generate_orders_collates_ratings_reviews(Customers, Restaurants, Addresses, Riders, Food, '2019-06-01', moment().format("YYYY-MM-DD"), null)
 
 // (shiftid, starttime1, endtime1, starttime2, endtime2)
 const Shifts = [
