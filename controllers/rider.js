@@ -42,8 +42,8 @@ const psGetAvailableOrders = new PS({
 
 const psGetCurrentOrder = new PS({
     name: 'get-current-order', text: `
-    Select distinct O.oid, R.rname, A1.streetname as rstreetname, A1.postalcode as rpostalcode,
-        A2.streetname as cstreetname, A2.postalcode as cpostalcode, O.finalprice + O.deliveryfee as totalprice, (
+    Select distinct O.oid, R.rname, A1.streetname || ' ' || A1.unit as raddress, A1.postalcode as rpostalcode,
+        A2.streetname || ' ' || A2.unit as caddress, A2.postalcode as cpostalcode, O.finalprice + O.deliveryfee as totalprice, (
             case
                 WHEN O.arriveatr IS NULL THEN '${orderStatuses.toRest}'
                 WHEN O.departfromr IS NULL THEN '${orderStatuses.waiting}'
@@ -336,10 +336,10 @@ async function getCurrentOrder(uid, lng, lat) {
     return {
         oid: order.oid,
         Restaurant: order.rname,
-        "Restaurant Address": order.rstreetname,
+        "Restaurant Address": order.raddress,
         rPostalCode: order.rpostalcode,
         "Distance To Restaurant": rDist,
-        "Customer Address": order.cstreetname,
+        "Customer Address": order.caddress,
         cPostalcode: order.cpostalcode,
         "Distance to Customer": cDist,
         "Total Price": order.totalprice,
