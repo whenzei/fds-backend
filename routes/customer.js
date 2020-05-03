@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { getMenu, getRestaurants, getRestaurantRating,
-    getRestaurantReviews } = require('../controllers/restaurant')
+    getRestaurantReviews, getFilteredRestaurants } = require('../controllers/restaurant')
 const { getFrequents, getAccountInfo, addCreditCard,
     removeCreditCard, getEligiblePromos } = require('../controllers/customer')
 const { addOrder, getOrders } = require('../controllers/orders')
@@ -16,6 +16,17 @@ router.get("/restaurants", async (req, res, next) => {
     let restaurants = []
     try {
         restaurants = await getRestaurants();
+    } catch (err) {
+        return next(err)
+    }
+    return res.send(restaurants);
+})
+
+router.get("/restaurants/search=:value", async (req, res, next) => {
+    let restaurants = []
+    try {
+        const searchVal = "%" + req.params.value + "%"
+        restaurants = await getFilteredRestaurants(searchVal);
     } catch (err) {
         return next(err)
     }

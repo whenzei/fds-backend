@@ -28,6 +28,14 @@ const psGetRestaurantReviews = new PS({
            )
            ORDER BY R.date desc`
 })
+const psGetFilteredRestaurants = new PS({
+    name: 'get-fitlered-restaurants',
+    text: `SELECT DISTINCT rid, minSpending, rname, addrId
+           FROM Food NATURAL JOIN Restaurants
+           WHERE fname ILIKE $1
+           OR rname ILIKE $1`
+});
+
 
 const psInsertFoodItem = new PS({ name: 'insert-food-item', text: 'INSERT INTO Food (fname, rid, price, category, dailyLimit) VALUES ($2, (SELECT rid FROM Staff WHERE uid = $1), ($3::FLOAT * 100), $4, $5);' });
 const psUpdateFoodItem = new PS({ name: 'update-food-item', text: 'UPDATE Food SET fname = $3, price = ($4::FLOAT * 100), category = $5, dailyLimit = $6, numOrders = $7 WHERE rid = (SELECT rid FROM Staff WHERE uid = $1) AND fname = $2;' });
@@ -63,6 +71,10 @@ const getRestaurantReviews = async (rid) => {
     return await db.any(psGetRestaurantReviews, [rid])
 }
 
+const getFilteredRestaurants = async (value) => {
+    return await db.any(psGetFilteredRestaurants, [value])
+}
+
 const insertFoodItem = async (uid, item) => {
     await db.none(psInsertFoodItem, [uid, item.fname, item.price, item.category, item.dailylimit]);
 }
@@ -81,5 +93,5 @@ const updateMinSpending = async (uid, minSpending) => {
 
 module.exports = {
     getRestaurants, getMenu, getRestaurant, getRestaurantRating, getRestaurantReviews,
-    getCuisines, insertFoodItem, updateFoodItem, deleteFoodItem, updateMinSpending, getMinSpending
+    getCuisines, insertFoodItem, updateFoodItem, deleteFoodItem, updateMinSpending, getMinSpending, getFilteredRestaurants
 }
