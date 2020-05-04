@@ -14,8 +14,8 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
     const currDate = moment(startDate + " 10")
     endDate = moment(endDate)
     const timestampFormat = "YYYY-MM-DD HH:mm"
+    let availRiders = new Set(Riders.map(rider => rider[0]))
     while (currDate < endDate || currDate.isSame(endDate, 'day')) {
-        let unavailRider = new Set()
 
         for (const customer of Customers) {
             // Customer: (uid, name, username, salt, passwordHash)
@@ -27,6 +27,7 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
                 for (let orderIdx = 0; orderIdx < dailyOrdersPerCustomer; orderIdx++) {
                     const restFood = Food.filter(food => food[0] == rid)
                     const numOfDistinctFood = _.random(1, restFood.length)
+                    const tempCollates = []
 
                     let totalPrice = 0
                     for (const food of _.sampleSize(restFood, numOfDistinctFood)) {
@@ -36,14 +37,19 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
                         const price = food[3] * qty
                         totalPrice += price
                         const collate = [food[1], rid, oid, price, qty]
-                        Collates.push(collate)
+                        tempCollates.push(collate)
                     }
 
                     // Orders: (oid, riderId, customerId, orderTime, deliveredTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, departFromR, finalPrice, addrId, pid)
                     const orderTime = currDate.clone().add(_.random(11), 'hour')
-                    let departForR = null, arriveAtR = null, departFromR = null, deliveredTime = null, rider = _.sample(Riders)[0];
+                    let departForR = null, arriveAtR = null, departFromR = null, deliveredTime = null, rider = null;
 
-                    if (currDate.isBefore(endDate) || !lastDayIncompleteOrders) {
+                    if (availRiders.size == 0) {
+                        continue
+                    }
+                    rider = _.sample(Array.from(availRiders))
+
+                    if (currDate.isBefore(endDate)) {
                         departForR = orderTime.clone().add(_.random(10), 'minute')
                         arriveAtR = departForR.clone().add(_.random(10), 'minute')
                         departFromR = arriveAtR.clone().add(_.random(10), 'minute')
@@ -65,12 +71,7 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
                             randInt = _.random(11)
                             deliveredTime = departFromR && randInt <= 10 ? departFromR.clone().add(randInt, 'minute') : null
 
-                            while (unavailRider.size != Riders.length && unavailRider.has(rider)) {
-                                rider = _.sample(Riders)[0]
-                            }
-                            if (unavailRider.length == Riders.length) {
-                                continue
-                            }
+                            rider = _.sample(Array.from(availRiders))
                         }
                     }
                     const isCod = _.random(1) > 0 
@@ -79,9 +80,10 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
                         departForR ? departForR.format(timestampFormat) : null, arriveAtR ? arriveAtR.format(timestampFormat) : null, departFromR ? departFromR.format(timestampFormat) : null,
                         totalPrice, _.sample(Addresses)[0], null, isCod]
                     Orders.push(order)
-                    if (rider != null) {
-                        unavailRider.add(rider)
+                    if (deliveredTime == null) {
+                        availRiders.delete(rider)
                     }
+                    tempCollates.forEach(c=>Collates.push(c))
 
                     // Rate delivered order (not on end date)
                     if (_.random(1, true) > ODDS_RATING && deliveredTime != null && !deliveredTime.isSame(endDate, 'day')) {
