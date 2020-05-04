@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const {getOrderSummary, getSalesSummary, getCustomerOrderSummary} = require('../../controllers/orders');
+const {getOrderSummary, getSalesSummary, getCustomerOrderSummary, getAreaOrderSummary} = require('../../controllers/orders');
 
 router.get('/orders-summary', async (req, res, next) => {
     let result;
@@ -30,6 +30,17 @@ router.get('/customer-order-summary/',
         result = await getCustomerOrderSummary(req.query);
     } catch (err) {
         return next(err);
+    }
+    return res.send(result);
+})
+
+router.get('/area-order-summary/',
+    async (req, res, next) => {
+    let result;
+    try {
+        result = await getAreaOrderSummary();
+    } catch (err) {
+        return next(err)
     }
     return res.send(result);
 })
