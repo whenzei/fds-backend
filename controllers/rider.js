@@ -217,8 +217,8 @@ const psGetPTSalaryInfo = new PS({
 
 const psGetRiderRatingInfo = new PS({
     name:"rider-rating-info",
-    text: "SELECT uid, name, count(*), TRUNC(avg(value), 1) as avg_rating, date_part('year', date) as year, date_part('month', date) as month " +
-    "FROM ratings JOIN orders using(oid) JOIN riders on (riderid = uid) JOIN Users using(uid) " +
+    text: "SELECT uid, name, count(value), COALESCE(TRUNC(avg(value), 1), 0) as avg_rating, date_part('year', date) as year, date_part('month', date) as month " +
+    "FROM ratings JOIN orders using(oid) RIGHT JOIN riders on (riderid = uid) JOIN Users using(uid) " +
     "GROUP BY uid, name, year, month " +
     "ORDER BY uid, year, month;"
 });
@@ -237,7 +237,7 @@ const psGetRiderTotalOrdersAndAverageDeliveryTime = new PS({
                                         "date_part('month', deliveredtime) as month, riderid, " +
                                         "EXTRACT(EPOCH from deliveredtime - departfromr)/60 as deliverytime, deliveredtime, departfromr " +
                                         "FROM orders)\n" +
-    "SELECT riderid, name, month, year, avg(deliverytime) as average_mins, count(*) as total_orders_delivered " +
+    "SELECT riderid, name, month, year, round(CAST(avg(deliverytime) as numeric), 2) as average_mins, count(*) as total_orders_delivered " +
     "FROM Rider_Delivery_Time join Users on (riderid = uid) " +
     "GROUP BY riderid, name, year, month " +
     "HAVING year IS NOT NULL and month IS NOT NULL " +
