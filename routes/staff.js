@@ -1,20 +1,20 @@
 var express = require('express');
 var router = express.Router();
-const { getRestaurantId, getTotalOrdersAndCost, getMinMaxDate, getFoodCount, getPromoStats, getAllOrders, getRestaurantPromos, insertRestaurantPromos, updateRestaurantPromos, deleteRestaurantPromos } = require('../controllers/staff');
+const { getRestaurantInfo, getTotalOrdersAndCost, getMinMaxDate, getFoodCount, getPromoStats, getAllOrders, getRestaurantPromos, insertRestaurantPromos, updateRestaurantPromos, deleteRestaurantPromos } = require('../controllers/staff');
 const { getMinSpending, getCuisines, getMenu, insertFoodItem, updateFoodItem, deleteFoodItem, updateMinSpending } = require('../controllers/restaurant')
 const { check } = require('express-validator');
 const { validate } = require('../validate');
 
 router.get("/", (req, res) => { res.send(`Hi I'm ${req.user.name}. I'm a ${req.user.role}.`) });
 
-router.get("/get-rid", async (req, res, next) => {
-    let rid;
+router.get("/get-restaurant-info", async (req, res, next) => {
+    let restaurant_data;
     try {
-        rid = await getRestaurantId(req.user.uid);
+        restaurant_data = await getRestaurantInfo(req.user.uid);
     } catch (err) {
         return next(err);
     }
-    return res.send(rid);
+    return res.send(restaurant_data);
 });
 
 router.get("/order-summary/:rid",

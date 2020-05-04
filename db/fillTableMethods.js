@@ -180,28 +180,28 @@ async function addOrders(arr) {
         // (riderId), deliveredTime(4), departForR(7), arriveAtR(8), departFromR(9)
         if (arr[7] == null) {
             await db.none(
-                `Insert into Orders (oid, riderId, customerId, orderTime, deliveryFee, isDeliveryFeeWaived, finalPrice, addrId, pid) Values
-                (${arr[0]}, ${arr[1]}, ${arr[2]}, '${arr[3]}', ${arr[5]}, ${arr[6]}, ${arr[10]}, ${arr[11]}, ${arr[12]})`
+                `Insert into Orders (oid, riderId, customerId, orderTime, deliveryFee, isDeliveryFeeWaived, finalPrice, addrId, pid, isCod) Values
+                (${arr[0]}, ${arr[1]}, ${arr[2]}, '${arr[3]}', ${arr[5]}, ${arr[6]}, ${arr[10]}, ${arr[11]}, ${arr[12]}, ${arr[13]})`
             );
         } else if (arr[8] == null) {
             await db.none(
-                `Insert into Orders (oid, riderId, customerId, orderTime, deliveryFee, isDeliveryFeeWaived, departForR, finalPrice, addrId, pid) Values
-                (${arr[0]}, ${arr[1]}, ${arr[2]}, '${arr[3]}', ${arr[5]}, ${arr[6]}, '${arr[7]}', ${arr[10]}, ${arr[11]}, ${arr[12]})`
+                `Insert into Orders (oid, riderId, customerId, orderTime, deliveryFee, isDeliveryFeeWaived, departForR, finalPrice, addrId, pid, isCod) Values
+                (${arr[0]}, ${arr[1]}, ${arr[2]}, '${arr[3]}', ${arr[5]}, ${arr[6]}, '${arr[7]}', ${arr[10]}, ${arr[11]}, ${arr[12]}, ${arr[13]})`
             );
         } else if (arr[9] == null) {
             await db.none(
-                `Insert into Orders (oid, riderId, customerId, orderTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, finalPrice, addrId, pid) Values
-                (${arr[0]}, ${arr[1]}, ${arr[2]}, '${arr[3]}', ${arr[5]}, ${arr[6]}, '${arr[7]}', '${arr[8]}', ${arr[10]}, ${arr[11]}, ${arr[12]})`
+                `Insert into Orders (oid, riderId, customerId, orderTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, finalPrice, addrId, pid, isCod) Values
+                (${arr[0]}, ${arr[1]}, ${arr[2]}, '${arr[3]}', ${arr[5]}, ${arr[6]}, '${arr[7]}', '${arr[8]}', ${arr[10]}, ${arr[11]}, ${arr[12]}, ${arr[13]})`
             );
         } else if (arr[4] == null) {
             await db.none(
-                `Insert into Orders (oid, riderId, customerId, orderTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, departFromR, finalPrice, addrId, pid) Values
-                (${arr[0]}, ${arr[1]}, ${arr[2]}, '${arr[3]}', ${arr[5]}, ${arr[6]}, '${arr[7]}', '${arr[8]}', '${arr[9]}', ${arr[10]}, ${arr[11]}, ${arr[12]})`
+                `Insert into Orders (oid, riderId, customerId, orderTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, departFromR, finalPrice, addrId, pid, isCod) Values
+                (${arr[0]}, ${arr[1]}, ${arr[2]}, '${arr[3]}', ${arr[5]}, ${arr[6]}, '${arr[7]}', '${arr[8]}', '${arr[9]}', ${arr[10]}, ${arr[11]}, ${arr[12]}, ${arr[13]})`
             );
         } else {
             await db.none(
-                `Insert into Orders (oid, riderId, customerId, orderTime, deliveredTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, departFromR, finalPrice, addrId, pid) Values
-            (${arr[0]}, ${arr[1]}, ${arr[2]}, '${arr[3]}', '${arr[4]}', ${arr[5]}, ${arr[6]}, '${arr[7]}', '${arr[8]}', '${arr[9]}', ${arr[10]}, ${arr[11]}, ${arr[12]})`
+                `Insert into Orders (oid, riderId, customerId, orderTime, deliveredTime, deliveryFee, isDeliveryFeeWaived, departForR, arriveAtR, departFromR, finalPrice, addrId, pid, isCod) Values
+            (${arr[0]}, ${arr[1]}, ${arr[2]}, '${arr[3]}', '${arr[4]}', ${arr[5]}, ${arr[6]}, '${arr[7]}', '${arr[8]}', '${arr[9]}', ${arr[10]}, ${arr[11]}, ${arr[12]}, ${arr[13]})`
             );
         }
     } catch (error) {

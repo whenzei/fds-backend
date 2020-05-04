@@ -4,7 +4,7 @@ const PS = require('pg-promise').PreparedStatement;
 
 const psGetStaff = new PS({ name: 'get-staff', text: 'SELECT * FROM Staff WHERE uid = $1;' });
 
-const psGetRestaurantId = new PS({ name: 'get-restaurant-id', text: 'SELECT rid FROM Staff WHERE uid = $1;' });
+const psGetRestaurantInfo = new PS({ name: 'get-restaurant-info', text: 'SELECT S.rid, (SELECT rname FROM Restaurants R WHERE R.rid = S.rid) as rname FROM Staff S WHERE S.uid = $1;' });
 
 const psGetTotalOrdersAndCost = new PS({ name: 'get-total-orders-and-cost', text:
 `
@@ -44,7 +44,7 @@ WITH FoodFreq AS (
 SELECT fname, totalQty
 FROM FoodFreq
 WHERE mth = $2 AND yr = $3
-ORDER BY totalQty ASC, fname, ASC
+ORDER BY totalQty ASC, fname ASC
 LIMIT $4;
 `});
 
@@ -70,21 +70,22 @@ WITH OrderRestaurantPair AS (
     FROM Collates natural join Orders
 ),
 RidToName AS (
-    SELECT uid as riderId, name as rname
+    SELECT uid as riderId, name as riderName
     FROM Riders natural join Users
 ),
 CidToName AS (
     SELECT uid as customerId, name as cname
     FROM Customers natural join Users
 )
-SELECT oid, rname, cname, orderTime, deliveredTime, finalPrice, (SELECT array_agg(fname) FROM COLLATES C WHERE C.oid = X.oid) as itemsOrdered,
+SELECT oid, riderName, cname, orderTime, deliveredTime, finalPrice, (SELECT array_agg(fname) FROM COLLATES C WHERE C.oid = X.oid) as itemsOrdered,
 case
+    when riderId IS NULL then 'Not Assigned'
+    when departForR IS NULL OR arriveAtR IS NULL OR departFromR IS NULL then 'Awaiting Pick Up'
+    when deliveredTime IS NULL then 'Delivery in Progress'
     when deliveredTime IS NOT NULL then 'Delivered'
-    when departFromR IS NOT NULL then 'Delivery in Progress'
-    when riderId IS NOT NULL AND arriveAtR IS NULL then 'Awaiting Pick Up'
-    else 'Not Assigned'
+    else 'Error'
 end as status
-FROM (Orders natural join OrderRestaurantPair join RidToName using (riderId) join CidToName using (customerId)) as X
+FROM ((Orders natural join OrderRestaurantPair) left join RidToName using (riderId) join CidToName using (customerId)) as X
 WHERE rid = $1
 ORDER BY orderTime DESC, deliveredTime DESC;`});
 
@@ -112,8 +113,8 @@ const getStaff = async () => {
     return await db.any(psGetStaff, [uid]);
 };
 
-const getRestaurantId = async (uid) => {
-    return await db.one(psGetRestaurantId, [uid]);
+const getRestaurantInfo = async (uid) => {
+    return await db.one(psGetRestaurantInfo, [uid]);
 };
 
 const getTotalOrdersAndCost = async (rid) => {
@@ -166,6 +167,6 @@ const deleteRestaurantPromos = async (pid, uid) => {
 };
 
 module.exports = {
-    getStaff, getRestaurantId, getTotalOrdersAndCost, getFoodCount, getMinMaxDate, getPromoStats, getAllOrders, getRestaurantPromos,
+    getStaff, getRestaurantInfo, getTotalOrdersAndCost, getFoodCount, getMinMaxDate, getPromoStats, getAllOrders, getRestaurantPromos,
     updateRestaurantPromos, deleteRestaurantPromos, insertRestaurantPromos
 }

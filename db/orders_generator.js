@@ -74,10 +74,11 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
                             rider = _.sample(Array.from(availRiders))
                         }
                     }
-                    
+                    const isCod = _.random(1) > 0 
                     // generate different secnarios: not assigned (a rider), awaiting pick up, delivery in progress and delivered
                     const order = [oid++, rider, customer[0], orderTime.format(timestampFormat), deliveredTime ? deliveredTime.format(timestampFormat) : null, deliveryFee, isDeliveryFeeWaived,
-                    departForR ? departForR.format(timestampFormat) : null, arriveAtR ? arriveAtR.format(timestampFormat) : null, departFromR ? departFromR.format(timestampFormat) : null, totalPrice, _.sample(Addresses)[0], null]
+                        departForR ? departForR.format(timestampFormat) : null, arriveAtR ? arriveAtR.format(timestampFormat) : null, departFromR ? departFromR.format(timestampFormat) : null,
+                        totalPrice, _.sample(Addresses)[0], null, isCod]
                     Orders.push(order)
                     if (deliveredTime == null) {
                         availRiders.delete(rider)
