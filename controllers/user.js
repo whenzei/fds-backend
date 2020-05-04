@@ -16,6 +16,16 @@ const psGetRole = new PS({
             else null
         end as role FROM Users`
 });
+const psAddUser = new PS({
+    name: 'add-user',
+    text: `INSERT INTO Users(name, userName, salt, passwordHash)
+           VALUES ($1, $2, 'salt', $3) RETURNING uid`
+});
+const psAddCustomer = new PS({
+    name: 'add-customer',
+    text: `INSERT INTO Customers(uid, points) VALUES ($1, $2)`
+})
+
 
 const getUsers = async function () {
     return await db.any(psGetUsers);
@@ -44,6 +54,19 @@ const getNextUid = async () => {
     return uid;
 }
 
+const addCustomer = async (customer) => {
+    try {
+        await db.tx(async t => {
+            const qAddUser = await t.one(psAddUser,
+                [customer.name, customer.username, customer.password])
+            const addCustomer = t.none(psAddCustomer, [qAddUser.uid, 0]);
+            t.batch([addCustomer]);
+        });
+    } catch (err) {
+        throw "User exists";
+    }
+}
+
 module.exports = {
-    getUsers, getRole: getRole, getUserByUid, getUserByUsername, getNextUid
+    getUsers, getRole: getRole, getUserByUid, getUserByUsername, getNextUid, addCustomer
 }
