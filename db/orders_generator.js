@@ -126,7 +126,6 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
         }
 
         currDate.add(1, 'day')
-
     }
     return {
         Orders,
@@ -154,7 +153,6 @@ function generate_promos(startDate, endDate, Restaurants) {
         monthIntervals.push({ start: currDate.startOf('month').format(dateFormat), end: currDate.endOf('month').format(dateFormat) })
         currDate.add(1, 'month')
     }
-
 
     // Gen global promo
     for (const monthInterval of monthIntervals) {
@@ -185,7 +183,6 @@ function generate_promos(startDate, endDate, Restaurants) {
             RestaurantPromos.push(promo)
         }
     }
-
 
     return {
         GlobalPromos, RestaurantPromos
@@ -223,14 +220,9 @@ function eligiblePromos(rid, orderTime, totalPrice, lastOrderDate, RestaurantPro
     }
 
     // RestaurantPromos (pid, rid, points, startDate, endDate, percentOff, minSpending, monthsWithNoOrders)
-
     for (const promo of RestaurantPromos) {
         const startDate = moment(promo[3])
         const endDate = moment(promo[4])
-        // if (!lastOrderDate.clone().add(promo[7], 'month').isBefore(orderTime)) {
-        //     console.log(lastOrderDate.format("YYYY-MM-DD"), orderTime.format("YYYY-MM-DD"))
-        //     break
-        // }
         if (rid == promo[1]
             && orderTime.isAfter(startDate) && orderTime.isBefore(endDate)
             && totalPrice >= promo[6]
