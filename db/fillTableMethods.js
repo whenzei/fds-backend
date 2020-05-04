@@ -112,15 +112,14 @@ async function addFood(arr) {
 
 async function addGlobalPromotion(arr) {
     try {
-        await db.tx(async t => {
-            const q1 = await t.one(
-                `Insert into Promotions (points, startDate, endDate, percentOff, minSpending, monthsWithNoOrders) Values
-                (${arr[2]}, '${arr[3]}', '${arr[4]}', ${arr[5]}, ${arr[6]}, ${arr[7]}) RETURNING pid`, a => a.pid);
-            const q2 = await t.none(
-                `Insert into GlobalPromos (pid) Values
-                (${q1.pid})`);
-            return t.batch([q1, q2]);
-        });
+        await db.none(
+            `Insert into Promotions (pid, points, startDate, endDate, percentOff, minSpending, monthsWithNoOrders) Values
+            (${arr[0]}, ${arr[1]}, '${arr[2]}', '${arr[3]}', ${arr[4]}, ${arr[5]}, ${arr[6]})`
+        );
+        await db.none(
+            `Insert into GlobalPromos (pid) Values
+            (${arr[0]})`
+        );
     } catch (error) {
         console.log(error, 'Failed to add global promotions');
     }
@@ -128,15 +127,14 @@ async function addGlobalPromotion(arr) {
 
 async function addRestaurantPromotion(arr) {
     try {
-        await db.tx(async t => {
-            const q1 = await t.one(
-                `Insert into Promotions (points, startDate, endDate, percentOff, minSpending, monthsWithNoOrders) Values
-                (${arr[3]}, '${arr[4]}', '${arr[5]}', ${arr[6]}, ${arr[7]}, ${arr[8]}) RETURNING pid`, a => a.pid);
-            const q2 = await t.none(
-                `Insert into RestaurantPromos (pid, rid) Values
-                (${q1.pid}, ${arr[2]})`);
-            return t.batch([q1, q2]);
-        });
+        await db.none(
+            `Insert into Promotions (pid, points, startDate, endDate, percentOff, minSpending, monthsWithNoOrders) Values
+            (${arr[0]}, ${arr[2]}, '${arr[3]}', '${arr[4]}', ${arr[5]}, ${arr[6]}, ${arr[7]})`
+        );
+        await db.none(
+            `Insert into RestaurantPromos (pid, rid) Values
+            (${arr[0]}, ${arr[1]})`
+        );
     } catch (error) {
         console.log(error, 'Failed to add restaurant promotions');
     }

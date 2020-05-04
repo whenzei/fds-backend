@@ -233,35 +233,6 @@ const Food = [
     [17, 'House Grilled Chicken', 'Western', '1900', '200'],
 ]
 
-// (pid, points, startDate, endDate, percentOff, minSpending (in cents), monthsWithNoOrders)
-const GlobalPromotions = [
-    // 10% off all orders for one month with min spend $30
-    [1, 'G', 0, '2018-06-01', '2019-07-01', 10, 1000, 0],
-    [2, 'G', 0, '2019-06-01', '2019-07-01', 10, 3000, 0],
-    [3, 'G', 0, '2019-06-01', '2019-07-01', 15, 3000, 2],
-    [4, 'G', 25, '2019-05-01', '2019-06-01', 0, 0, 0],
-    [5, 'G', 35, '2019-05-01', '2019-06-01', 0, 0, 3],
-    [15, 'G', 35, '2020-01-01', '2020-07-07', 10, 0, 3],
-    [16, 'G', 100, '2020-01-01', '2020-09-02', 5, 0, 0],
-    [17, 'G', 100, '2020-01-01', '2020-05-03', 15, 0, 2],
-    [18, 'G', 50, '2020-01-01', '2020-07-07', 20, 300, 1],
-    [19, 'G', 70, '2020-01-01', '2020-08-07', 25, 0, 3],
-    [20, 'G', 1000, '2020-01-01', '2020-09-07', 0, 500, 0]
-];
-
-// (pid, rid, points, startDate, endDate, percentOff, minSpending (in cents), monthsWithNoOrders)
-const RestaurantPromotions = [
-    [6, 'R', 2, 0, '2019-06-01', '2019-07-01', 15, 3500, 0],
-    [7, 'R', 2, 0, '2019-06-01', '2019-07-01', 15, 3500, 0],
-    [8, 'R', 2, 25, '2019-05-01', '2019-06-01', 0, 0, 0],
-    [9, 'R', 4, 0, '2019-06-01', '2019-07-01', 10, 3000, 1],
-    [10, 'R', 2, 10, '2019-05-01', '2019-11-01', 0, 0, 3],
-    [11, 'R', 2, 10, '2019-10-01', '2019-12-01', 0, 0, 0],
-    [12, 'R', 1, 0, '2020-01-01', '2020-12-12', 20, 0, 0],
-    [13, 'R', 1, 20, '2020-03-03', '2020-10-10', 10, 1000, 0],
-    [14, 'R', 1, 200, '2020-02-02', '2020-09-09', 5, 0, 2],
-];
-
 const Addresses = [
     //1 
     [1, '12-34', '77 TREVOSE CRESCENT', 298091],
@@ -341,7 +312,7 @@ const Frequents = [
     [4, 4, '2020-03-01 19:10:25-07']
 ];
 
-const {Collates, Orders, Reviews, Ratings} = generate_orders_collates_ratings_reviews(Customers, Restaurants, Addresses, Riders, Food, '2019-06-01', moment().format("YYYY-MM-DD"), null)
+const {Collates, Orders, Reviews, Ratings, GlobalPromos, RestaurantPromos} = generate_orders_collates_ratings_reviews(Customers, Restaurants, Addresses, Riders, Food, '2019-06-01', moment().format("YYYY-MM-DD"))
 
 // (shiftid, starttime1, endtime1, starttime2, endtime2)
 const Shifts = [
@@ -438,15 +409,12 @@ async function fill() {
         await addReceive(receive)
     }
 
-    let promos = [...GlobalPromotions, ...RestaurantPromotions];
-    promos = promos.sort(Comparator);
-    for (const promo of promos) {
-        let type = promo[1];
-        if (type === 'G') {
-            await addGlobalPromotion(promo);
-        } else if (type === 'R') {
-            await addRestaurantPromotion(promo);
-        }
+    for (const globPromo of GlobalPromos) {
+        await addGlobalPromotion(globPromo)
+    }
+
+    for (const restPromo of RestaurantPromos) {
+        await addRestaurantPromotion(restPromo)
     }
 
     for (const rec of Frequents) {
