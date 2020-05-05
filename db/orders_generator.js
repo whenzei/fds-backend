@@ -21,8 +21,15 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
         return map
     }, {})
     let availRiders = new Set(Riders.map(rider => rider[0]))
+    let month = currDate.month()
+    const totalMonths = endDate.diff(currDate, 'months')
+    let monthsPassed = 0;
     while (currDate < endDate || currDate.isSame(endDate, 'day')) {
-
+        if (month != currDate.month()) {
+            month = currDate.month()
+            monthsPassed++
+            console.log(Math.round(monthsPassed / totalMonths * 100) + "%")
+        }
         for (const customer of Customers) {
             // Customer: (uid, name, username, salt, passwordHash)
             const uid = customer[0]
