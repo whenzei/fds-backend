@@ -77,7 +77,7 @@ CidToName AS (
     SELECT uid as customerId, name as cname
     FROM Customers natural join Users
 )
-SELECT oid, riderName, cname, orderTime, deliveredTime, finalPrice, (SELECT array_agg(fname) FROM COLLATES C WHERE C.oid = X.oid) as itemsOrdered,
+SELECT oid, riderName, cname, orderTime, deliveredTime, finalPrice, pid, (SELECT array_agg(fname) FROM COLLATES C WHERE C.oid = X.oid) as itemsOrdered,
 case
     when riderId IS NULL then 'Not Assigned'
     when departForR IS NULL OR arriveAtR IS NULL OR departFromR IS NULL then 'Awaiting Pick Up'
