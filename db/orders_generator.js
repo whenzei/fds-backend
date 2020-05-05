@@ -138,7 +138,7 @@ function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addres
 }
 
 function generate_promos(startDate, endDate, Restaurants) {
-    const ODDS_MONTHLY_REST_PROMO = 0.5;
+    const ODDS_MONTHLY_REST_PROMO = 0.99;
     const ODDS_MONTHLY_GLOBAL_PROMO = 0.5;
     // RestaurantPromos (pid, rid, points, startDate, endDate, percentOff, minSpending, monthsWithNoOrders)
     const RestaurantPromos = []
@@ -162,7 +162,7 @@ function generate_promos(startDate, endDate, Restaurants) {
         }
         const points = _.random(100)
         const percentOff = _.sample([10, 20, 50])
-        const minSpending = _.sample([1500, 25000, 50000])
+        const minSpending = _.sample([1500, 2500, 5000, 10000])
         const monthsWithNoOrders = _.sample([0, 3, 12, 100])
         const promo = [pid++, points, monthInterval.start, monthInterval.end, percentOff, minSpending, monthsWithNoOrders]
         GlobalPromos.push(promo)
@@ -177,7 +177,7 @@ function generate_promos(startDate, endDate, Restaurants) {
             }
             const points = _.random(100)
             const percentOff = _.sample([10, 20, 50])
-            const minSpending = _.sample([1500, 25000, 50000])
+            const minSpending = _.sample([1500, 2500, 5000, 10000])
             const monthsWithNoOrders = _.sample([0, 3, 12, 100])
             const promo = [pid++, rest[0], points, monthInterval.start, monthInterval.end, percentOff, minSpending, monthsWithNoOrders]
             RestaurantPromos.push(promo)
