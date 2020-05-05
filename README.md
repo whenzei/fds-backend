@@ -4,8 +4,8 @@ Written in Javascript with ExpressJs.
 # Database credentials setup ( :heavy_exclamation_mark: Must be done first)
 * Put your Postgres password in db/index.js.
 
-# Quick start
-Double click run_backend.bat to quickly fulfill dependencies and start the backend server (Make sure to setup database credentials first)
+# Auto installation
+Double click `run_backend.bat` to quickly fulfill dependencies and start the backend server ( :heavy_exclamation_mark: Make sure to setup database credentials first)
 
 # Manual installation
 ## 1. Node setup
@@ -13,7 +13,7 @@ Double click run_backend.bat to quickly fulfill dependencies and start the backe
 * Run `npm install` to install the node modules.
 
 ## 2. Database setup
-* Run `node nuke.js` to init db, apply schema and generate dummy data
+* Run `node db/nuke.js` to init db, apply schema and generate dummy data
 
 ## 3. Run server
 * Run `npm run dev` to get the application running on your machine.  
