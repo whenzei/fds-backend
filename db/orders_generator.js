@@ -3,6 +3,7 @@ const _ = require('lodash')
 
 function generate_orders_collates_ratings_reviews(Customers, Restaurants, Addresses, Riders, Food, startDate, endDate, deliveryFee = 300,
     isDeliveryFeeWaived = false, lastDayIncompleteOrders = true) {
+    console.log("Generating Orders, Collates, Ratings, Reviews and Promotions...Might take a few minutes")
     const ODDS_RATING = 0.5;
     const ODDS_REVIEW = 0.5;
     const MAX_NUM_FOOD_ITEM_IN_ORDER = 5;
