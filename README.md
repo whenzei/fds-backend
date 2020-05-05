@@ -2,7 +2,7 @@ Backend Application for Food Delivery Service.
 Written in Javascript with ExpressJs.  
 
 # Database credentials setup ( :heavy_exclamation_mark: Must be done first)
-* Put your Postgres username and password in db/index.js. Default username is postgres.
+* Put your Postgres password in db/index.js.
 
 # Quick start
 Double click run_backend.bat to quickly fulfill dependencies and start the backend server (Make sure to setup database credentials first)
