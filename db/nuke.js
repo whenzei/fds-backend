@@ -19,7 +19,7 @@ async function main() {
 
 if (require.main === module) {
     main().then(() => {
-        console.log("NUKED!!!")
+        console.log("Data reset complete")
         process.exit()
     })
 }

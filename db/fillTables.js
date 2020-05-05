@@ -312,7 +312,7 @@ const Frequents = [
     [4, 4, '2020-03-01 19:10:25-07']
 ];
 
-const {Collates, Orders, Reviews, Ratings, GlobalPromos, RestaurantPromos} = generate_orders_collates_ratings_reviews(Customers, Restaurants, Addresses, Riders, Food, '2019-06-01', moment().format("YYYY-MM-DD"))
+const { Collates, Orders, Reviews, Ratings, GlobalPromos, RestaurantPromos } = generate_orders_collates_ratings_reviews(Customers, Restaurants, Addresses, Riders, Food, '2019-06-01', moment().format("YYYY-MM-DD"))
 
 // (shiftid, starttime1, endtime1, starttime2, endtime2)
 const Shifts = [
@@ -361,7 +361,9 @@ function Comparator(a, b) {
 }
 
 async function fill() {
-    await deleteTables().then(() => console.log('Tables cleared'));
+    await deleteTables();
+    console.log("Tables cleared")
+    console.log("Filling tables...")
 
     for (const addr of Addresses) {
         await addAddress(addr);
