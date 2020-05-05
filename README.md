@@ -8,14 +8,13 @@ Written in Javascript with ExpressJs.
 Double click `run_backend.bat` to quickly fulfill dependencies and start the backend server ( :heavy_exclamation_mark: Make sure to setup database credentials first)
 
 # Manual installation
-## 1. Node setup
-* Ensure that latest version of Node is installed
-* Run `npm install` to install the node modules.
+``` bash
+# install dependencies
+npm install
 
-## 2. Database setup
-* Run `node db/nuke.js` to init db, apply schema and generate dummy data
+# Setup database and fill with dummy data
+node db/nuke.js
 
-## 3. Run server
-* Run `npm run dev` to get the application running on your machine.  
-(Check that it is up and running on [http://localhost:8000](http://localhost:8000) )
-
+# Run server on localhost:8000
+npm run dev
+```
