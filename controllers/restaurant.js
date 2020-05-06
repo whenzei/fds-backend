@@ -4,6 +4,7 @@ const PS = require('pg-promise').PreparedStatement;
 const psGetRestaurants = new PS({ name: 'get-retaurants', text: 'SELECT * FROM Restaurants' })
 const psGetMenu = new PS({ name: 'get-menu', text: 'SELECT * FROM Food WHERE rid = $1 ORDER BY fname' });
 const psGetRestaurant = new PS({ name: 'get-restaurant', text: 'SELECT * FROM Restaurants WHERE rid = $1' });
+const psGetRestaurantWithAddress = new PS({ name: 'get-restaurant-address', text: 'SELECT * FROM Restaurants join Address using(addrid)' });
 const psGetCuisines = new PS({ name: 'get-cuisines', text: 'SELECT unnest(enum_range(NULL::CUISINE_ENUM))' });
 const psGetRestaurantRating = new PS({
     name: 'get-res-rating',
@@ -36,6 +37,13 @@ const psGetFilteredRestaurants = new PS({
            OR rname ILIKE $1`
 });
 
+const psDeleteRestaurant = new PS({
+    name:'delete-restaurant', text: `DELETE FROM Restaurants WHERE rid=$1`
+});
+
+const psUpdateRestaurant = new PS({
+    name:'update-restaurant', text: `UPDATE Restaurants SET minspending = $3, rname = $2, addrId = $4 WHERE rid = $1`
+});
 
 const psInsertFoodItem = new PS({ name: 'insert-food-item', text: 'INSERT INTO Food (fname, rid, price, category, dailyLimit) VALUES ($2, (SELECT rid FROM Staff WHERE uid = $1), ($3::FLOAT * 100), $4, $5);' });
 const psUpdateFoodItem = new PS({ name: 'update-food-item', text: 'UPDATE Food SET fname = $3, price = ($4::FLOAT * 100), category = $5, dailyLimit = $6, numOrders = $7 WHERE rid = (SELECT rid FROM Staff WHERE uid = $1) AND fname = $2;' });
@@ -55,6 +63,9 @@ const getRestaurant = async (rid) => {
     return await db.oneOrNone(psGetRestaurant, [rid])
 }
 
+const getRestaurantWithAddress = async() => {
+    return await db.any(psGetRestaurantWithAddress)
+}
 const getMinSpending = async (rid) => {
     return await db.one(psGetMinSpending, [rid]);
 };
@@ -91,7 +102,17 @@ const updateMinSpending = async (uid, minSpending) => {
     await db.none(psUpdateMinSpending, [uid, minSpending]);
 }
 
+const deleteRestaurant = async (rid) => {
+    await db.none(psDeleteRestaurant, [rid]);
+}
+
+const updateRestaurant = async (restaurant) => {
+    console.log(restaurant)
+    await db.none(psUpdateRestaurant, [restaurant.rid, restaurant.rname, restaurant.minspending, restaurant.addrid]);
+}
+
 module.exports = {
     getRestaurants, getMenu, getRestaurant, getRestaurantRating, getRestaurantReviews,
-    getCuisines, insertFoodItem, updateFoodItem, deleteFoodItem, updateMinSpending, getMinSpending, getFilteredRestaurants
+    getCuisines, insertFoodItem, updateFoodItem, deleteFoodItem, updateMinSpending, getMinSpending, getFilteredRestaurants,
+    deleteRestaurant, updateRestaurant, getRestaurantWithAddress
 }
