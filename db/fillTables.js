@@ -63,7 +63,6 @@ const Managers = [
 const Staffs = [
     [15, 'S', 'Macguire', 'flash', 'password11', 'safetosay', 1],
     [16, 'S', 'Pom', 'iamvegan', 'password22', 'iambatman', 2],
-
     [17, 'S', 'human1', 'human1', 'password22', 'human1', 3],
     [18, 'S', 'human2', 'human2', 'password22', 'human2', 4],
     [19, 'S', 'human3', 'human3', 'password22', 'human3', 5],
