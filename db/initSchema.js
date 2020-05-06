@@ -191,7 +191,7 @@ TRIGGERS = {
         /*check if total number of hours in each WWS is at least 10 and at most 48*/
         SELECT sum(endTime - startTime) INTO totalHours
             FROM PTSchedules
-            WHERE NEW.uid = uid AND date_part('year', date::date) = date_part('year', NEW.date::date) AND date_part('week', date::date) = date_part('week', NEW.date::date);
+            WHERE NEW.uid = uid AND date_part('isoyear', date::date) = date_part('isoyear', NEW.date::date) AND date_part('week', date::date) = date_part('week', NEW.date::date);
         
             IF totalHours < 10 OR  totalHours > 48 THEN
                 RAISE EXCEPTION 'Total number of hours for each part time rider must be at least 10 and at most 48 hours.';
