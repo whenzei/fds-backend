@@ -6,6 +6,8 @@ const logger = require('morgan');
 const strategies = require('./auth/strategies');
 const passport = require('passport')
 const cors = require('cors');
+var compression = require('compression');
+var helmet = require('helmet');
 
 const customerRouter = require('./routes/customer');
 const customerSignupRouter = require('./routes/customerSignup');
@@ -18,6 +20,8 @@ const signupBusinessRouter = require('./routes/signupBusiness');
 
 const port = process.env.PORT || "8000";
 
+app.use(compression()); //Compress all routes
+app.use(helmet());
 app.use(cors());
 app.use(session({ secret: "lalalalala" }));
 app.use(bodyParser.urlencoded({ extended: false }));
