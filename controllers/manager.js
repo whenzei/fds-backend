@@ -97,7 +97,7 @@ const addPromo = async (promo) => {
         }
         promoData = [promo.startdate, promo.enddate, promo.points, promo.percentoff, promo.minspending, promo.monthswithnoorders];
         const q1 = await db.one(psInsertPromo, promoData);
-        await db.any(psInsertGlobalPromo, [q1.pid]);
+        await db.none(psInsertGlobalPromo, [q1.pid]);
 
     } catch (err) {
         throw (err, "Promotion could not be added");
@@ -110,7 +110,7 @@ const editPromo = async (promo) => {
             return;
         }
         promoData = [promo.pid, promo.startdate, promo.enddate, promo.points, promo.percentoff, promo.minspending, promo.monthswithnoorders];
-        await db.any(psEditGlobalPromo, promoData);
+        await db.none(psEditGlobalPromo, promoData);
 
     } catch (err) {
         throw (err);

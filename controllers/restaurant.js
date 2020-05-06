@@ -107,7 +107,6 @@ const deleteRestaurant = async (rid) => {
 }
 
 const updateRestaurant = async (restaurant) => {
-    console.log(restaurant)
     await db.none(psUpdateRestaurant, [restaurant.rid, restaurant.rname, restaurant.minspending, restaurant.addrid]);
 }
 
