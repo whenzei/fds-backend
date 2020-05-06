@@ -13,14 +13,14 @@ const Customers = [
     [2, 'C', 'zhow qing tian', 'zhow', 'pepper', 'asdsad', 1000],
     [3, 'C', 'staff of wizardry', 'Knack2Babee', 'SeaSalt', '123', 500],
     [4, 'C', 'the fork on the left', 'oheehee', 'Mother', 'Father', 20000],
-    [17, 'C', 'John Doe', 'jdoe', 'please', 'password', 20000],
-    [18, 'C', 'Tan Ah Kau', 'tahkau', 'give', 'password', 20000],
-    [19, 'C', 'Lim Bee Bee', 'lbeebee', 'me', 'password', 5000],
-    [20, 'C', 'Kamal Lama', 'kamalama', 'an', 'password', 5000],
-    [21, 'C', 'Jaleney', 'jujuje', 'A', 'password', 10000],
-    [22, 'C', 'Lu Lu', 'lulu', 'for', 'password', 20000],
-    [23, 'C', 'Hebe Fu', 'youthefool', 'this', 'password', 15000],
-    [24, 'C', 'Shimmy shammy', 'shimsham', 'module', 'password', 20000]
+    [32, 'C', 'John Doe', 'jdoe', 'please', 'password', 20000],
+    [33, 'C', 'Tan Ah Kau', 'tahkau', 'give', 'password', 20000],
+    [34, 'C', 'Lim Bee Bee', 'lbeebee', 'me', 'password', 5000],
+    [35, 'C', 'Kamal Lama', 'kamalama', 'an', 'password', 5000],
+    [36, 'C', 'Jaleney', 'jujuje', 'A', 'password', 10000],
+    [37, 'C', 'Lu Lu', 'lulu', 'for', 'password', 20000],
+    [38, 'C', 'Hebe Fu', 'youthefool', 'this', 'password', 15000],
+    [39, 'C', 'Shimmy shammy', 'shimsham', 'module', 'password', 20000]
 ];
 
 //(uid, name, username, salt, passwordHash)
@@ -63,6 +63,21 @@ const Managers = [
 const Staffs = [
     [15, 'S', 'Macguire', 'flash', 'password11', 'safetosay', 1],
     [16, 'S', 'Pom', 'iamvegan', 'password22', 'iambatman', 2],
+    [17, 'S', 'human1', 'human1', 'password22', 'human1', 3],
+    [18, 'S', 'human2', 'human2', 'password22', 'human2', 4],
+    [19, 'S', 'human3', 'human3', 'password22', 'human3', 5],
+    [20, 'S', 'human4', 'human4', 'password22', 'human4', 6],
+    [21, 'S', 'human5', 'human5', 'password22', 'human5', 7],
+    [22, 'S', 'human6', 'human6', 'password22', 'human6', 8],
+    [23, 'S', 'human7', 'human7', 'password22', 'human7', 9],
+    [24, 'S', 'human8', 'human8', 'password22', 'human8', 10],
+    [25, 'S', 'human9', 'human9', 'password22', 'human9', 11],
+    [26, 'S', 'human10', 'human10', 'password22', 'human10', 12],
+    [27, 'S', 'human11', 'human11', 'password22', 'human11', 13],
+    [28, 'S', 'human12', 'human12', 'password22', 'human12', 14],
+    [29, 'S', 'human13', 'human13', 'password22', 'human13', 15],
+    [30, 'S', 'human14', 'human14', 'password22', 'human14', 16],
+    [31, 'S', 'human15', 'human15', 'password22', 'human15', 17],
 ];
 
 // (minSpending (in cents), rname)
