@@ -11,7 +11,7 @@ async function main() {
         await fill();
         await setNextSerialKeys();
     } catch (e) {
-        console.log("Nuke stoped")
+        console.log("Encountered error. DB Init stopped")
         console.log(e)
         process.exit()
     }
@@ -19,7 +19,7 @@ async function main() {
 
 if (require.main === module) {
     main().then(() => {
-        console.log("Data reset complete")
+        console.log("DB Init complete")
         process.exit()
     })
 }
