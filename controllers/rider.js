@@ -215,6 +215,36 @@ const psGetPTSalaryInfo = new PS({
     `
 })
 
+const psGetRiderRatingInfo = new PS({
+    name:"rider-rating-info",
+    text: "SELECT uid, name, count(value), COALESCE(TRUNC(avg(value), 1), 0) as avg_rating, date_part('year', date) as year, date_part('month', date) as month " +
+    "FROM ratings JOIN orders using(oid) RIGHT JOIN riders on (riderid = uid) JOIN Users using(uid) " +
+    "GROUP BY uid, name, year, month " +
+    "ORDER BY uid, year, month;"
+});
+
+const psGetRiderSalaryInfo = new PS({
+    name:"rider-salary-summary",
+    text:"SELECT uid, name, month, year, sum(basesalary) + sum(commission) as totalSalary, sum(hoursclocked) as totalHours " +
+    "FROM receives natural join payout natural join users " +
+    "GROUP BY uid, name, year, month " +
+    "ORDER BY uid, year, month;\n"
+});
+
+const psGetRiderTotalOrdersAndAverageDeliveryTime = new PS({
+    name:"rider-total-orders-average-delivery-time",
+    text:" with Rider_Delivery_Time as (SELECT oid, date_part('year', deliveredtime) as year, " +
+                                        "date_part('month', deliveredtime) as month, riderid, " +
+                                        "EXTRACT(EPOCH from deliveredtime - departfromr)/60 as deliverytime, deliveredtime, departfromr " +
+                                        "FROM orders)\n" +
+    "SELECT riderid, name, month, year, round(CAST(avg(deliverytime) as numeric), 2) as average_mins, count(*) as total_orders_delivered " +
+    "FROM Rider_Delivery_Time join Users on (riderid = uid) " +
+    "GROUP BY riderid, name, year, month " +
+    "HAVING year IS NOT NULL and month IS NOT NULL " +
+    "ORDER BY riderid, year, month;"
+});
+
+
 const psGetRating = new PS({
     name: 'get-rating', text: `
     select coalesce(avg(value), 0) as value, count(value) as count
@@ -417,6 +447,18 @@ async function getPTSalaryInfo(uid, year) {
     return await db.oneOrNone(psGetPTSalaryInfo, [uid, year]) || { weeks: [] }
 }
 
+async function getRiderSalaryInfo() {
+    return await db.any(psGetRiderSalaryInfo)
+}
+
+async function getRiderTotalOrdersAndAverageTime() {
+    return await db.any(psGetRiderTotalOrdersAndAverageDeliveryTime)
+}
+
+async function getRiderRatingInfo() {
+    return await db.any(psGetRiderRatingInfo)
+}
+
 async function getRating(uid) {
     return await db.one(psGetRating, uid)
 }
@@ -428,5 +470,6 @@ async function getSummaryInfo(uid, year) {
 module.exports = {
     getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule,
     RiderTypes, getPartTimeSchedule, getAvailableOrders, getCurrentOrder, selectOrder, updateOrderStatus, orderStatuses,
+    getGetFTSalaryInfo, getPTSalaryInfo, getRiderSalaryInfo, getRiderTotalOrdersAndAverageTime, getRiderRatingInfo,
     getGetFTSalaryInfo, getPTSalaryInfo, getRating, getSummaryInfo
 }
