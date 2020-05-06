@@ -210,8 +210,8 @@ const psGetPTSalaryInfo = new PS({
             )
         ) weeks
     from receives R natural join Payout P
-    where R.uid = $1 and R.year = $2
-    group by R.year
+    where R.uid = $1 and date_part('isoyear', P.startdate::date) = $2
+    group by date_part('isoyear', P.startdate::date)
     `
 })
 
