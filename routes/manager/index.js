@@ -1,7 +1,6 @@
 var router = require('express').Router();
 const {getCustomerSignups} = require('../../controllers/customer');
-const {getStaffRiderList, deleteUser, getGlobalPromos, addPromo, deleteGlobalPromo, editPromo, addRestaurants} = require('../../controllers/manager');
-const {getRestaurantWithAddress, deleteRestaurant, updateRestaurant} = require('../../controllers/restaurant');
+const {getStaffRiderList, deleteUser, getGlobalPromos, addPromo, deleteGlobalPromo, editPromo} = require('../../controllers/manager');
 
 
 router.get("/", (req, res) => res.send(`Hi I'm ${req.user.name}. I'm a ${req.user.role}.`))
@@ -34,44 +33,6 @@ router.post("/delete-user", async (req, res, next) => {
         return next(err);
     }
     return res.send(req.body.name.toString() + " deleted successfully.");
-})
-
-router.get("/get-restaurants", async (req, res, next) => {
-    let result;
-    try {
-        result = await getRestaurantWithAddress();
-    } catch (err) {
-        return next(err);
-    }
-    return res.send(result);
-})
-
-router.post("/delete-restaurant/:rid", async (req, res, next) => {
-    let result;
-    try {
-        result = await deleteRestaurant(req.params.rid);
-    } catch (err) {
-        return next(err);
-    }
-    return res.send(result);
-})
-
-router.post('/add-restaurant', async (req, res, next) => {
-    try {
-        const result = await addRestaurants(req.body.restaurant);
-    } catch (err) {
-        return next(err)
-}
-return res.send(req.body.restaurant.rname.toString() + " added successfully.");
-})
-
-router.post('/update-restaurant', async (req, res, next) => {
-    try {
-            const result = await updateRestaurant(req.body.restaurant);
-    } catch (err) {
-        return next(err)
-    }
-    return res.send(req.body.restaurant.rname.toString() + " added successfully.");
 })
 
 router.get("/global-promos", async (req, res, next) => {

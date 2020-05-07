@@ -23,10 +23,6 @@ const psInsertStaff = new PS({ name: 'insert-staff', text: `INSERT into Staff (u
 
 const psInsertRider = new PS({ name: 'insert-rider', text: `INSERT into Riders (uid) values ($1);` });
 
-const psInsertRestaurant = new PS({ name: 'insert-restaurant', text: `INSERT into Restaurants (rname, minspending, addrid) values
-($2, $1, $3);
-`});
-
 const psInsertPromo = new PS({ name: 'get-promo-by-id', text: ` 
 INSERT into Promotions (startDate, endDate, points, percentOff, minSpending, monthsWithNoOrders) values
 ($1, $2, $3, $4, ($5::FLOAT * 100) , $6) RETURNING pid;`
@@ -88,19 +84,6 @@ async function deleteUser(role, uid) {
     }
 }
 
-const addRestaurants = async (restaurant) => {
-    try {
-        if(restaurant == null) {
-            return;
-        }
-        restData = [parseInt(restaurant.minspending), restaurant.rname,parseInt(restaurant.addrid)];
-        await db.any(psInsertRestaurant, restData);
-        
-    } catch (err) {
-        throw (err, "Restaurant could not be added");
-    }
-}
-
 async function getGlobalPromos() {
     return await db.any(psGetGlobalPromo)
 }
@@ -141,5 +124,5 @@ async function deleteGlobalPromo(pid) {
 }
 
 module.exports = {
-    addUser, getStaffRiderList, deleteUser, addRestaurants, getGlobalPromos, addPromo, deleteGlobalPromo, editPromo
+    addUser, getStaffRiderList, deleteUser, getGlobalPromos, addPromo, deleteGlobalPromo, editPromo
 }
