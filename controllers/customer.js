@@ -40,7 +40,7 @@ const psGetElgiblePromos = new PS({
                     SELECT 1
                     FROM Orders
                     WHERE customerId = $2
-                    AND EXTRACT(MONTH FROM age(NOW(), orderTime)) <= coalesce(monthsWithNoOrders, 0) 
+                    AND EXTRACT(MONTH FROM age(NOW(), orderTime)) < coalesce(monthsWithNoOrders, 0) 
                 )
                 EXCEPT
                 SELECT pid, startDate, endDate, percentOff, minSpending, monthsWithNoOrders
