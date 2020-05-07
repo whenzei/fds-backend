@@ -1,6 +1,6 @@
 const user = {
     user: 'postgres',
-    password: 'Aditya@123'
+    password: 'postgres'
 }
 module.exports = {
     user
