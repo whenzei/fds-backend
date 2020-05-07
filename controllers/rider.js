@@ -135,6 +135,17 @@ const psDeleteWeeklySchedules = new PS({
     `
 })
 
+const psDeleteMonthlySchedule = new PS({
+    name: 'delete-monthly-ft-schedule', text: `
+    delete from
+        FTschedules F
+    where
+        uid = $1
+        and year = $2
+        and month = $3
+    `
+})
+
 const psInsertPTSchedule = new PS({
     name: 'insert-pt-schedule', text: `
     insert into ptschedules (uid, date, startTime, endTime)
@@ -216,32 +227,32 @@ const psGetPTSalaryInfo = new PS({
 })
 
 const psGetRiderRatingInfo = new PS({
-    name:"rider-rating-info",
+    name: "rider-rating-info",
     text: "SELECT uid, name, count(value), COALESCE(TRUNC(avg(value), 1), 0) as avg_rating, date_part('year', date) as year, date_part('month', date) as month " +
-    "FROM ratings JOIN orders using(oid) RIGHT JOIN riders on (riderid = uid) JOIN Users using(uid) " +
-    "GROUP BY uid, name, year, month " +
-    "ORDER BY uid, year, month;"
+        "FROM ratings JOIN orders using(oid) RIGHT JOIN riders on (riderid = uid) JOIN Users using(uid) " +
+        "GROUP BY uid, name, year, month " +
+        "ORDER BY uid, year, month;"
 });
 
 const psGetRiderSalaryInfo = new PS({
-    name:"rider-salary-summary",
-    text:"SELECT uid, name, month, year, sum(basesalary) + sum(commission) as totalSalary, sum(hoursclocked) as totalHours " +
-    "FROM receives natural join payout natural join users " +
-    "GROUP BY uid, name, year, month " +
-    "ORDER BY uid, year, month;\n"
+    name: "rider-salary-summary",
+    text: "SELECT uid, name, month, year, sum(basesalary) + sum(commission) as totalSalary, sum(hoursclocked) as totalHours " +
+        "FROM receives natural join payout natural join users " +
+        "GROUP BY uid, name, year, month " +
+        "ORDER BY uid, year, month;\n"
 });
 
 const psGetRiderTotalOrdersAndAverageDeliveryTime = new PS({
-    name:"rider-total-orders-average-delivery-time",
-    text:" with Rider_Delivery_Time as (SELECT oid, date_part('year', deliveredtime) as year, " +
-                                        "date_part('month', deliveredtime) as month, riderid, " +
-                                        "EXTRACT(EPOCH from deliveredtime - departfromr)/60 as deliverytime, deliveredtime, departfromr " +
-                                        "FROM orders)\n" +
-    "SELECT riderid, name, month, year, round(CAST(avg(deliverytime) as numeric), 2) as average_mins, count(*) as total_orders_delivered " +
-    "FROM Rider_Delivery_Time join Users on (riderid = uid) " +
-    "GROUP BY riderid, name, year, month " +
-    "HAVING year IS NOT NULL and month IS NOT NULL " +
-    "ORDER BY riderid, year, month;"
+    name: "rider-total-orders-average-delivery-time",
+    text: " with Rider_Delivery_Time as (SELECT oid, date_part('year', deliveredtime) as year, " +
+        "date_part('month', deliveredtime) as month, riderid, " +
+        "EXTRACT(EPOCH from deliveredtime - departfromr)/60 as deliverytime, deliveredtime, departfromr " +
+        "FROM orders)\n" +
+        "SELECT riderid, name, month, year, round(CAST(avg(deliverytime) as numeric), 2) as average_mins, count(*) as total_orders_delivered " +
+        "FROM Rider_Delivery_Time join Users on (riderid = uid) " +
+        "GROUP BY riderid, name, year, month " +
+        "HAVING year IS NOT NULL and month IS NOT NULL " +
+        "ORDER BY riderid, year, month;"
 });
 
 
@@ -317,16 +328,13 @@ async function updateFTSchedule(year, month, uid, startDayOfMonth, shiftIds) {
 }
 
 async function updatePTSchedule(uid, year, week, dailyschedules) {
-    db.tx(async t => {
-        await db.none(psDeleteWeeklySchedules, [uid, year, week])
-        dailyschedules.forEach(async (dailyschedule, day) => {
-            dailyschedule.slots.forEach((async slot => {
-                await t.none(
-                    psInsertPTSchedule,
-                    [uid, year, week, day, slot.startTime, slot.endTime]
-                )
-            }))
-        });
+    await db.tx(async t => {
+        await t.none(psDeleteWeeklySchedules, [uid, year, week])
+        const slots = dailyschedules.map((dailyschedule, day) => dailyschedule.slots.map(slot => [uid, year, week, day, slot.startTime, slot.endTime])).flat()
+        let count = 0
+        for (const slot of slots) {
+            await t.none(psInsertPTSchedule, slot)
+        }
     })
 }
 
@@ -467,9 +475,17 @@ async function getSummaryInfo(uid, year) {
     return await db.any(psGetSummary, [uid, year])
 }
 
+async function clearFTSchedule(uid, year, month) {
+    return await db.any(psDeleteMonthlySchedule, [uid, year, month])
+}
+
+async function clearPTSchedule(uid, year, week) {
+    await db.none(psDeleteWeeklySchedules, [uid, year, week])
+}
+
 module.exports = {
     getRiderType, getFullTimeSchedule, getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule,
     RiderTypes, getPartTimeSchedule, getAvailableOrders, getCurrentOrder, selectOrder, updateOrderStatus, orderStatuses,
     getGetFTSalaryInfo, getPTSalaryInfo, getRiderSalaryInfo, getRiderTotalOrdersAndAverageTime, getRiderRatingInfo,
-    getGetFTSalaryInfo, getPTSalaryInfo, getRating, getSummaryInfo
+    getGetFTSalaryInfo, getPTSalaryInfo, getRating, getSummaryInfo, clearFTSchedule, clearPTSchedule
 }
