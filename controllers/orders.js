@@ -101,9 +101,9 @@ const psGetYearlyCustomerOrderSummary = new PS({name: 'customer-yearly-order-sum
     "HAVING date_part('year', deliveredtime) IS NOT NULL " +
     "ORDER BY year;"});
 
-const psGetHourlyAreaOrdersSummary = new PS({name: 'orders-hourly-area-summary', text: "SELECT postalcode, count(*),date_part('hour', ordertime) as hour from ORDERS NATURAL JOIN ADDRESS " +
-    "GROUP BY postalcode, hour " +
-    "ORDER BY hour;"});
+const psGetHourlyAreaOrdersSummary = new PS({name: 'orders-hourly-area-summary', text: "SELECT postalcode, count(*),date_part('hour', ordertime) as hour, date_part('month', ordertime) as month, date_part('year', ordertime) as year from ORDERS NATURAL JOIN ADDRESS " +
+    "GROUP BY postalcode, hour, month, year " +
+    "ORDER BY year, month, hour;"});
 const DELIVERY_FEE = 300;
 
 const addOrder = async function (user, order) {

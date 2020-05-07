@@ -2,7 +2,6 @@ const db = require('../db');
 const PS = require('pg-promise').PreparedStatement;
 const { Roles } = require('../auth/index');
 const { getNextUid } = require('../controllers/user');
-const { addRider, addStaff, addRestaurant, addGlobalPromotion } = require('../db/fillTableMethods');
 
 const psGetStaffRider = new PS({
     name: 'get-all-rider-staff', text:
@@ -16,6 +15,30 @@ const psDeleteUser = new PS({
     `DELETE FROM Users
     WHERE uid = $1`
 });
+
+const psInsertUser = new PS({ name: 'insert-user', text:
+        `
+INSERT into Users (name, username, salt, passwordhash) values
+($1, $2, $3, $4) RETURNING uid;
+`});
+
+const psInsertStaff = new PS({ name: 'insert-staff', text:
+        `
+INSERT into Staff (uid, rid) values
+($1, $2);
+`});
+
+const psInsertRider = new PS({ name: 'insert-rider', text:
+        `INSERT into Riders (uid) values ($1);`
+});
+
+
+
+const psInsertRestaurant = new PS({ name: 'insert-restaurant', text:
+        `
+INSERT into Restaurants (rname, minspending, addrid) values
+($2, $1, $3);
+`});
 
 const psInsertPromo = new PS({ name: 'get-promo-by-id', text:
         `
@@ -45,11 +68,20 @@ const addUser = async (user) => {
         uid = await getNextUid();
         
         if (user.role == Roles.staff) {
-            staffData = [null, 'S', user.name, user.username, 'salt', user.password, user.rid];
-            await addStaff(staffData);
+            userData = [user.name, user.username, 'salt', user.password];
+            await db.tx(async t => {
+                const q1 = await t.one(psInsertUser, userData);
+                staffData = [q1.uid, user.rid]
+                const q2 = await t.none(psInsertStaff, staffData)
+                return t.batch([q1, q2])
+            })
         } else if (user.role == Roles.rider){
-            riderData = [null, 'R', user.name, user.username, 'salt', user.password];
-            await addRider(riderData);
+            userData = [user.name, user.username, 'salt', user.password];
+            await db.tx(async t => {
+                const q1 = await t.one(psInsertUser, userData);
+                const q2 = await t.none(psInsertRider, q1.uid);
+                return t.batch([q1,q2]);
+            })
         } else {
             throw "Not authorised to add the user";
         }
@@ -78,8 +110,8 @@ const addRestaurants = async (restaurant) => {
         if(restaurant == null) {
             return;
         }
-        restData = [null, parseInt(restaurant.minspending), restaurant.rname,parseInt(restaurant.addrid)];
-        await addRestaurant(restData);
+        restData = [parseInt(restaurant.minspending), restaurant.rname,parseInt(restaurant.addrid)];
+        await db.any(psInsertRestaurant, restData);
         
     } catch (err) {
         throw (err, "Restaurant could not be added");
@@ -96,8 +128,12 @@ const addPromo = async (promo) => {
             return;
         }
         promoData = [promo.startdate, promo.enddate, promo.points, promo.percentoff, promo.minspending, promo.monthswithnoorders];
-        const q1 = await db.one(psInsertPromo, promoData);
-        await db.none(psInsertGlobalPromo, [q1.pid]);
+        db.tx(async t =>
+        {
+            const q1 = await db.one(psInsertPromo, promoData);
+            const q2 = await db.none(psInsertGlobalPromo, [q1.pid]);
+            return t.batch([q1, q2]);
+        })
 
     } catch (err) {
         throw (err, "Promotion could not be added");
