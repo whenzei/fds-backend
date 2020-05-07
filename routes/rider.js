@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getGetFTSalaryInfo, getPTSalaryInfo, orderStatuses, updateOrderStatus, selectOrder, getCurrentOrder, getAvailableOrders, getFullTimeSchedule, getPartTimeSchedule,
-    getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule, getRating, getSummaryInfo } = require('../controllers/rider')
+    getStartDaysOfMonth, getShifts, updateFTSchedule, updatePTSchedule, getRating, getSummaryInfo, clearFTSchedule, clearPTSchedule } = require('../controllers/rider')
 const { check } = require('express-validator');
 const { validate } = require('../validate')
 const { RiderTypes } = require('../controllers/rider')
@@ -140,7 +140,7 @@ router.post("/update-pt-schedule",
         }
         // Update schedule
         try {
-            updatePTSchedule(req.user.uid, year, week, dailySchedules)
+            await updatePTSchedule(req.user.uid, year, week, dailySchedules)
         } catch (e) {
             return next(e)
         }
@@ -149,6 +149,64 @@ router.post("/update-pt-schedule",
     }
 )
 
+router.post("/clear-pt-schedule",
+    [
+        check('year').isInt({ min: 2020 }),
+        check('week').isInt({ min: 1, max: 53 }),
+    ],
+    validate,
+    async function (req, res, next) {
+
+        if (req.user.riderType != RiderTypes.partTime) {
+            return next("Not Part Time rider")
+        }
+        const year = req.body.year;
+        const week = req.body.week;
+        const dailySchedules = req.body.dailySchedules;
+
+        // Check future
+        const nextWeek = moment(new Date()).add(1, 'week')
+        if (year < nextWeek.isoWeekYear() || (year == nextWeek.isoWeekYear() && week < nextWeek.isoWeek())) {
+            return next("Too late to update")
+        }
+
+        // Clear schedule
+        try {
+            clearPTSchedule(req.user.uid, year, week)
+        } catch (e) {
+            return next(e)
+        }
+        return res.status(201).send()
+    }
+)
+
+router.post("/clear-ft-schedule",
+    [
+        check('year').isInt({ min: 2020 }),
+        check('month').isInt({ min: 1, max: 12 }), // 1 indexed
+    ],
+    validate,
+    async function (req, res, next) {
+        if (req.user.riderType != RiderTypes.fullTime) {
+            return next("Not Full Time rider")
+        }
+        const year = req.body.year
+        const month = req.body.month
+        // Check future/past
+        if (new Date(year, month - 1, 1) < new Date()) {
+            res.status(422)
+            return next("Too late to update")
+        }
+
+        // Clear schedule
+        try {
+            clearFTSchedule(req.user.uid, year, month)
+        } catch (e) {
+            return next(e)
+        }
+        return res.status(201).send()
+    }
+)
 
 router.post("/update-ft-schedule",
     [
