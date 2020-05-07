@@ -11,40 +11,26 @@ const psGetStaffRider = new PS({
 });
 
 const psDeleteUser = new PS({
-    name: 'delete-user', text:
-    `DELETE FROM Users
-    WHERE uid = $1`
+    name: 'delete-user', text: `DELETE FROM Users WHERE uid = $1`
 });
 
-const psInsertUser = new PS({ name: 'insert-user', text:
-        `
-INSERT into Users (name, username, salt, passwordhash) values
-($1, $2, $3, $4) RETURNING uid;
-`});
-
-const psInsertStaff = new PS({ name: 'insert-staff', text:
-        `
-INSERT into Staff (uid, rid) values
-($1, $2);
-`});
-
-const psInsertRider = new PS({ name: 'insert-rider', text:
-        `INSERT into Riders (uid) values ($1);`
+const psInsertUser = new PS({ name: 'insert-user', text: `INSERT into Users (name, username, salt, passwordhash) values
+($1, $2, $3, $4) RETURNING uid;`
 });
 
+const psInsertStaff = new PS({ name: 'insert-staff', text: `INSERT into Staff (uid, rid) values ($1, $2);
+`});
 
+const psInsertRider = new PS({ name: 'insert-rider', text: `INSERT into Riders (uid) values ($1);` });
 
-const psInsertRestaurant = new PS({ name: 'insert-restaurant', text:
-        `
-INSERT into Restaurants (rname, minspending, addrid) values
+const psInsertRestaurant = new PS({ name: 'insert-restaurant', text: `INSERT into Restaurants (rname, minspending, addrid) values
 ($2, $1, $3);
 `});
 
-const psInsertPromo = new PS({ name: 'get-promo-by-id', text:
-        `
+const psInsertPromo = new PS({ name: 'get-promo-by-id', text: ` 
 INSERT into Promotions (startDate, endDate, points, percentOff, minSpending, monthsWithNoOrders) values
-($1, $2, $3, $4, ($5::FLOAT * 100) , $6) RETURNING pid;
-`});
+($1, $2, $3, $4, ($5::FLOAT * 100) , $6) RETURNING pid;`
+});
 
 const psInsertGlobalPromo = new PS({name: 'add-global-promo', text: `INSERT into GlobalPromos (pid) values ($1)`});
 
@@ -52,10 +38,7 @@ const psDeleteGlobalPromo = new PS({name: 'delete-global-promo', text: `DELETE f
 
 const psGetGlobalPromo = new PS({ name: 'get-promo', text: 'SELECT * FROM Promotions NATURAL JOIN Globalpromos' })
 
-const psEditGlobalPromo = new PS({ name: 'edit-promo', text:
-        `
-UPDATE Promotions
-SET
+const psEditGlobalPromo = new PS({ name: 'edit-promo', text: `UPDATE Promotions SET 
 startDate = $2, endDate = $3, points = $4, percentOff = $5, minSpending = ($6::FLOAT * 100), monthsWithNoOrders  = $7
 WHERE pid = $1 AND pid in (SELECT pid FROM GlobalPromos);
 `});
@@ -130,8 +113,8 @@ const addPromo = async (promo) => {
         promoData = [promo.startdate, promo.enddate, promo.points, promo.percentoff, promo.minspending, promo.monthswithnoorders];
         db.tx(async t =>
         {
-            const q1 = await db.one(psInsertPromo, promoData);
-            const q2 = await db.none(psInsertGlobalPromo, [q1.pid]);
+            const q1 = await t.one(psInsertPromo, promoData);
+            const q2 = await t.none(psInsertGlobalPromo, [q1.pid]);
             return t.batch([q1, q2]);
         })
 
@@ -156,8 +139,6 @@ const editPromo = async (promo) => {
 async function deleteGlobalPromo(pid) {
     return await db.any(psDeleteGlobalPromo, [pid])
 }
-
-
 
 module.exports = {
     addUser, getStaffRiderList, deleteUser, addRestaurants, getGlobalPromos, addPromo, deleteGlobalPromo, editPromo
