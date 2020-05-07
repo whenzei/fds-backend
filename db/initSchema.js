@@ -158,7 +158,7 @@ TRIGGERS = {
         WITH SortPT AS (
             SELECT P1.uid, P1.date, P2.startTime - P1.endTime as break
             FROM PTSchedules P1, PTSchedules P2
-            WHERE P1.uid = P2.uid AND P1.date = P2.date AND P1.startTime < P2.startTime
+            WHERE P1.uid = P2.uid AND P1.date = P2.date AND (P1.starttime < P2.starttime OR (P1.starttime = P2.starttime AND P1.endtime <> P2.endtime))
         )
         /*check breaks for each day, returns 1 if any of the days have a break that is < 1 hour*/
         SELECT count(*) INTO numViolates
