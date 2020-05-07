@@ -36,7 +36,6 @@ const psGetFilteredRestaurants = new PS({
            OR rname ILIKE $1`
 });
 
-
 const psInsertFoodItem = new PS({ name: 'insert-food-item', text: 'INSERT INTO Food (fname, rid, price, category, dailyLimit) VALUES ($2, (SELECT rid FROM Staff WHERE uid = $1), ($3::FLOAT * 100), $4, $5);' });
 const psUpdateFoodItem = new PS({ name: 'update-food-item', text: 'UPDATE Food SET fname = $3, price = ($4::FLOAT * 100), category = $5, dailyLimit = $6, numOrders = $7 WHERE rid = (SELECT rid FROM Staff WHERE uid = $1) AND fname = $2;' });
 const psDeleteFoodItem = new PS({ name: 'delete-food-item', text: 'DELETE FROM Food WHERE rid = (SELECT rid FROM Staff WHERE uid = $1) AND fname = $2' });
