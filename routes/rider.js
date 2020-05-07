@@ -142,6 +142,13 @@ router.post("/update-pt-schedule",
         try {
             await updatePTSchedule(req.user.uid, year, week, dailySchedules)
         } catch (e) {
+            if (e.constraint == 'ptschedules_pkey') {
+                return res.status(500).send("Duplicate time interval detected")
+            } else if (e.constraint == 'ptschedules_check') {
+                return res.status(500).send("Time intervals should be more than 1 hour and less than 5 hours")
+            } else if (e.where.includes("check_pt_schedule")) {
+                return res.status(500).send("There must be at least one hour break between two consecutive hour intervals")
+            }
             return next(e)
         }
 
